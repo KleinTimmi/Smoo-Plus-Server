@@ -408,6 +408,16 @@ bool hakoniwaSequenceHook(HakoniwaSequence* sequence) {
 
     bool isYukimaru = !playerBase->getPlayerInfo();
 
+    // Infinite Cap Bounce (netzwerkfähig, Standalone)
+    extern bool gInfiniteCapBounce;
+    if (gInfiniteCapBounce) {
+        PlayerActorHakoniwa* hakoniwa = static_cast<PlayerActorHakoniwa*>(playerBase);
+        if (hakoniwa && hakoniwa->mHackCap && hakoniwa->mHackCap->mCapActionHistory) {
+            hakoniwa->mHackCap->mCapActionHistory->clearCapJump();
+            hakoniwa->mHackCap->mCapActionHistory->clearWallAirLimit();
+        }
+    }
+
     isInGame = !stageScene->isPause();
 
     GameModeManager::instance()->setPaused(stageScene->isPause());

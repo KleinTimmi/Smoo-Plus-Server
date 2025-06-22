@@ -2,6 +2,8 @@
 #include "logger.hpp"
 #include "main.hpp"
 
+#include "ExtrasFeatures.h"
+
 al::LiveActor *createPuppetActorFromFactory(al::ActorInitInfo const &rootInitInfo, al::PlacementInfo const &rootPlacementInfo, bool isDebug) {
     al::ActorInitInfo actorInitInfo = al::ActorInitInfo();
     actorInitInfo.initViewIdSelf(&rootPlacementInfo, rootInitInfo);

@@ -21,7 +21,9 @@
 #include "server/gamemode/GameModeManager.hpp"
 #include "server/hns/HideAndSeekMode.hpp"
 
-#include "game\Player\HackCap\PlayerCapActionHistory.h"
+#include "game/Player/HackCap/PlayerCapActionHistory.h"
+
+#include "ExtrasFeatures.h"
 
 SEAD_SINGLETON_DISPOSER_IMPL(Client)
 
@@ -342,12 +344,10 @@ void Client::readFunc() {
                 break;
             case PacketType::EXTRA: {
                 auto* extras = static_cast<ExtrasPacket*>(curPacket);
-                if (extras->InfiniteCapBounce) {
-                    clearCapJump();
-                    clearWallAirLimit();
-                } else {
-                    Logger::log("Disabling Infinite Cap Bounce.\n");
-                }
+                gInfiniteCapBounce = extras->InfiniteCapBounce;
+                Logger::log("Set Infinite Cap Bounce to: %s\n", gInfiniteCapBounce ? "ON" : "OFF");
+            
+
             } break;
                 
 

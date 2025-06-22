@@ -1,0 +1,1 @@
+bool gInfiniteCapBounce = false;
