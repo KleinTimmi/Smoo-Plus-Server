@@ -5,7 +5,7 @@ namespace Shared.Packet.Packets;
 
 [Packet(PacketType.Game)]
 public struct GamePacket : IPacket {
-    private const int StageSize = 0x40;
+    private const int StageSize = 0x40;  //60 bytes for Stage string
     public bool Is2d = false;
     public byte ScenarioNum = 0;
     public string Stage = "";
