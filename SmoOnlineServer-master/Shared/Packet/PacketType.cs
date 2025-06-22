@@ -14,5 +14,5 @@ public enum PacketType : short {
     Capture,
     ChangeStage,
     Command,
-    Extra
+    Extra,
 }

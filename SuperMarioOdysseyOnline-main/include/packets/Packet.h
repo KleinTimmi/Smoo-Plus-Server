@@ -25,6 +25,7 @@ enum PacketType : short {
     CMD,
     UDPINIT,
     HOLEPUNCH,
+    EXTRA, 
     End, // end of enum for bounds checking
 };
 
@@ -44,7 +45,8 @@ USED static const char* packetNames[] = {
     "Change Stage",
     "Server Command",
     "Udp Initialization",
-    "Hole punch",
+    "Hole punch",     
+    "Extras",
 };
 
 enum SenderType {

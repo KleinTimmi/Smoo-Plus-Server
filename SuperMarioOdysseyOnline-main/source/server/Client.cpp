@@ -14,11 +14,14 @@
 #include "packets/HolePunchPacket.h"
 #include "packets/InitPacket.h"
 #include "packets/UdpPacket.h"
+#include "packets/ExtrasPacket.h"
 
 #include "sead/heap/seadHeapMgr.h"
 
 #include "server/gamemode/GameModeManager.hpp"
 #include "server/hns/HideAndSeekMode.hpp"
+
+#include "game\Player\HackCap\PlayerCapActionHistory.h"
 
 SEAD_SINGLETON_DISPOSER_IMPL(Client)
 
@@ -336,6 +339,17 @@ void Client::readFunc() {
                 break;
             case PacketType::PLAYERCON:
                 updatePlayerConnect((PlayerConnect*)curPacket);
+                break;
+            case PacketType::EXTRA: {
+                auto* extras = static_cast<ExtrasPacket*>(curPacket);
+                if (extras->InfiniteCapBounce) {
+                    clearCapJump();
+                    clearWallAirLimit();
+                } else {
+                    Logger::log("Disabling Infinite Cap Bounce.\n");
+                }
+            } break;
+                
 
                 // Send relevant info packets when another client is connected
 
