@@ -34,6 +34,7 @@ TARGET		?=	$(notdir $(CURDIR))$(SMOVER)
 BUILD		?=	build$(SMOVER)
 SOURCES		:=  \
 			source/sead/time  \
+			ExtrasHooks.cpp \
 			source/sead  \
 			source/puppets  \
 			source/speedboot  \

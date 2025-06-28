@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Packet.h"
+#include "ExtrasPacket.h"
 
 struct PACKED ExtrasPacket : Packet {
     ExtrasPacket() : Packet() {

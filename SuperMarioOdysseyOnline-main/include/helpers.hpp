@@ -5,6 +5,10 @@
 #include "sead/math/seadVector.h"
 #include "sead/math/seadQuat.hpp"
 
+#include "game/StageScene/StageScene.h"
+#include "game/Player/PlayerActorHakoniwa.h"
+
+
 #include "al/util.hpp"
 
 #include "puppets/PuppetInfo.h"
@@ -34,6 +38,9 @@ const char* tryConvertName(const char* className);
 
 void killMainPlayer(al::LiveActor* actor);
 void killMainPlayer(PlayerActorHakoniwa* mainPlayer);
+
+
+PlayerActorHakoniwa* tryGetPlayerActorHakoniwa(StageScene* scene);
 
 __attribute__((used)) static const char* costumeNames[] = {
     "Mario",
@@ -77,8 +84,9 @@ __attribute__((used)) static const char* costumeNames[] = {
     "MarioSwimwear",
     "MarioTailCoat",
     "MarioTuxedo",
-    "MarioUnderwear"
-};
+    "MarioUnderwear",
+    "MarioHue1"};
+
 // full costume list from 1.3
 // attribute otherwise the build log is spammed with unused warnings
 // __attribute__((used)) static const char* costumeNames[] = {
@@ -108,6 +116,20 @@ __attribute__((used)) static const char* costumeNames[] = {
 //     "MarioTuxedo",
 //     // "MarioZombie" // DLC
 // };
+
+inline PlayerActorHakoniwa* tryGetPlayerActorHakoniwa(StageScene* scene) {
+    if (!scene)
+        return nullptr;
+    al::PlayerHolder* holder = al::getScenePlayerHolder(scene);
+    PlayerActorBase* base = al::tryGetPlayerActor(holder, 0);
+    if (!base)
+        return nullptr;
+    // Beispiel: Überprüfe den Klassennamen
+    const char* name = base->getName();
+    if (name && strcmp(name, "PlayerActorHakoniwa") == 0)
+        return static_cast<PlayerActorHakoniwa*>(base);
+    return nullptr;
+}
 
 struct HackActorName {
     const char* className;

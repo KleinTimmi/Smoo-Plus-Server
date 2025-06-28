@@ -1,5 +1,8 @@
 #include "main.hpp"
 
+#include "ExtrasFeatures.h"
+#include "ExtrasHooks.h"
+
 #include <cmath>
 #include <math.h>
 
@@ -26,6 +29,8 @@
 #include "game/Player/PlayerActorHakoniwa.h"
 #include "game/Player/PlayerFunction.h"
 #include "game/Player/PlayerHackKeeper.h"
+#include "game/Player/HackCap/PlayerCapActionHistory.h" //  for infinite cap bounce
+#include "game/Player/PlayerWallActionHistory.h"        // for infinte wall cap jumps
 #include "game/StageScene/StageScene.h"
 
 #include "helpers.hpp"
@@ -61,6 +66,14 @@ void updatePlayerInfo(GameDataHolderAccessor holder, PlayerActorBase* playerBase
 
         pInfSendTimer = 0;
     }
+
+    if (playerBase && gInfiniteCapBounce || debugMode) {
+    PlayerActorHakoniwa* hakoniwa = static_cast<PlayerActorHakoniwa*>(playerBase);
+    if (hakoniwa->mHackCap && hakoniwa->mHackCap->mCapActionHistory) {
+        hakoniwa->mHackCap->mCapActionHistory->clearCapJump();
+        hakoniwa->mPlayerWallActionHistory->reset();
+    }
+}
 
     if (gameInfSendTimer >= 60) {
         if (isYukimaru) {
@@ -403,20 +416,14 @@ bool hakoniwaSequenceHook(HakoniwaSequence* sequence) {
 
     bool isFirstStep = al::isFirstStep(sequence);
 
-    al::PlayerHolder* pHolder    = al::getScenePlayerHolder(stageScene);
-    PlayerActorBase*  playerBase = al::tryGetPlayerActor(pHolder, 0);
+    al::PlayerHolder* pHolder = al::getScenePlayerHolder(stageScene);
+    PlayerActorBase* playerBase = al::tryGetPlayerActor(pHolder, 0);
 
-    bool isYukimaru = !playerBase->getPlayerInfo();
-
-    // Infinite Cap Bounce (netzwerkfähig, Standalone)
-    extern bool gInfiniteCapBounce;
-    if (gInfiniteCapBounce) {
-        PlayerActorHakoniwa* hakoniwa = static_cast<PlayerActorHakoniwa*>(playerBase);
-        if (hakoniwa && hakoniwa->mHackCap && hakoniwa->mHackCap->mCapActionHistory) {
-            hakoniwa->mHackCap->mCapActionHistory->clearCapJump();
-            hakoniwa->mHackCap->mCapActionHistory->clearWallAirLimit();
-        }
-    }
+bool isYukimaru = true;
+    if (playerBase)
+        isYukimaru = !playerBase->getPlayerInfo();
+    
+    PlayerActorHakoniwa* hakoniwa = tryGetPlayerActorHakoniwa(stageScene);
 
     isInGame = !stageScene->isPause();
 

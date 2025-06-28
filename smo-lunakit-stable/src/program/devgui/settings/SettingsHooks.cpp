@@ -25,21 +25,21 @@ HOOK_DEFINE_TRAMPOLINE(ControlHook) {
         PlayerActorHakoniwa* player = tryGetPlayerActorHakoniwa(scene);
         DevGuiSettings* set = DevGuiManager::instance()->getSettings();
 
-        if (player && set->getStateByName("Infinite Cap Bounce")) {  // wenn Infinite Cap Bounce = true setzt es jeden frame die cap jumps zu 0
+        if(player && set->getStateByName("Infinite Cap Bounce")) {
             player->mHackCap->mCapActionHistory->clearCapJump();
             player->mHackCap->mCapActionHistory->clearWallAirLimit();
         }
 
-        if(player && set->getStateByName("Clear Wall Jump Limits"))// wenn aktiv gibt es die möglichkeit auf capy zu springen nach einem walljump
+        if(player && set->getStateByName("Clear Wall Jump Limits"))
             player->mPlayerWallActionHistory->reset();
 
-        if (!set->getStateByName("Display HUD") && scene->mStageSceneLayout->isWait()) {  // wenn Display HUD = false wird das HUD ausgeblendet
+        if(!set->getStateByName("Display HUD") && scene->mStageSceneLayout->isWait()) {
             scene->mStageSceneLayout->end();
             MapMini* compass = scene->mStageSceneLayout->mMapMiniLyt;
             if (compass->mIsAlive) compass->end();
         }
 
-        if (!set->getStateByName("Play Music")) {  // wenn Play Music = false wird die Musik gestoppt
+        if(!set->getStateByName("Play Music")) {
             if (al::isPlayingBgm(scene)) {
                 al::stopAllBgm(scene, 0);
             }
@@ -49,10 +49,10 @@ HOOK_DEFINE_TRAMPOLINE(ControlHook) {
     }
 };
 
-HOOK_DEFINE_TRAMPOLINE(NoclipMovementHook) {// This hook allows the player to move freely in the air without collision.
+HOOK_DEFINE_TRAMPOLINE(NoclipMovementHook) {
     static void Callback(PlayerActorHakoniwa *player) {
         static bool wasNoclipOn = false;
-bool isNoclip = DevGuiManager::instance()->getSettings()->getStateByName("Noclip");  // Noclip is enabled if the setting is true.
+        bool isNoclip = DevGuiManager::instance()->getSettings()->getStateByName("Noclip");
 
         if (!isNoclip && wasNoclipOn)
             al::onCollide(player);
@@ -63,7 +63,7 @@ bool isNoclip = DevGuiManager::instance()->getSettings()->getStateByName("Noclip
             return;
         }
 
-        if (isNoclip) {  // If noclip is enabled, the player can move freely in the air.
+        if (isNoclip) {
             static float speed = 20.0f;
             static float speedMax = 250.0f;
             static float vspeed = 10.0f;
