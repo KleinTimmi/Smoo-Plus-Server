@@ -2,9 +2,5 @@
 
 bool gInfiniteCapBounce = false;
 bool gNoclip = false;
-
-void main() {
-	if (gInfiniteCapBounce) {
-
-    }
-}
+bool gNoDamage = false;
+bool gSuperJump = false;

@@ -11,6 +11,7 @@
 
 #include "logger.hpp"
 
+
 #include "packets/HolePunchPacket.h"
 #include "packets/InitPacket.h"
 #include "packets/UdpPacket.h"
@@ -345,8 +346,6 @@ void Client::readFunc() {
             case PacketType::EXTRA: {
                 auto* extras = static_cast<ExtrasPacket*>(curPacket);
                 gInfiniteCapBounce = extras->InfiniteCapBounce;
-                Logger::log("Set Infinite Cap Bounce to: %s\n", gInfiniteCapBounce ? "ON" : "OFF");
-            
 
             } break;
                 
