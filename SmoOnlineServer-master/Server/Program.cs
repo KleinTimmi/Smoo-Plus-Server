@@ -446,7 +446,7 @@ CommandHandler.RegisterCommand("sendall", args => {
     return $"Sent players to {stage}:{-1}";
 });
 
-CommandHandler.RegisterCommand("infCapBounce", args =>
+CommandHandler.RegisterCommand("infCapDive", args =>
 {
     const string optionUsage = "Usage: infCapBounce <Player/*> <true/false>";
     if (args.Length != 2)

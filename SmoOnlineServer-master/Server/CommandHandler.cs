@@ -10,8 +10,63 @@ public static class CommandHandler {
 
     public static Dictionary<string, Handler> Handlers = new Dictionary<string, Handler>();
 
+    private static readonly Dictionary<string, string> CommandDescriptions = new()
+    {
+        { "help", "Zeigt diese Hilfe an" },
+        { "infCapDive", "Infinite Capbounces" },
+        { "ban", "Bannt einen Spieler" },        
+        // { "deinBefehl", "Beschreibung" },
+        // Weitere Kommandos hier ergänzen
+    };
+
+    // Usage-Informationen
+    private static readonly Dictionary<string, string> CommandUsages = new()
+    {
+        { "help", "help" },
+        { "rejoin", "rejoin <* | !* (usernames to not rejoin...) | (usernames to rejoin...)>" },
+        { "crash", "crash <* | !* (usernames to not crash...) | (usernames to crash...)>" },
+        { "ban", "ban <Spielername>" },
+        { "unban", "unban <Spielername>" },
+        { "send", "send <stage> <id> <scenario[-1..127]> <player/*>" },
+        { "sendall", "sendall <stage>" },
+        { "infCapDive", "infCapDive <Player/*> <true/false>" },
+        { "scenario", "scenario merge [true/false]" },
+        { "tag", "tag time <user/*> <minutes[0-65535]> <seconds[0-59]>\ntag seeking <user/*> <true/false>\ntag start <time> <seekers>" },
+        { "maxplayers", "maxplayers <playercount>" },
+        { "list", "list" },
+        { "flip", "flip list\nflip add <user id>\nflip remove <user id>\nflip set <true/false>\nflip pov <both/self/others>" },
+        { "shine", "shine list\nshine clear\nshine sync\nshine send <id> <player/*>\nshine set <true/false>\nshine include <id>\nshine exclude <id>" },
+        { "loadsettings", "loadsettings" },
+        { "restartserver", "restartserver" },
+        { "exit", "exit" },
+        { "quit", "quit" },
+        { "q", "q" }
+        // ...
+    };
+
     static CommandHandler() {
-        RegisterCommand("help", _ => $"Valid commands: {string.Join(", ", Handlers.Keys)}");
+        RegisterCommand("help", _ =>
+        {
+            var sb = new StringBuilder();
+            sb.AppendLine("Verfügbare Kommandos:\n");
+            // Passe die Spaltenbreiten an (z.B. 20, 32, 40)
+            sb.AppendLine($"{"Kommando",-20} | {"Beschreibung",-32} | {"Usage",-40}");
+            sb.AppendLine(new string('-', 20) + "-|-" + new string('-', 32) + "-|-" + new string('-', 40));
+            foreach (var cmd in Handlers.Keys.OrderBy(k => k))
+            {
+                CommandDescriptions.TryGetValue(cmd, out var desc);
+                CommandUsages.TryGetValue(cmd, out var usage);
+
+                desc = string.IsNullOrWhiteSpace(desc) ? "-" : desc;
+                usage = string.IsNullOrWhiteSpace(usage) ? "-" : usage;
+
+                var usageLines = usage.Split('\n');
+                sb.AppendLine($"{cmd,-20} | {desc.PadRight(32)} | {usageLines[0]}");
+                for (int i = 1; i < usageLines.Length; i++)
+                    sb.AppendLine($"{new string(' ', 20)} | {new string(' ', 32)} | {usageLines[i]}");
+            }
+            return sb.ToString();
+        });
     }
 
     public static void RegisterCommand(string name, Handler handler) {
