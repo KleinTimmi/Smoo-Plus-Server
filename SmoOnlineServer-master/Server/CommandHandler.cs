@@ -1,8 +1,6 @@
 ﻿using System.Runtime.InteropServices;
 using System.Text;
 
-using Pgrogramm.cs;
-
 namespace Server;
 
 public static class CommandHandler {
@@ -14,7 +12,24 @@ public static class CommandHandler {
     {
         { "help", "Zeigt diese Hilfe an" },
         { "infCapDive", "Infinite Capbounces" },
-        { "ban", "Bannt einen Spieler" },        
+        { "ban", "Ban a player from the server" },
+        { "unban", "Unban a player from the server" },
+        { "rejoin", "Rejoin players to the server" },
+        { "crash", "Crash players on the server" },
+        { "send", "Send a Player to a Sage" },
+        { "sendall", "Send a scenario to all players" },
+        { "scenario", "Merge scenarios (true/false)" },
+        { "tag", "" },
+        { "maxplayers", "Set maximum Player" },
+        { "list", "List connected players" },
+        { "flip", "Flip a Player" },
+        { "shine", "Shine Sync" },
+        { "loadsettings", "Load server settings from file" },
+        { "restartserver", "Restart the server" },
+        { "exit", "Exit the server application" },
+        { "quit", "Quit the server application" },
+        { "q", "Quit the server application" }
+
         // { "deinBefehl", "Beschreibung" },
         // Weitere Kommandos hier ergänzen
     };
@@ -48,9 +63,9 @@ public static class CommandHandler {
         RegisterCommand("help", _ =>
         {
             var sb = new StringBuilder();
-            sb.AppendLine("Verfügbare Kommandos:\n");
+            sb.AppendLine("Available commands:\n");
             // Passe die Spaltenbreiten an (z.B. 20, 32, 40)
-            sb.AppendLine($"{"Kommando",-20} | {"Beschreibung",-32} | {"Usage",-40}");
+            sb.AppendLine($"{"Commands",-20} | {"Description",-32} | {"Usage",-40}");
             sb.AppendLine(new string('-', 20) + "-|-" + new string('-', 32) + "-|-" + new string('-', 40));
             foreach (var cmd in Handlers.Keys.OrderBy(k => k))
             {
