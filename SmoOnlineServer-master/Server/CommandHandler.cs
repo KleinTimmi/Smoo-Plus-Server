@@ -58,8 +58,19 @@ public static class CommandHandler {
         { "q", "q" }
         // ...
     };
+    
+    public static IEnumerable<(string Name, string? Description, string? Usage)> GetAllCommands()
+{
+    foreach (var cmd in Handlers.Keys)
+    {
+        CommandDescriptions.TryGetValue(cmd, out var desc);
+        CommandUsages.TryGetValue(cmd, out var usage);
+        yield return (cmd, desc, usage);
+    }
+}
 
-    static CommandHandler() {
+    static CommandHandler()
+    {
         RegisterCommand("help", _ =>
         {
             var sb = new StringBuilder();

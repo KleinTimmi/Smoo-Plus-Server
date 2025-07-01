@@ -1,0 +1,15 @@
+body { background: #f8f9fa; }
+.sidebar {
+    min-height: 100vh;
+    background: linear-gradient(180deg, #232946 0%, #3a3a5d 100%);
+    color: #fff;
+}
+button.flex-fill {
+    min-width: 80px;
+}
+.sidebar .nav-link, .sidebar .navbar-brand { color: #fff; }
+.sidebar .nav-link.active, .sidebar .nav-link:hover { background: #232946; color: #fff; }
+.card { margin-bottom: 1.5rem; }
+.dashboard-title { font-size: 2rem; font-weight: 600; margin-bottom: 1.5rem; }
+.form-control, .form-select { background: #fff; }
+.btn { min-width: 120px; }

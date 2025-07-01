@@ -762,6 +762,107 @@ Task.Run(() => {
 }).ContinueWith(logError);
 #pragma warning restore CS4014
 
+Task.Run(() =>
+{
+    var listener = new HttpListener();
+    listener.Prefixes.Add("http://localhost:8080/");
+    listener.Start();
+    consoleLogger.Info("Webinterface läuft auf http://localhost:8080/");
+try
+{
+    System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo
+    {
+        FileName = "http://localhost:8080/dashboard.html",
+        UseShellExecute = true
+    });
+}
+catch (Exception ex)
+{
+    consoleLogger.Info("Konnte Browser nicht öffnen: " + ex.Message);
+}
+    while (listener.IsListening)
+    {
+        var context = listener.GetContext();
+        string urlPath = context.Request.Url.AbsolutePath.TrimStart('/');
+        if (string.IsNullOrEmpty(urlPath)) urlPath = "index.html";
+        string filePath = Path.Combine(AppContext.BaseDirectory, "web-interface", urlPath);
+
+        // API-Routen abfangen (Dummy-Daten)
+        if (urlPath.StartsWith("api/serverinfo"))
+        {
+            string response = "{\"host\": \"localhost\", \"players\": 0, \"permissions\": \"admin\"}";
+            context.Response.ContentType = "application/json";
+            byte[] buffer = Encoding.UTF8.GetBytes(response);
+            context.Response.ContentLength64 = buffer.Length;
+            context.Response.OutputStream.Write(buffer, 0, buffer.Length);
+            context.Response.OutputStream.Close();
+            continue;
+        }
+        if (urlPath == "commands/exec" && context.Request.HttpMethod == "POST")
+{
+    using var reader = new StreamReader(context.Request.InputStream);
+    string body = reader.ReadToEnd();
+    string command = "";
+    try
+    {
+        var json = System.Text.Json.JsonDocument.Parse(body);
+        command = json.RootElement.GetProperty("command").GetString() ?? "";
+    }
+    catch { }
+
+    // Führe das Kommando aus
+    var result = CommandHandler.GetResult(command);
+    string output = string.Join("\n", result.ReturnStrings);
+
+    context.Response.ContentType = "text/plain";
+    byte[] buffer = Encoding.UTF8.GetBytes(output);
+    context.Response.ContentLength64 = buffer.Length;
+    context.Response.OutputStream.Write(buffer, 0, buffer.Length);
+    context.Response.OutputStream.Close();
+    return;
+}
+        if (urlPath.StartsWith("api/console"))
+        {
+            string response = "{\"output\": [\"API not implemented\"]}";
+            context.Response.ContentType = "application/json";
+            byte[] buffer = Encoding.UTF8.GetBytes(response);
+            context.Response.ContentLength64 = buffer.Length;
+            context.Response.OutputStream.Write(buffer, 0, buffer.Length);
+            context.Response.OutputStream.Close();
+            continue;
+        }
+
+        // Statische Dateien ausliefern
+        if (File.Exists(filePath))
+        {
+            string ext = Path.GetExtension(filePath).ToLower();
+            context.Response.ContentType = ext switch
+            {
+                ".html" => "text/html",
+                ".css" => "text/css",
+                ".js" => "application/javascript",
+                ".png" => "image/png",
+                ".jpg" => "image/jpeg",
+                ".ico" => "image/x-icon",
+                _ => "application/octet-stream"
+            };
+            byte[] buffer = File.ReadAllBytes(filePath);
+            context.Response.ContentLength64 = buffer.Length;
+            context.Response.OutputStream.Write(buffer, 0, buffer.Length);
+        }
+        else
+        {
+            // Fallback: index.html für SPA-Routing
+            string fallback = Path.Combine(AppContext.BaseDirectory, "web-interface", "index.html");
+            byte[] buffer = File.ReadAllBytes(fallback);
+            context.Response.ContentType = "text/html";
+            context.Response.ContentLength64 = buffer.Length;
+            context.Response.OutputStream.Write(buffer, 0, buffer.Length);
+        }
+        context.Response.OutputStream.Close();
+    }
+});
+
 await server.Listen(cts.Token);
 
 if (restartRequested) //need to do this here because this needs to happen after the listener closes, and there isn't an
