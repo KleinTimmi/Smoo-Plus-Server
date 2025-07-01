@@ -5,7 +5,7 @@
     <title>Neorix Odyssey Server</title>
     <meta name='viewport' content='width=device-width, initial-scale=1'>
     <link href='https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css' rel='stylesheet'>
-    <link href='dashboard.css' rel='stylesheet'> <!-- HIER -->
+    <link href='dashboard.css' rel='stylesheet'>
 </head>
 <body>
 <div class='container-fluid'>
@@ -13,134 +13,144 @@
         <nav class='col-md-2 d-none d-md-block sidebar py-4'>
             <div class='navbar-brand px-3 mb-4 fs-4'>Neorix Odyssey Server</div>
             <ul class='nav flex-column'>
-                <li class='nav-item'><a class='nav-link active' href='#'>Home</a></li>
-                <li class='nav-item'><a class='nav-link' href='#'>Dashboard</a></li>
-                <li class='nav-item'><a class='nav-link' href='#'>Playerlist</a></li>
-                <li class='nav-item'><a class='nav-link' href='#'>Console</a></li>
-                <li class='nav-item'><a class='nav-link' href='#'>Map</a></li>
+                <li class='nav-item'><a class='nav-link active' href='#' id="navDashboard">Dashboard</a></li>
+                <li class='nav-item'><a class='nav-link' href='#' id="navPlayerlist">Playerlist</a></li>
+                <li class='nav-item'><a class='nav-link' href='#' id="navFeatures">Features</a></li>
+                <li class='nav-item'><a class='nav-link' href='#' id="navConsole">Console</a></li>
             </ul>
         </nav>
         <main class='col-md-10 ms-sm-auto px-4'>
-            <div class='dashboard-title mt-4'>Dashboard</div>
-            <div class='row'>
-                <div class='col-md-4'>
-                    <div class='card'>
-                        <div class='card-body'>
-                            <h5 class='card-title'>Server Information</h5>
-                            <div id='serverInfo'>
-                                Host: {{HOST}}<br>
-                                Players: <span id='playerCount'>{{PLAYER_COUNT}}</span><br>
-                                Host: localhost:8081<br>
-                                Players: <span id='playerCount'>0</span><br>
-                                Permissions: <span id='permissions'></span>
+            <!-- Dashboard Section -->
+            <div id="dashboardSection">
+                <div class='dashboard-title mt-4'>Dashboard</div>
+                <div class='row'>
+                    <div class='col-md-4'>
+                        <div class='card'>
+                            <div class='card-body'>
+                                <h5 class='card-title'>Ban List</h5>
+                                <div id='banList'></div>
                             </div>
                         </div>
                     </div>
-                </div>
-                <div class='col-md-4'>
-                    <div class='card'>
-                        <div class='card-body'>
-                            <h5 class='card-title'>Ban List</h5>
-                            <div id='banList'></div>
-                        </div>
-                    </div>
-                </div>
-                <div class='col-md-4'>
-                    <div class='card'>
-                        <div class='card-body'>
-                            <h5 class='card-title'>Ban Stage</h5>
-                            <div class='mb-2'>
-                                <label>Kingdom:</label>
-                                <select class='form-select' id='kingdomSelect'><option>Odyssey</option></select>
-                            </div>
-                            <div class='mb-2'>
-                                <label>Stage:</label>
-                                <select class='form-select' id='stageSelect'><option>HomeShipInsideStage</option></select>
-                            </div>
-                            <button class='btn btn-outline-primary w-100' id='banStageBtn'>Ban</button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class='row'>
-                <div class='col-12'>
-                    <div class='card'>
-                        <div class='card-body'>
-                            <div class='row'>
-                                <div class='col-md-5'>
-                                    <div class='mb-2'>
-                                        <button class='btn btn-outline-primary me-2' id='restartBtn'>Restart Server</button>
-                                        <button class='btn btn-outline-primary me-2' id='loadSettingsBtn'>Load Settings</button>
-                                    </div>
-                                    <div class='mb-2'>
-                                        <button class='btn btn-outline-danger me-2' id='rejoinAllBtn'>Rejoin All</button>
-                                        <button class='btn btn-outline-danger' id='crashAllBtn'>Crash All</button>
-                                    </div>
-                                </div>
-                                <div class='col-md-3'>
-                                    <label>Flip POV</label>
-                                    <div class='d-flex w-100 gap-2 mb-2'>
-                                        <button class='btn btn-outline-secondary flex-fill' id='flipSelfBtn'>Self</button>
-                                        <button class='btn btn-outline-secondary flex-fill' id='flipOtherBtn'>Other</button>
-                                        <button class='btn btn-outline-secondary flex-fill' id='flipBothBtn'>Both</button>
-                                    </div>
-                                </div>
-                                <div class='col-md-2'>
-                                    <label>Scenario Merging</label>
-                                    <div class='d-flex w-100 gap-2 mb-2'>
-                                        <button class='btn btn-outline-secondary flex-fill' id='mergeEnableBtn'>Enable</button>
-                                        <button class='btn btn-outline-secondary flex-fill' id='mergeDisableBtn'>Disable</button>
-                                    </div>
-                                </div>
-                                <div class='col-md-2'>
-                                    <label>Max Players</label>
-                                    <div class='input-group mb-2'>
-                                        <input type='number' class='form-control' id='maxPlayersInput' min='0' value='0'>
-                                        <button class='btn btn-outline-primary' id='setMaxPlayersBtn'>Set</button>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class='row'>
-                <div class='col-12'>
-                    <div class='card'>
-                        <div class='card-body'>
-                            <h5 class='card-title'>Send Player</h5>
-                            <form class='row g-2' id='sendPlayerForm'>
-                                <div class='col-md-2'>
-                                    <label>Player:</label>
-                                    <input class='form-control' id='sendPlayerName' value='All'>
-                                </div>
-                                <div class='col-md-2'>
+                    <div class='col-md-4'>
+                        <div class='card'>
+                            <div class='card-body'>
+                                <h5 class='card-title'>Ban Stage</h5>
+                                <div class='mb-2'>
                                     <label>Kingdom:</label>
-                                    <select class='form-select' id='sendKingdom'><option>Odyssey</option></select>
+                                    <select class='form-select' id='kingdomSelect'><option>Odyssey</option></select>
                                 </div>
-                                <div class='col-md-3'>
+                                <div class='mb-2'>
                                     <label>Stage:</label>
-                                    <select class='form-select' id='sendStage'><option>HomeShipInsideStage</option></select>
+                                    <select class='form-select' id='stageSelect'><option>HomeShipInsideStage</option></select>
                                 </div>
-                                <div class='col-md-2'>
-                                    <label>Scenario:</label>
-                                    <input class='form-control' id='sendScenario' value='-1'>
+                                <button class='btn btn-outline-primary w-100' id='banStageBtn'>Ban</button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class='col-md-4'>
+                        <div class='card'>
+                            <div class='card-body'>
+                                <div class='mb-2'>
+                                    <button class='btn btn-outline-primary me-2' id='restartBtn'>Restart Server</button>
+                                    <button class='btn btn-outline-primary me-2' id='loadSettingsBtn'>Load Settings</button>
                                 </div>
-                                <div class='col-md-3 d-flex align-items-end'>
-                                    <button class='btn btn-outline-primary w-100' id='sendPlayerBtn' type='submit'>Send</button>
+                                <div class='mb-2'>
+                                    <button class='btn btn-outline-danger me-2' id='rejoinAllBtn'>Rejoin All</button>
+                                    <button class='btn btn-outline-danger' id='crashAllBtn'>Crash All</button>
                                 </div>
-                            </form>
+                                <label>Flip POV</label>
+                                <div class='d-flex w-100 gap-2 mb-2'>
+                                    <button class='btn btn-outline-secondary flex-fill' id='flipSelfBtn'>Self</button>
+                                    <button class='btn btn-outline-secondary flex-fill' id='flipOtherBtn'>Other</button>
+                                    <button class='btn btn-outline-secondary flex-fill' id='flipBothBtn'>Both</button>
+                                </div>
+                                <label>Scenario Merging</label>
+                                <div class='d-flex w-100 gap-2 mb-2'>
+                                    <button class='btn btn-outline-secondary flex-fill' id='mergeEnableBtn'>Enable</button>
+                                    <button class='btn btn-outline-secondary flex-fill' id='mergeDisableBtn'>Disable</button>
+                                </div>
+                                <label>Max Players</label>
+                                <div class='input-group mb-2'>
+                                    <input type='number' class='form-control' id='maxPlayersInput' min='0' value='0'>
+                                    <button class='btn btn-outline-primary' id='setMaxPlayersBtn'>Set</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class='row mt-4'>
+                    <div class='col-12'>
+                        <div class='card'>
+                            <div class='card-body'>
+                                <h5 class='card-title'>Send Player</h5>
+                                <form class='row g-2' id='sendPlayerForm'>
+                                    <div class='col-md-2'>
+                                        <label>Player:</label>
+                                        <input class='form-control' id='sendPlayerName' value='All'>
+                                    </div>
+                                    <div class='col-md-2'>
+                                        <label>Kingdom:</label>
+                                        <select class='form-select' id='sendKingdom'><option>Odyssey</option></select>
+                                    </div>
+                                    <div class='col-md-3'>
+                                        <label>Stage:</label>
+                                        <select class='form-select' id='sendStage'><option>HomeShipInsideStage</option></select>
+                                    </div>
+                                    <div class='col-md-2'>
+                                        <label>Scenario:</label>
+                                        <input class='form-control' id='sendScenario' value='-1'>
+                                    </div>
+                                    <div class='col-md-3 d-flex align-items-end'>
+                                        <button class='btn btn-outline-primary w-100' id='sendPlayerBtn' type='submit'>Send</button>
+                                    </div>
+                                </form>
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
-            <div class='row'>
-                <div class='col-12'>
-                    <div class='card'>
-                        <div class='card-body'>
-                            <h5 class='card-title'>Console Output</h5>
-                            <pre id='output' style='background:#181818;color:#fff;padding:1em;border-radius:4px;min-height:2em;'></pre>
+            <!-- Playerlist Section -->
+            <div id="playerlistSection" style="display:none;">
+                <div class='dashboard-title mt-4'>Playerlist</div>
+                <div class='card'>
+                    <div class='card-body'>
+                        <table class='table table-striped'>
+                            <thead>
+                                <tr>
+                                    <th>Name</th>
+                                    <th>Status</th>
+                                    <th>Banned</th>
+                                    <th>Ignored</th>
+                                    <th>Aktionen</th>
+                                </tr>
+                            </thead>
+                            <tbody id="playerTable">
+                                <!-- Dynamisch per JS -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            <!-- Features Section -->
+            <div id="featuresSection" style="display:none;">
+                <div class='dashboard-title mt-4'>Features</div>
+                <div class='card'>
+                    <div class='card-body'>
+                        <p>Hier können zukünftige Features angezeigt werden.</p>
+                    </div>
+                </div>
+            </div>
+            <!-- Console Section -->
+            <div id="consoleSection" style="display:none;">
+                <div class='card mt-4'>
+                    <div class='card-body'>
+                        <h5 class='card-title'>Console Output</h5>
+                        <div class="input-group mb-2">
+                            <input type="text" id="consoleInput" class="form-control" placeholder="Befehl eingeben...">
+                            <button class="btn btn-outline-primary" id="consoleSendBtn" type="button">Senden</button>
                         </div>
+                        <pre id='log' style='background:#181818;color:#fff;padding:1em;border-radius:4px;min-height:2em;'></pre>
                     </div>
                 </div>
             </div>
@@ -149,6 +159,61 @@
 </div>
 <script src='https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js'></script>
 <script src="dashboard.js"></script>
+<script>
+// Navigation Umschaltung
+function showSection(section) {
+    document.getElementById('dashboardSection').style.display = section === 'dashboard' ? 'block' : 'none';
+    document.getElementById('playerlistSection').style.display = section === 'playerlist' ? 'block' : 'none';
+    document.getElementById('featuresSection').style.display = section === 'features' ? 'block' : 'none';
+    document.getElementById('consoleSection').style.display = section === 'console' ? 'block' : 'none';
+    // Active-Klasse setzen
+    document.getElementById('navDashboard').classList.toggle('active', section === 'dashboard');
+    document.getElementById('navPlayerlist').classList.toggle('active', section === 'playerlist');
+    document.getElementById('navFeatures').classList.toggle('active', section === 'features');
+    document.getElementById('navConsole').classList.toggle('active', section === 'console');
+}
+document.getElementById('navDashboard').onclick = function(e){ e.preventDefault(); showSection('dashboard'); };
+document.getElementById('navPlayerlist').onclick = function(e){ e.preventDefault(); showSection('playerlist'); renderPlayerTable(); };
+document.getElementById('navFeatures').onclick = function(e){ e.preventDefault(); showSection('features'); };
+document.getElementById('navConsole').onclick = function(e){ e.preventDefault(); showSection('console'); };
+
+// Beispiel-Playerdaten
+const players = [
+    { name: "Alice", connected: true, banned: false, ignored: false },
+    { name: "Bob", connected: false, banned: true, ignored: false },
+    { name: "Charlie", connected: true, banned: false, ignored: true }
+];
+function renderPlayerTable() {
+    const tbody = document.getElementById('playerTable');
+    if (!tbody) return;
+    tbody.innerHTML = '';
+    players.forEach((c, i) => {
+        tbody.innerHTML += `
+          <tr>
+            <td>${c.name}</td>
+            <td>${c.connected ? 'Online' : 'Offline'}</td>
+            <td>${c.banned ? 'Ja' : 'Nein'}</td>
+            <td>${c.ignored ? 'Ja' : 'Nein'}</td>
+            <td>
+              <button class="btn btn-sm btn-outline-danger" onclick="toggleBan(${i})">${c.banned ? 'Entbannen' : 'Bannen'}</button>
+              <button class="btn btn-sm btn-outline-secondary" onclick="toggleIgnore(${i})">${c.ignored ? 'Nicht ignorieren' : 'Ignorieren'}</button>
+              <button class="btn btn-sm btn-outline-info" onclick="showDetails(${i})">Details</button>
+            </td>
+          </tr>
+        `;
+    });
+}
+window.toggleBan = function(i) {
+    players[i].banned = !players[i].banned;
+    renderPlayerTable();
+}
+window.toggleIgnore = function(i) {
+    players[i].ignored = !players[i].ignored;
+    renderPlayerTable();
+}
+window.showDetails = function(i) {
+    alert(`Details für ${players[i].name}:\nStatus: ${players[i].connected ? 'Online' : 'Offline'}\nBanned: ${players[i].banned}\nIgnored: ${players[i].ignored}`);
+}
+</script>
 </body>
 </html>
-";

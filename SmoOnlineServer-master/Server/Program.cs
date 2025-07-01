@@ -16,6 +16,8 @@ Logger consoleLogger = new Logger("Console");
 DiscordBot bot = new DiscordBot();
 await bot.Run();
 
+consoleLogger.Info("Server gestartet!");
+
 async Task PersistShines()
 {
     if (!Settings.Instance.PersistShines.Enabled)
@@ -61,12 +63,14 @@ async Task LoadShines()
 // Load shines table from file
 await LoadShines();
 
-server.ClientJoined += (c, _) => {
+server.ClientJoined += (c, _) =>
+{
     c.Metadata["shineSync"] = new ConcurrentBag<int>();
     c.Metadata["loadedSave"] = false;
-    c.Metadata["scenario"] = (byte?) 0;
+    c.Metadata["scenario"] = (byte?)0;
     c.Metadata["2d"] = false;
     c.Metadata["disableShineSync"] = false;
+    
 };
 
 async Task ClientSyncShineBag(Client client) {
@@ -762,118 +766,132 @@ Task.Run(() => {
 }).ContinueWith(logError);
 #pragma warning restore CS4014
 
-Task.Run(() =>
+var serverTask = Task.Run(async () =>
 {
     var listener = new HttpListener();
     listener.Prefixes.Add("http://localhost:8080/");
     listener.Start();
     consoleLogger.Info("Webinterface läuft auf http://localhost:8080/");
-try
-{
-    System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo
+    try
     {
-        FileName = "http://localhost:8080/dashboard.html",
-        UseShellExecute = true
-    });
-}
-catch (Exception ex)
-{
-    consoleLogger.Info("Konnte Browser nicht öffnen: " + ex.Message);
-}
+        System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo
+        {
+            FileName = "http://localhost:8080/dashboard.html",
+            UseShellExecute = true
+        });
+    }
+    catch (Exception ex)
+    {
+        consoleLogger.Info("Konnte Browser nicht öffnen: " + ex.Message);
+    }
     while (listener.IsListening)
     {
         var context = listener.GetContext();
-        string urlPath = context.Request.Url.AbsolutePath.TrimStart('/');
-        if (string.IsNullOrEmpty(urlPath)) urlPath = "index.html";
-        string filePath = Path.Combine(AppContext.BaseDirectory, "web-interface", urlPath);
-
-        // API-Routen abfangen (Dummy-Daten)
-        if (urlPath.StartsWith("api/serverinfo"))
+        Task.Run(() =>
         {
-            string response = "{\"host\": \"localhost\", \"players\": 0, \"permissions\": \"admin\"}";
-            context.Response.ContentType = "application/json";
-            byte[] buffer = Encoding.UTF8.GetBytes(response);
-            context.Response.ContentLength64 = buffer.Length;
-            context.Response.OutputStream.Write(buffer, 0, buffer.Length);
-            context.Response.OutputStream.Close();
-            continue;
-        }
-        if (urlPath == "commands/exec" && context.Request.HttpMethod == "POST")
-{
-    using var reader = new StreamReader(context.Request.InputStream);
-    string body = reader.ReadToEnd();
-    string command = "";
-    try
-    {
-        var json = System.Text.Json.JsonDocument.Parse(body);
-        command = json.RootElement.GetProperty("command").GetString() ?? "";
-    }
-    catch { }
+            string urlPath = context.Request.Url.AbsolutePath.TrimStart('/');
+            if (string.IsNullOrEmpty(urlPath)) urlPath = "index.html";
+            string filePath = Path.Combine(AppContext.BaseDirectory, "web-interface", urlPath);
 
-    // Führe das Kommando aus
-    var result = CommandHandler.GetResult(command);
-    string output = string.Join("\n", result.ReturnStrings);
-
-    context.Response.ContentType = "text/plain";
-    byte[] buffer = Encoding.UTF8.GetBytes(output);
-    context.Response.ContentLength64 = buffer.Length;
-    context.Response.OutputStream.Write(buffer, 0, buffer.Length);
-    context.Response.OutputStream.Close();
-    return;
-}
-        if (urlPath.StartsWith("api/console"))
-        {
-            string response = "{\"output\": [\"API not implemented\"]}";
-            context.Response.ContentType = "application/json";
-            byte[] buffer = Encoding.UTF8.GetBytes(response);
-            context.Response.ContentLength64 = buffer.Length;
-            context.Response.OutputStream.Write(buffer, 0, buffer.Length);
-            context.Response.OutputStream.Close();
-            continue;
-        }
-
-        // Statische Dateien ausliefern
-        if (File.Exists(filePath))
-        {
-            string ext = Path.GetExtension(filePath).ToLower();
-            context.Response.ContentType = ext switch
+            // API-Routen abfangen (Dummy-Daten)
+            if (urlPath.StartsWith("api/serverinfo"))
             {
-                ".html" => "text/html",
-                ".css" => "text/css",
-                ".js" => "application/javascript",
-                ".png" => "image/png",
-                ".jpg" => "image/jpeg",
-                ".ico" => "image/x-icon",
-                _ => "application/octet-stream"
-            };
-            byte[] buffer = File.ReadAllBytes(filePath);
-            context.Response.ContentLength64 = buffer.Length;
-            context.Response.OutputStream.Write(buffer, 0, buffer.Length);
+                string response = "{\"host\": \"localhost\", \"players\": 0, \"permissions\": \"admin\"}";
+                context.Response.ContentType = "application/json";
+                byte[] buffer = Encoding.UTF8.GetBytes(response);
+                context.Response.ContentLength64 = buffer.Length;
+                context.Response.OutputStream.Write(buffer, 0, buffer.Length);
+                context.Response.OutputStream.Close();
+                return;
+            }
+            if (urlPath == "commands/exec" && context.Request.HttpMethod == "POST")
+            {
+                using var reader = new StreamReader(context.Request.InputStream);
+                string body = reader.ReadToEnd();
+                string command = "";
+                try
+                {
+                    var json = System.Text.Json.JsonDocument.Parse(body);
+                    command = json.RootElement.GetProperty("command").GetString() ?? "";
+                }
+                catch { }
+
+                // Führe das Kommando aus
+                var result = CommandHandler.GetResult(command);
+                string output = string.Join("\n", result.ReturnStrings);
+
+                context.Response.ContentType = "text/plain";
+                byte[] buffer = Encoding.UTF8.GetBytes(output);
+                context.Response.ContentLength64 = buffer.Length;
+                context.Response.OutputStream.Write(buffer, 0, buffer.Length);
+                context.Response.OutputStream.Close();
+                return;
+            }
+            if (urlPath == "commands/output" && context.Request.HttpMethod == "GET")
+            {
+                string output = consoleLogger.GetOutput();
+                context.Response.ContentType = "text/plain";
+                byte[] buffer = Encoding.UTF8.GetBytes(output);
+                context.Response.ContentLength64 = buffer.Length;
+                context.Response.OutputStream.Write(buffer, 0, buffer.Length);
+                context.Response.OutputStream.Close();
+                return;
+            }
+            if (urlPath.StartsWith("api/console"))
+            {
+                string response = "{\"output\": [\"API not implemented\"]}";
+                context.Response.ContentType = "application/json";
+                byte[] buffer = Encoding.UTF8.GetBytes(response);
+                context.Response.ContentLength64 = buffer.Length;
+                context.Response.OutputStream.Write(buffer, 0, buffer.Length);
+                context.Response.OutputStream.Close();
+                return;
+            }
+
+            // Statische Dateien ausliefern
+            if (File.Exists(filePath))
+            {
+                string ext = Path.GetExtension(filePath).ToLower();
+                context.Response.ContentType = ext switch
+                {
+                    ".html" => "text/html",
+                    ".css" => "text/css",
+                    ".js" => "application/javascript",
+                    ".png" => "image/png",
+                    ".jpg" => "image/jpeg",
+                    ".ico" => "image/x-icon",
+                    _ => "application/octet-stream"
+                };
+                byte[] buffer = File.ReadAllBytes(filePath);
+                context.Response.ContentLength64 = buffer.Length;
+                context.Response.OutputStream.Write(buffer, 0, buffer.Length);
+            }
+            else
+            {
+                // Fallback: index.html für SPA-Routing
+                string fallback = Path.Combine(AppContext.BaseDirectory, "web-interface", "index.html");
+                byte[] buffer = File.ReadAllBytes(fallback);
+                context.Response.ContentType = "text/html";
+                context.Response.ContentLength64 = buffer.Length;
+                context.Response.OutputStream.Write(buffer, 0, buffer.Length);
+            }
+            context.Response.OutputStream.Close();
+        });
+    }
+
+    await server.Listen(cts.Token);
+
+    if (restartRequested) //need to do this here because this needs to happen after the listener closes, and there isn't an
+                          //easy way to sync in the restartserver command without it exiting Main()
+    {
+        string? path = System.Reflection.Assembly.GetEntryAssembly()?.GetName().Name;
+        const string unableToStartMsg = "Unable to ascertain the executable location, you'll need to re-run the server manually.";
+        if (path != null) //path is probably just "Server", but in the context of the assembly, that's all you need to restart it.
+        {
+            Console.WriteLine($"Server Running on (pid): {System.Diagnostics.Process.Start(path)?.Id.ToString() ?? unableToStartMsg}");
         }
         else
-        {
-            // Fallback: index.html für SPA-Routing
-            string fallback = Path.Combine(AppContext.BaseDirectory, "web-interface", "index.html");
-            byte[] buffer = File.ReadAllBytes(fallback);
-            context.Response.ContentType = "text/html";
-            context.Response.ContentLength64 = buffer.Length;
-            context.Response.OutputStream.Write(buffer, 0, buffer.Length);
-        }
-        context.Response.OutputStream.Close();
+            consoleLogger.Info(unableToStartMsg);
     }
 });
-
-await server.Listen(cts.Token);
-
-if (restartRequested) //need to do this here because this needs to happen after the listener closes, and there isn't an
-                      //easy way to sync in the restartserver command without it exiting Main()
-{
-    string? path = System.Reflection.Assembly.GetEntryAssembly()?.GetName().Name;
-    const string unableToStartMsg = "Unable to ascertain the executable location, you'll need to re-run the server manually.";
-    if (path != null) //path is probably just "Server", but in the context of the assembly, that's all you need to restart it.
-    {
-        Console.WriteLine($"Server Running on (pid): {System.Diagnostics.Process.Start(path)?.Id.ToString() ?? unableToStartMsg}");
-    }
-    else
-        consoleLogger.Info(unableToStartMsg);
-}
+await serverTask; // <-- Add this line to close Task.Run and terminate the statement

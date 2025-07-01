@@ -7,6 +7,16 @@ body { background: #f8f9fa; }
 button.flex-fill {
     min-width: 80px;
 }
+#log {
+    height: 741px;
+    overflow-y: auto;
+    border: 1px solid #ccc;
+    background: #111;
+    color: #eee;
+    padding: 8px;
+    font-family: monospace;
+    white-space: pre-wrap;
+}
 .sidebar .nav-link, .sidebar .navbar-brand { color: #fff; }
 .sidebar .nav-link.active, .sidebar .nav-link:hover { background: #232946; color: #fff; }
 .card { margin-bottom: 1.5rem; }

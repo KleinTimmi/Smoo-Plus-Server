@@ -3,19 +3,44 @@
 namespace Shared;
 
 public class Logger {
+    private readonly List<string> outputBuffer = new();
+    private readonly object bufferLock = new();
+
     public Logger(string name) {
         Name = name;
     }
 
     public string Name { get; set; }
 
-    public void Info(string text) => Handler?.Invoke(Name, "Info", text, ConsoleColor.White);
+    public void Info(string text) => WriteAndHandle("Info", text, ConsoleColor.White);
 
-    public void Warn(string text) => Handler?.Invoke(Name, "Warn", text, ConsoleColor.Yellow);
+    public void Warn(string text) => WriteAndHandle("Warn", text, ConsoleColor.Yellow);
 
-    public void Error(string text) => Handler?.Invoke(Name, "Error", text, ConsoleColor.Red);
+    public void Error(string text) => WriteAndHandle("Error", text, ConsoleColor.Red);
 
     public void Error(Exception error) => Error(error.ToString());
+
+    private void WriteAndHandle(string level, string text, ConsoleColor color)
+    {
+        lock (bufferLock)
+        {
+            foreach (var line in text.Split('\n'))
+            {
+                outputBuffer.Add($"[{DateTime.Now}] {level} [{Name}] {line}");
+                if (outputBuffer.Count > 1000)
+                    outputBuffer.RemoveAt(0);
+            }
+        }
+        Handler?.Invoke(Name, level, text, color);
+    }
+
+    public string GetOutput()
+    {
+        lock (bufferLock)
+        {
+            return string.Join(Environment.NewLine, outputBuffer);
+        }
+    }
 
     public static string PrefixNewLines(string text, string prefix) {
         StringBuilder builder = new StringBuilder();
