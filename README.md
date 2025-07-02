@@ -11,7 +11,7 @@ Port:4205
 
 ###Features
 
-*eventuell costum oder schon in Game Outfides für Räuber und Gendarmen die sich automatisch wechseln 
+* eventuell costum oder schon in Game Outfides für Räuber und Gendarmen die sich automatisch wechseln 
 
 
 ## 15 Zählt 
