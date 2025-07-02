@@ -1,7 +1,7 @@
 Port:4205
 
 
-# Consolen Befehle 
+# Consolen Befehle:
 
 - change Gamemode 
 - change parameter (speed,jumpheigt)
