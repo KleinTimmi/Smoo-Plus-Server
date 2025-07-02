@@ -7,7 +7,6 @@ Port:4205
 - change parameter (speed,jumpheigt)
 - noclip infinite cap dives 
 - change costumes 
-- 
 
 
 # Gamemode Ideen:
