@@ -9,7 +9,7 @@ Port:4205
 * Wenn ein Gendarm den Räuber berührt wird dieser ins Gefängnis teleportiert.
 * Das Gefängnis kann von den Räubern über ein P-Schalter geöffnet bzw. despawn werden, damit die gefangenen fliehen können.
 
-###Features
+### Features
 
 * eventuell costum oder schon in Game Outfides für Räuber und Gendarmen die sich automatisch wechseln 
 
