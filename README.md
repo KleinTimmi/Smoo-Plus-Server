@@ -1,6 +1,14 @@
 Port:4205
 
 
+# Consolen Befehle 
+
+- change Gamemode 
+- change parameter (speed,jumpheigt)
+- noclip infinite cap dives 
+- change costumes 
+- 
+
 
 # Gamemode Ideen:
 
