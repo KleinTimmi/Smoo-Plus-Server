@@ -766,7 +766,7 @@ Task.Run(() => {
 }).ContinueWith(logError);
 #pragma warning restore CS4014
 
-var serverTask = Task.Run(async () =>
+var webTask = Task.Run(async () =>
 {
     var listener = new HttpListener();
     listener.Prefixes.Add("http://localhost:8080/");
@@ -784,16 +784,16 @@ var serverTask = Task.Run(async () =>
     {
         consoleLogger.Info("Konnte Browser nicht öffnen: " + ex.Message);
     }
+
     while (listener.IsListening)
     {
-        var context = listener.GetContext();
-        Task.Run(() =>
-        {
-            string urlPath = context.Request.Url.AbsolutePath.TrimStart('/');
-            if (string.IsNullOrEmpty(urlPath)) urlPath = "index.html";
-            string filePath = Path.Combine(AppContext.BaseDirectory, "web-interface", urlPath);
+        var context = await listener.GetContextAsync();
+        string urlPath = context.Request.Url!.AbsolutePath.TrimStart('/').ToLower();
+        string filePath = Path.Combine(AppContext.BaseDirectory, "web-interface", urlPath.Replace('/', Path.DirectorySeparatorChar));
 
-            // API-Routen abfangen (Dummy-Daten)
+        try
+        {
+            // API: Serverinfo
             if (urlPath.StartsWith("api/serverinfo"))
             {
                 string response = "{\"host\": \"localhost\", \"players\": 0, \"permissions\": \"admin\"}";
@@ -802,8 +802,10 @@ var serverTask = Task.Run(async () =>
                 context.Response.ContentLength64 = buffer.Length;
                 context.Response.OutputStream.Write(buffer, 0, buffer.Length);
                 context.Response.OutputStream.Close();
-                return;
+                continue;
             }
+
+            // API: Konsolenbefehl ausführen
             if (urlPath == "commands/exec" && context.Request.HttpMethod == "POST")
             {
                 using var reader = new StreamReader(context.Request.InputStream);
@@ -816,17 +818,21 @@ var serverTask = Task.Run(async () =>
                 }
                 catch { }
 
-                // Führe das Kommando aus
                 var result = CommandHandler.GetResult(command);
                 string output = string.Join("\n", result.ReturnStrings);
+
+                // Kommando und Ausgabe ins Log schreiben
+                consoleLogger.Info($"> {command}\n{output}");
 
                 context.Response.ContentType = "text/plain";
                 byte[] buffer = Encoding.UTF8.GetBytes(output);
                 context.Response.ContentLength64 = buffer.Length;
                 context.Response.OutputStream.Write(buffer, 0, buffer.Length);
                 context.Response.OutputStream.Close();
-                return;
+                continue;
             }
+
+            // API: Konsolen-Log abrufen
             if (urlPath == "commands/output" && context.Request.HttpMethod == "GET")
             {
                 string output = consoleLogger.GetOutput();
@@ -835,8 +841,10 @@ var serverTask = Task.Run(async () =>
                 context.Response.ContentLength64 = buffer.Length;
                 context.Response.OutputStream.Write(buffer, 0, buffer.Length);
                 context.Response.OutputStream.Close();
-                return;
+                continue;
             }
+
+            // API: Dummy-Console
             if (urlPath.StartsWith("api/console"))
             {
                 string response = "{\"output\": [\"API not implemented\"]}";
@@ -845,7 +853,7 @@ var serverTask = Task.Run(async () =>
                 context.Response.ContentLength64 = buffer.Length;
                 context.Response.OutputStream.Write(buffer, 0, buffer.Length);
                 context.Response.OutputStream.Close();
-                return;
+                continue;
             }
 
             // Statische Dateien ausliefern
@@ -876,22 +884,20 @@ var serverTask = Task.Run(async () =>
                 context.Response.OutputStream.Write(buffer, 0, buffer.Length);
             }
             context.Response.OutputStream.Close();
-        });
-    }
-
-    await server.Listen(cts.Token);
-
-    if (restartRequested) //need to do this here because this needs to happen after the listener closes, and there isn't an
-                          //easy way to sync in the restartserver command without it exiting Main()
-    {
-        string? path = System.Reflection.Assembly.GetEntryAssembly()?.GetName().Name;
-        const string unableToStartMsg = "Unable to ascertain the executable location, you'll need to re-run the server manually.";
-        if (path != null) //path is probably just "Server", but in the context of the assembly, that's all you need to restart it.
-        {
-            Console.WriteLine($"Server Running on (pid): {System.Diagnostics.Process.Start(path)?.Id.ToString() ?? unableToStartMsg}");
         }
-        else
-            consoleLogger.Info(unableToStartMsg);
+        catch (Exception ex)
+        {
+            context.Response.StatusCode = 500;
+            byte[] buffer = Encoding.UTF8.GetBytes("Internal Server Error\n" + ex);
+            context.Response.ContentLength64 = buffer.Length;
+            context.Response.OutputStream.Write(buffer, 0, buffer.Length);
+            context.Response.OutputStream.Close();
+        }
     }
 });
-await serverTask; // <-- Add this line to close Task.Run and terminate the statement
+
+// Spielserver separat starten
+var gameTask = server.Listen(cts.Token);
+
+// Auf beide Tasks warten
+await Task.WhenAll(webTask, gameTask);

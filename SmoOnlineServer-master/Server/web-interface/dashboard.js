@@ -1,16 +1,14 @@
 document.getElementById('consoleSendBtn').onclick = function(e) {
-    // Falls du das Event brauchst: if (e) e.preventDefault();
-    const input = document.getElementById('consoleInput');
-    const command = input.value.trim();
-    if (!command) return;
+    const input = document.getElementById('consoleInput').value;
     fetch('/commands/exec', {
         method: 'POST',
         headers: {'Content-Type': 'application/json'},
-        body: JSON.stringify({command})
+        body: JSON.stringify({ command: input })
     })
     .then(r => r.text())
-    .then(() => {
-        input.value = '';
+    .then(result => {
+        updateConsoleOutput();
+        document.getElementById('consoleInput').value = '';
     });
 };
 

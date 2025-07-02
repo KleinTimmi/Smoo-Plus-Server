@@ -105,20 +105,25 @@ public static class CommandHandler {
         }
     }
 
+
+
     /// <summary>
     /// Modified by <b>TheUbMunster</b>
     /// </summary>
     public static Response GetResult(string input)
     {
-        try {
+        try
+        {
             string[] args = input.Split(' ');
             if (args.Length == 0) return "No command entered, see help command for valid commands";
             //this part is to allow single arguments that contain spaces (since the game seems to be able to handle usernames with spaces, we need to as well)
             List<string> newArgs = new List<string>();
             newArgs.Add(args[0]);
-            for (int i = 1; i < args.Length; i++) {
+            for (int i = 1; i < args.Length; i++)
+            {
                 if (args[i].Length == 0) continue; //empty string (>1 whitespace between arguments).
-                else if (args[i][0] == '\"') {
+                else if (args[i][0] == '\"')
+                {
                     //concatenate args until a string ends with a quote
                     StringBuilder sb = new StringBuilder();
                     i--; //fix off-by-one issue
@@ -126,7 +131,8 @@ public static class CommandHandler {
                     {
                         i++;
                         sb.Append(args[i] + " "); //add space back removed by the string.Split(' ')
-                        if (i >= args.Length) {
+                        if (i >= args.Length)
+                        {
                             return "Unmatching quotes, make sure that whenever quotes are used, another quote is present to close it (no action was performed).";
                         }
                     } while (args[i][^1] != '\"');
@@ -141,7 +147,8 @@ public static class CommandHandler {
             string commandName = args[0];
             return Handlers.TryGetValue(commandName, out Handler? handler) ? handler(args[1..]) : $"Invalid command {args[0]}, see help command for valid commands";
         }
-        catch (Exception e) {
+        catch (Exception e)
+        {
             return $"An error occured while trying to process your command: {e}";
         }
     }
