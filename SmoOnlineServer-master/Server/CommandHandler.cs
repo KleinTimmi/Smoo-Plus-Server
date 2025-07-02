@@ -1,8 +1,6 @@
 ﻿using System.Runtime.InteropServices;
 using System.Text;
 
-using Pgrogramm.cs;
-
 namespace Server;
 
 public static class CommandHandler {
@@ -14,7 +12,24 @@ public static class CommandHandler {
     {
         { "help", "Zeigt diese Hilfe an" },
         { "infCapDive", "Infinite Capbounces" },
-        { "ban", "Bannt einen Spieler" },        
+        { "ban", "Ban a player from the server" },
+        { "unban", "Unban a player from the server" },
+        { "rejoin", "Rejoin players to the server" },
+        { "crash", "Crash players on the server" },
+        { "send", "Send a Player to a Sage" },
+        { "sendall", "Send a scenario to all players" },
+        { "scenario", "Merge scenarios (true/false)" },
+        { "tag", "" },
+        { "maxplayers", "Set maximum Player" },
+        { "list", "List connected players" },
+        { "flip", "Flip a Player" },
+        { "shine", "Shine Sync" },
+        { "loadsettings", "Load server settings from file" },
+        { "restartserver", "Restart the server" },
+        { "exit", "Exit the server application" },
+        { "quit", "Quit the server application" },
+        { "q", "Quit the server application" }
+
         // { "deinBefehl", "Beschreibung" },
         // Weitere Kommandos hier ergänzen
     };
@@ -43,14 +58,25 @@ public static class CommandHandler {
         { "q", "q" }
         // ...
     };
+    
+    public static IEnumerable<(string Name, string? Description, string? Usage)> GetAllCommands()
+{
+    foreach (var cmd in Handlers.Keys)
+    {
+        CommandDescriptions.TryGetValue(cmd, out var desc);
+        CommandUsages.TryGetValue(cmd, out var usage);
+        yield return (cmd, desc, usage);
+    }
+}
 
-    static CommandHandler() {
+    static CommandHandler()
+    {
         RegisterCommand("help", _ =>
         {
             var sb = new StringBuilder();
-            sb.AppendLine("Verfügbare Kommandos:\n");
+            sb.AppendLine("Available commands:\n");
             // Passe die Spaltenbreiten an (z.B. 20, 32, 40)
-            sb.AppendLine($"{"Kommando",-20} | {"Beschreibung",-32} | {"Usage",-40}");
+            sb.AppendLine($"{"Commands",-20} | {"Description",-32} | {"Usage",-40}");
             sb.AppendLine(new string('-', 20) + "-|-" + new string('-', 32) + "-|-" + new string('-', 40));
             foreach (var cmd in Handlers.Keys.OrderBy(k => k))
             {
@@ -79,20 +105,25 @@ public static class CommandHandler {
         }
     }
 
+
+
     /// <summary>
     /// Modified by <b>TheUbMunster</b>
     /// </summary>
     public static Response GetResult(string input)
     {
-        try {
+        try
+        {
             string[] args = input.Split(' ');
             if (args.Length == 0) return "No command entered, see help command for valid commands";
             //this part is to allow single arguments that contain spaces (since the game seems to be able to handle usernames with spaces, we need to as well)
             List<string> newArgs = new List<string>();
             newArgs.Add(args[0]);
-            for (int i = 1; i < args.Length; i++) {
+            for (int i = 1; i < args.Length; i++)
+            {
                 if (args[i].Length == 0) continue; //empty string (>1 whitespace between arguments).
-                else if (args[i][0] == '\"') {
+                else if (args[i][0] == '\"')
+                {
                     //concatenate args until a string ends with a quote
                     StringBuilder sb = new StringBuilder();
                     i--; //fix off-by-one issue
@@ -100,7 +131,8 @@ public static class CommandHandler {
                     {
                         i++;
                         sb.Append(args[i] + " "); //add space back removed by the string.Split(' ')
-                        if (i >= args.Length) {
+                        if (i >= args.Length)
+                        {
                             return "Unmatching quotes, make sure that whenever quotes are used, another quote is present to close it (no action was performed).";
                         }
                     } while (args[i][^1] != '\"');
@@ -115,7 +147,8 @@ public static class CommandHandler {
             string commandName = args[0];
             return Handlers.TryGetValue(commandName, out Handler? handler) ? handler(args[1..]) : $"Invalid command {args[0]}, see help command for valid commands";
         }
-        catch (Exception e) {
+        catch (Exception e)
+        {
             return $"An error occured while trying to process your command: {e}";
         }
     }
