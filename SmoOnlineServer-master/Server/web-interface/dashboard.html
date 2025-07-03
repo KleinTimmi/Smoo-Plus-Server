@@ -9,6 +9,10 @@
       rel="stylesheet"
     />
     <link href="dashboard.css" rel="stylesheet" />
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css"
+      rel="stylesheet"
+    />
   </head>
   <body>
     <div class="container-fluid">
@@ -42,7 +46,60 @@
                 <div class="card">
                   <div class="card-body">
                     <h5 class="card-title">Ban List</h5>
-                    <div id="banList"></div>
+                    <ul class="nav nav-tabs" id="banListTabs" role="tablist">
+                      <li class="nav-item" role="presentation">
+                        <button
+                          class="nav-link active"
+                          id="banPlayers-tab"
+                          data-bs-toggle="tab"
+                          data-bs-target="#banPlayers"
+                          type="button"
+                          role="tab"
+                          aria-controls="banPlayers"
+                          aria-selected="true"
+                        >
+                          Player
+                        </button>
+                      </li>
+                      <li class="nav-item" role="presentation">
+                        <button
+                          class="nav-link"
+                          id="banStages-tab"
+                          data-bs-toggle="tab"
+                          data-bs-target="#banStages"
+                          type="button"
+                          role="tab"
+                          aria-controls="banStages"
+                          aria-selected="false"
+                        >
+                          Stage
+                        </button>
+                      </li>
+                    </ul>
+                    <div class="tab-content" id="banListTabsContent">
+                      <div
+                        class="tab-pane fade show active"
+                        id="banPlayers"
+                        role="tabpanel"
+                        aria-labelledby="banPlayers-tab"
+                      >
+                        <ul
+                          class="list-group list-group-flush"
+                          id="banListPlayers"
+                        ></ul>
+                      </div>
+                      <div
+                        class="tab-pane fade"
+                        id="banStages"
+                        role="tabpanel"
+                        aria-labelledby="banStages-tab"
+                      >
+                        <ul
+                          class="list-group list-group-flush"
+                          id="banListStages"
+                        ></ul>
+                      </div>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -52,22 +109,31 @@
                     <h5 class="card-title">Ban Stage</h5>
                     <div class="mb-2">
                       <label>Kingdom:</label>
-                      <select class="form-select" id="kingdomSelect">
-                        <option>Odyssey</option>
-                      </select>
+                      <select class="form-select" id="kingdomSelect"></select>
                     </div>
                     <div class="mb-2">
                       <label>Stage:</label>
                       <select class="form-select" id="stageSelect">
                         <option>HomeShipInsideStage</option>
+                        <option>CapWorldHomeStage</option>
+                        <option>WaterfallWorldHomeStage</option>
+                        <option>SandWorldHomeStage</option>
                       </select>
                     </div>
-                    <button
-                      class="btn btn-outline-primary w-100"
-                      id="banStageBtn"
-                    >
-                      Ban
-                    </button>
+                    <div class="d-flex gap-2">
+                      <button
+                        class="btn btn-outline-primary flex-fill"
+                        id="banStageBtn"
+                      >
+                        Ban
+                      </button>
+                      <button
+                        class="btn btn-outline-primary flex-fill"
+                        id="unbanStageBtn"
+                      >
+                        Unban
+                      </button>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -165,15 +231,13 @@
                         <label>Player:</label>
                         <input
                           class="form-control"
-                          id="sendPlayerName"
+                          id="sendPlayer"
                           value="All"
                         />
                       </div>
                       <div class="col-md-2">
                         <label>Kingdom:</label>
-                        <select class="form-select" id="sendKingdom">
-                          <option>Odyssey</option>
-                        </select>
+                        <select class="form-select" id="sendKingdom"></select>
                       </div>
                       <div class="col-md-3">
                         <label>Stage:</label>

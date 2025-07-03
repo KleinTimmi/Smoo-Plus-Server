@@ -857,6 +857,23 @@ var webTask = Task.Run(async () =>
                 continue;
             }
 
+            // API: Banlist
+            if (urlPath.StartsWith("api/banlist"))
+            {
+                var banPlayers = Settings.Instance.BanList.Players?.Select(guid => guid.ToString()).ToArray() ?? Array.Empty<string>();
+                var banStages = Settings.Instance.BanList.Stages?.ToArray() ?? Array.Empty<string>();
+                string response = System.Text.Json.JsonSerializer.Serialize(new {
+                    players = banPlayers,
+                    stages = banStages
+                });
+                context.Response.ContentType = "application/json";
+                byte[] buffer = Encoding.UTF8.GetBytes(response);
+                context.Response.ContentLength64 = buffer.Length;
+                context.Response.OutputStream.Write(buffer, 0, buffer.Length);
+                context.Response.OutputStream.Close();
+                continue;
+            }
+            
             // Statische Dateien ausliefern
             if (File.Exists(filePath))
             {

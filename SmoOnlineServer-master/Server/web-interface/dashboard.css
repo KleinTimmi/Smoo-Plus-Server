@@ -1,35 +1,65 @@
-body { background: #f8f9fa; }
+body {
+  background: #f8f9fa;
+}
 .sidebar {
-    min-height: 100vh;
-    background: linear-gradient(180deg, #232946 0%, #3a3a5d 100%);
-    color: #fff;
+  min-height: 100vh;
+  background: linear-gradient(180deg, #232946 0%, #3a3a5d 100%);
+  color: #fff;
 }
 button.flex-fill {
-    min-width: 80px;
+  min-width: 80px;
 }
 #log {
-    height: 741px;
-    overflow-y: auto;
-    border: 1px solid #ccc;
-    background: #111;
-    color: #eee;
-    padding: 8px;
-    font-family: monospace;
-    white-space: pre-wrap;
+  height: 741px;
+  overflow-y: auto;
+  border: 1px solid #ccc;
+  background: #111;
+  color: #eee;
+  padding: 8px;
+  font-family: monospace;
+  white-space: pre-wrap;
 }
 .feature-box {
-    max-width: 300px;
-    margin: 0 auto 1.5rem auto;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.07);
-    border-radius: 10px;
-    border: 1px solid #e0e0e0;
+  max-width: 300px;
+  margin: 0 auto 1.5rem auto;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.07);
+  border-radius: 10px;
+  border: 1px solid #e0e0e0;
 }
 .feature-box .card-body {
-    padding: 1rem;
+  padding: 1rem;
 }
-.sidebar .nav-link, .sidebar .navbar-brand { color: #fff; }
-.sidebar .nav-link.active, .sidebar .nav-link:hover { background: #232946; color: #fff; }
-.card { margin-bottom: 1.5rem; }
-.dashboard-title { font-size: 2rem; font-weight: 600; margin-bottom: 1.5rem; }
-.form-control, .form-select { background: #fff; }
-.btn { min-width: 120px; }
+.sidebar .nav-link,
+.sidebar .navbar-brand {
+  color: #fff;
+}
+.sidebar .nav-link.active,
+.sidebar .nav-link:hover {
+  background: #232946;
+  color: #fff;
+}
+.card {
+  margin-bottom: 1.5rem;
+}
+.dashboard-title {
+  font-size: 2rem;
+  font-weight: 600;
+  margin-bottom: 1.5rem;
+}
+.form-control,
+.form-select {
+  background: #fff;
+}
+.btn {
+  min-width: 120px;
+}
+#banListPlayers .list-group-item,
+#banListStages .list-group-item {
+  border: none;
+  border-bottom: 1px solid #eee;
+  background: #f9f9f9;
+}
+#banListPlayers .btn,
+#banListStages .btn {
+  min-width: 80px;
+}

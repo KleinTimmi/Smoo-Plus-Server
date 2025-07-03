@@ -1,3 +1,58 @@
+const stagesByKingdom = {
+  Odyssey: ["HomeShipInsideStage"],
+  "Cap Kingdom": [
+    "CapWorldHomeStage",
+    "CapWorldTowerStage",
+    "PoisonWaveExStage",
+    "PushBlockExStage",
+    "FrogSearchExStage",
+    "RollingExStage",
+  ],
+  "Cascade Kingdom": [
+    "WaterfallWorldHomeStage",
+    "TrexPoppunExStage",
+    "WanwanClashExStage",
+    "Lift2DExStage",
+    "CapAppearExStage",
+    "WindBlowExStage",
+  ],
+  "Sand Kingdom": [],
+};
+
+//dropdown menu logic
+function fillKingdomDropdowns() {
+  const kingdomNames = Object.keys(stagesByKingdom);
+  const dropdownIds = ["kingdomSelect", "sendKingdom"];
+  dropdownIds.forEach((id) => {
+    const select = document.getElementById(id);
+    if (!select) return;
+    select.innerHTML = "";
+    kingdomNames.forEach((kingdom) => {
+      const opt = document.createElement("option");
+      opt.value = kingdom;
+      opt.textContent = kingdom;
+      select.appendChild(opt);
+    });
+  });
+}
+
+// Beim Laden der Seite Kingdom-Dropdowns befüllen und initialisieren
+document.addEventListener("DOMContentLoaded", function () {
+  fillKingdomDropdowns();
+
+  // Ban Stage Dropdown initialisieren
+  const kingdomSelect = document.getElementById("kingdomSelect");
+  if (kingdomSelect) {
+    kingdomSelect.dispatchEvent(new Event("change"));
+  }
+
+  // Send Player Dropdown initialisieren
+  const sendKingdom = document.getElementById("sendKingdom");
+  if (sendKingdom) {
+    sendKingdom.dispatchEvent(new Event("change"));
+  }
+});
+
 document.getElementById("consoleSendBtn").onclick = function (e) {
   const input = document.getElementById("consoleInput").value;
   fetch("/commands/exec", {
@@ -244,3 +299,134 @@ document.getElementById("setMaxPlayersBtn").onclick = async function () {
     body: JSON.stringify({ command: `maxplayers ${value}` }),
   });
 };
+
+//Ban Stage
+document.getElementById("banStageBtn").onclick = async function () {
+  const stage = document.getElementById("stageSelect").value;
+  await fetch("/commands/exec", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ command: `ban stage ${stage}` }),
+  });
+};
+
+//Unban Stage
+document.getElementById("unbanStageBtn").onclick = async function () {
+  const stage = document.getElementById("stageSelect").value;
+  await fetch("/commands/exec", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ command: `unban stage ${stage}` }),
+  });
+};
+
+//Ban Stage dropdown
+document
+  .getElementById("kingdomSelect")
+  .addEventListener("change", function () {
+    const kingdom = this.value;
+    const stageSelect = document.getElementById("stageSelect");
+    stageSelect.innerHTML = "";
+    (stagesByKingdom[kingdom] || []).forEach((stage) => {
+      const opt = document.createElement("option");
+      opt.value = stage;
+      opt.textContent = stage;
+      stageSelect.appendChild(opt);
+    });
+  });
+
+//Send Player
+document.getElementById("sendPlayerBtn").onclick = async function () {
+  const player = document.getElementById("sendPlayer").value;
+  const stage = document.getElementById("sendStage").value;
+  const scenario = document.getElementById("sendScenario").value;
+  await fetch("/commands/exec", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ command: `send ${stage} "" ${scenario} ${player}` }),
+  });
+};
+// Send Player dropdown
+document.getElementById("sendKingdom").addEventListener("change", function () {
+  const kingdom = this.value;
+  const stageSelect = document.getElementById("sendStage");
+  stageSelect.innerHTML = "";
+  (stagesByKingdom[kingdom] || []).forEach((stage) => {
+    const opt = document.createElement("option");
+    opt.value = stage;
+    opt.textContent = stage;
+    stageSelect.appendChild(opt);
+  });
+});
+
+//Ban List
+async function updateBanLists() {
+  try {
+    const response = await fetch("/api/banlist");
+    if (!response.ok) throw new Error("Fehler beim Laden der Ban-Liste");
+    const data = await response.json();
+
+    // Spieler-Ban-Liste anzeigen
+    const playerList = document.getElementById("banListPlayers");
+    if (playerList) {
+      if (data.players && data.players.length > 0) {
+        playerList.innerHTML = data.players
+          .map(
+            (p) =>
+              `<li class=\"list-group-item d-flex justify-content-between align-items-center\">` +
+              `<span><i class=\"bi bi-person-x-fill text-danger\"></i> ${p}</span>` +
+              `<button class=\"btn btn-sm btn-outline-success\" onclick=\"unbanPlayer('${p}')\">Entbannen</button>` +
+              `</li>`
+          )
+          .join("");
+      } else {
+        playerList.innerHTML =
+          '<li class="list-group-item text-muted"><i>Keine Spieler gebannt</i></li>';
+      }
+    }
+
+    // Stage-Ban-Liste anzeigen
+    const stageList = document.getElementById("banListStages");
+    if (stageList) {
+      if (data.stages && data.stages.length > 0) {
+        stageList.innerHTML = data.stages
+          .map(
+            (s) =>
+              `<li class=\"list-group-item d-flex justify-content-between align-items-center\">` +
+              `<span><i class=\"bi bi-flag-fill text-warning\"></i> ${s}</span>` +
+              `<button class=\"btn btn-sm btn-outline-success\" onclick=\"unbanStage('${s}')\">Entbannen</button>` +
+              `</li>`
+          )
+          .join("");
+      } else {
+        stageList.innerHTML =
+          '<li class="list-group-item text-muted"><i>Keine Stages gebannt</i></li>';
+      }
+    }
+  } catch (e) {
+    document.getElementById("banListPlayers").innerHTML =
+      '<li class="list-group-item text-danger">Fehler beim Laden!</li>';
+    document.getElementById("banListStages").innerHTML =
+      '<li class="list-group-item text-danger">Fehler beim Laden!</li>';
+  }
+}
+
+window.unbanPlayer = function (player) {
+  fetch("/commands/exec", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ command: `unban player ${player}` }),
+  }).then(updateBanLists);
+};
+
+window.unbanStage = function (stage) {
+  fetch("/commands/exec", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ command: `unban stage ${stage}` }),
+  }).then(updateBanLists);
+};
+
+// Beim Laden der Seite Ban-Listen initialisieren
+document.addEventListener("DOMContentLoaded", updateBanLists);
+setInterval(updateBanLists, 500); // alle 0,5 Sekunden neu laden
