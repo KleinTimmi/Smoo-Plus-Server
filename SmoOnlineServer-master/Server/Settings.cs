@@ -16,6 +16,7 @@ public class Settings {
     }
 
     public static void LoadSettings() {
+        bool needSave = false;
         if (File.Exists("settings.json")) {
             string text = File.ReadAllText("settings.json");
             try {
@@ -24,9 +25,12 @@ public class Settings {
             }
             catch (Exception e) {
                 Logger.Warn($"Failed to load settings.json: {e}");
+                needSave = true; // Fehler beim Laden: Defaults speichern
             }
+        } else {
+            needSave = true; // Datei existiert nicht: Defaults speichern
         }
-        SaveSettings();
+        if (needSave) SaveSettings();
         LoadHandler?.Invoke();
     }
 

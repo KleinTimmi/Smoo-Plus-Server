@@ -796,7 +796,8 @@ var webTask = Task.Run(async () =>
             // API: Serverinfo
             if (urlPath.StartsWith("api/serverinfo"))
             {
-                string response = "{\"host\": \"localhost\", \"players\": 0, \"permissions\": \"admin\"}";
+                var settings = Settings.Instance.Server;
+                string response = $"{{\"host\": \"{settings.Address}\", \"port\": {settings.Port}, \"maxPlayers\": {settings.MaxPlayers}}}";
                 context.Response.ContentType = "application/json";
                 byte[] buffer = Encoding.UTF8.GetBytes(response);
                 context.Response.ContentLength64 = buffer.Length;
