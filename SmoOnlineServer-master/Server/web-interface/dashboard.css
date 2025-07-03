@@ -63,3 +63,8 @@ button.flex-fill {
 #banListStages .btn {
   min-width: 80px;
 }
+
+.outfit-img {
+  height: 32px;
+  max-width: 48px;
+}

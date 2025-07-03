@@ -102,45 +102,47 @@ setInterval(function () {
 }, 2000);
 
 async function fetchPlayers() {
-  const response = await fetch("/api", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-      API_JSON_REQUEST: {
-        Token: "PlayerToken",
-        Type: "Status",
-      },
-    }),
-  });
+  const response = await fetch("/api/players");
   if (!response.ok) return [];
   const data = await response.json();
   return data.Players || [];
 }
 
+function getCapImg(capName) {
+  if (!capName) return "-";
+  return `<img src="images/cap/${capName}.png" alt="${capName}" class="outfit-img">`;
+}
+
+function getBodyImg(bodyName) {
+  if (!bodyName) return "-";
+  return `<img src="images/body/${bodyName}.png" alt="${bodyName}" class="outfit-img">`;
+}
+
 async function renderPlayerTable() {
   const tbody = document.getElementById("playerTable");
   if (!tbody) return;
-  tbody.innerHTML = "";
   const players = await fetchPlayers();
+  let html = "";
   players.forEach((c, i) => {
-    tbody.innerHTML += `
-          <tr>
-            <td>${c.Name}</td>
-            <td>${c.IPv4 ? "Online" : "Offline"}</td>
-            <td>${c.Banned ? "Ja" : "Nein"}</td>
-            <td>${c.Ignored ? "Ja" : "Nein"}</td>
-            <td>
-              <button class="btn btn-sm btn-outline-danger" onclick="toggleBan(${i})">${
+    html += `
+      <tr>
+        <td>${c.Name}</td>
+        <td>${c.IPv4 ? "Online" : "Offline"}</td>
+        <td>${getCapImg(c.Cap)}</td>
+        <td>${getBodyImg(c.Body)}</td>
+        <td>${c.Banned ? "Ja" : "Nein"}</td>
+        <td>${c.Stage || "-"}</td>
+        <td>${c.IPv4 || "-"}</td>
+        <td>
+          <button class="btn btn-sm btn-outline-danger" onclick="toggleBan(${i})">${
       c.Banned ? "Entbannen" : "Bannen"
     }</button>
-              <button class="btn btn-sm btn-outline-secondary" onclick="toggleIgnore(${i})">${
-      c.Ignored ? "Nicht ignorieren" : "Ignorieren"
-    }</button>
-              <button class="btn btn-sm btn-outline-info" onclick="showDetails(${i})">Details</button>
-            </td>
-          </tr>
-        `;
+          <button class="btn btn-sm btn-outline-info" onclick="showDetails(${i})">Details</button>
+        </td>
+      </tr>
+    `;
   });
+  tbody.innerHTML = html;
 }
 
 const logDiv = document.getElementById("log");
@@ -176,10 +178,13 @@ document.getElementById("navDashboard").onclick = function (e) {
   showSection("dashboard");
   loadServerInfo();
 };
+let playerlistInterval;
 document.getElementById("navPlayerlist").onclick = async function (e) {
   e.preventDefault();
   await renderPlayerTable();
   showSection("playerlist");
+  clearInterval(playerlistInterval);
+  playerlistInterval = setInterval(renderPlayerTable, 2000); // alle 2 Sekunden aktualisieren
 };
 document.getElementById("navFeatures").onclick = function (e) {
   e.preventDefault();
@@ -335,18 +340,31 @@ document
     });
   });
 
-//Send Player
-document.getElementById("sendPlayerBtn").onclick = async function () {
-  const player = document.getElementById("sendPlayer").value;
-  const stage = document.getElementById("sendStage").value;
-  const scenario = document.getElementById("sendScenario").value;
-  await fetch("/commands/exec", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ command: `send ${stage} "" ${scenario} ${player}` }),
+// Hilfsfunktion: sendPlayer Dropdown mit aktiven Spielern befüllen
+async function fillSendPlayerDropdown() {
+  const select = document.getElementById("sendPlayer");
+  if (!select) return;
+  select.innerHTML = '<option value="All">All</option>';
+  const players = await fetchPlayers();
+  players.forEach((p) => {
+    if (p.Name) {
+      const opt = document.createElement("option");
+      opt.value = p.Name;
+      opt.textContent = p.Name;
+      select.appendChild(opt);
+    }
   });
-};
-// Send Player dropdown
+}
+
+// Beim Laden der Seite und beim Öffnen des Send Player Bereichs Dropdown befüllen
+
+document.addEventListener("DOMContentLoaded", fillSendPlayerDropdown);
+document
+  .getElementById("navDashboard")
+  .addEventListener("click", fillSendPlayerDropdown);
+// Falls Features- oder Playerlist-Tab das Formular beeinflussen, ggf. auch dort aufrufen
+
+//Send player dropdown
 document.getElementById("sendKingdom").addEventListener("change", function () {
   const kingdom = this.value;
   const stageSelect = document.getElementById("sendStage");
@@ -358,6 +376,26 @@ document.getElementById("sendKingdom").addEventListener("change", function () {
     stageSelect.appendChild(opt);
   });
 });
+
+//Send Player
+// Das Formular abfangen, damit kein Reload passiert
+const sendPlayerForm = document.getElementById("sendPlayerForm");
+if (sendPlayerForm) {
+  sendPlayerForm.addEventListener("submit", async function (e) {
+    e.preventDefault();
+    let player = document.getElementById("sendPlayer").value;
+    if (player === "All") player = "*";
+    const stage = document.getElementById("sendStage").value;
+    const scenario = document.getElementById("sendScenario").value;
+    await fetch("/commands/exec", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        command: `send ${stage} "" ${scenario} ${player}`,
+      }),
+    });
+  });
+}
 
 //Ban List
 async function updateBanLists() {
@@ -430,3 +468,16 @@ window.unbanStage = function (stage) {
 // Beim Laden der Seite Ban-Listen initialisieren
 document.addEventListener("DOMContentLoaded", updateBanLists);
 setInterval(updateBanLists, 500); // alle 0,5 Sekunden neu laden
+
+window.toggleBan = async function (idx) {
+  const players = await fetchPlayers();
+  const player = players[idx];
+  await fetch("/commands/exec", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      command: `${player.Banned ? "unban" : "ban"} player ${player.Name}`,
+    }),
+  });
+  renderPlayerTable();
+};

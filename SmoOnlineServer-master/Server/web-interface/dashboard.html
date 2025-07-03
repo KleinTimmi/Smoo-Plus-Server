@@ -229,11 +229,9 @@
                     <form class="row g-2" id="sendPlayerForm">
                       <div class="col-md-2">
                         <label>Player:</label>
-                        <input
-                          class="form-control"
-                          id="sendPlayer"
-                          value="All"
-                        />
+                        <select class="form-select" id="sendPlayer">
+                          <option value="All">All</option>
+                        </select>
                       </div>
                       <div class="col-md-2">
                         <label>Kingdom:</label>
@@ -278,8 +276,11 @@
                     <tr>
                       <th>Name</th>
                       <th>Status</th>
+                      <th>Cap</th>
+                      <th>Body</th>
                       <th>Banned</th>
-                      <th>Ignored</th>
+                      <th>Stage</th>
+                      <th>IP</th>
                       <th>Aktionen</th>
                     </tr>
                   </thead>

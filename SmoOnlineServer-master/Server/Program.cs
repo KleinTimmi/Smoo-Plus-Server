@@ -873,6 +873,26 @@ var webTask = Task.Run(async () =>
                 context.Response.OutputStream.Close();
                 continue;
             }
+            // API: Playerlist
+            if (urlPath.StartsWith("api/players"))
+            {
+            var players = server.Clients.Select(c => new {
+                Name = c.Name,
+                IPv4 = c.Connected ? ((IPEndPoint)c.Socket?.RemoteEndPoint!).Address.ToString() : null,
+                Banned = c.Banned,
+                Ignored = c.Ignored,
+                Cap = c.CurrentCostume?.CapName ?? "",
+                Body = c.CurrentCostume?.BodyName ?? ""
+            }).ToArray();
+
+                string response = System.Text.Json.JsonSerializer.Serialize(new { Players = players });
+                context.Response.ContentType = "application/json";
+                byte[] buffer = Encoding.UTF8.GetBytes(response);
+                context.Response.ContentLength64 = buffer.Length;
+                context.Response.OutputStream.Write(buffer, 0, buffer.Length);
+                context.Response.OutputStream.Close();
+                continue;
+            }
             
             // Statische Dateien ausliefern
             if (File.Exists(filePath))
