@@ -20,14 +20,6 @@
 
 
 
-
-.
-.
-.
-.
-.
-.
-.
-letztes: das der Host nur noch einen Befehl ausfürt (Host <player>) und ab da an diese Person die Befehle im Spiel im gui selbst machen kann (zb. sendall o.ä.).
+und als letztes: das der Host nur noch einen Befehl ausfürt (Host <player>) und ab da an diese Person die Befehle im Spiel im gui selbst machen kann (zb. sendall o.ä.).
 
 das klingt nach einer extrem schweren Aufgabe und ich würde es auch wenn überhaupt als letztes machen
