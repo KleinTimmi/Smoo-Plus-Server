@@ -41,6 +41,7 @@
 #include "packets/PlayerDC.h"
 #include "packets/PlayerInfPacket.h"
 #include "packets/ShineCollect.h"
+#include "packets/Extras.hpp"
 
 #include "puppets/PuppetHolder.hpp"
 
@@ -182,6 +183,7 @@ class Client {
         void updatePlayerConnect(PlayerConnect* packet);
         void updateCaptureInfo(CaptureInf* packet);
         void sendToStage(ChangeStagePacket* packet);
+        void handleExtrasPacket(Packet* curPacket);
         void sendUdpHolePunch();
         void sendUdpInit();
         void disconnectPlayer(PlayerDC* packet);

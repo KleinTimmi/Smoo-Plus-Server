@@ -14,14 +14,16 @@ endif
 SMOVER ?= 100
 BUILDVER ?= 101
 BUILDVERSTR ?= $(GIT_REV)
-IP ?= 10.0.0.221 # ftp server ip (usually is switch's local IP)
-DEBUGLOG ?= 0 # defaults to disable debug logger 
-SERVERIP ?= 0.0.0.0 # put debug logger server IP here
-ISEMU ?= 0 # set to 1 to compile for emulators
+IP ?= 192.168.178.37 # ftp server ip (usually is switch's local IP)
+DEBUGLOG ?= 1 # defaults to disable debug logger 
+SERVERIP ?= 192.168.178.37 # put debug logger server IP here
+ISEMU ?= 1 # set to 1 to compile for emulators
+
 
 PROJNAME ?= StarlightBase
 
 all: starlight
+$(info EMU origin: $(origin EMU), value: $(EMU))
 
 starlight:
 	$(MAKE) all -f MakefileNSO SMOVER=$(SMOVER) BUILDVERSTR=$(BUILDVERSTR) BUILDVER=$(BUILDVER) DEBUGLOG=$(DEBUGLOG) SERVERIP=${SERVERIP} EMU=${ISEMU}

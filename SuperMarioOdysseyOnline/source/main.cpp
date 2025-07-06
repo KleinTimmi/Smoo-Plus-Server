@@ -26,6 +26,9 @@
 #include "game/Player/PlayerActorHakoniwa.h"
 #include "game/Player/PlayerFunction.h"
 #include "game/Player/PlayerHackKeeper.h"
+#include "game/Player/PlayerCostumeInfo.h"
+#include "game/Player/HackCap/PlayerCapActionHistory.h"
+#include "game/Player/Actions/PlayerWallActionHistory.h"
 #include "game/StageScene/StageScene.h"
 
 #include "helpers.hpp"
@@ -46,6 +49,10 @@
 
 #include "rs/util.hpp"
 
+#include "Packets/Extras.h"
+#include "Packets/Extras.hpp"
+#include "al/util/ControllerUtil.h"
+
 static int pInfSendTimer = 0;
 static int gameInfSendTimer = 0;
 
@@ -61,6 +68,19 @@ void updatePlayerInfo(GameDataHolderAccessor holder, PlayerActorBase* playerBase
 
         pInfSendTimer = 0;
     }
+
+
+if (playerBase && (debugMode)) {  // if debug mode == enabled, or if infinite cap bounce == enabled
+        if (debugMode || gInfiniteCapBounce) {
+            PlayerActorHakoniwa* hakoniwa = static_cast<PlayerActorHakoniwa*>(playerBase);
+            if (hakoniwa->mHackCap && hakoniwa->mHackCap->mCapActionHistory) 
+            {
+            hakoniwa->mHackCap->mCapActionHistory->clearCapJump();
+            hakoniwa->mPlayerWallActionHistory->reset();
+            }
+        }
+    }
+
 
     if (gameInfSendTimer >= 60) {
         if (isYukimaru) {

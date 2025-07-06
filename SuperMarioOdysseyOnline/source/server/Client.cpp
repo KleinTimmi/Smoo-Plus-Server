@@ -14,11 +14,16 @@
 #include "packets/HolePunchPacket.h"
 #include "packets/InitPacket.h"
 #include "packets/UdpPacket.h"
+#include "packets/Extras.h"
+#include "packets/Extras.hpp"
+
 
 #include "sead/heap/seadHeapMgr.h"
 
 #include "server/gamemode/GameModeManager.hpp"
 #include "server/hns/HideAndSeekMode.hpp"
+
+
 
 SEAD_SINGLETON_DISPOSER_IMPL(Client)
 
@@ -278,7 +283,6 @@ void Client::showUIMessage(const char16_t* msg) {
 
     al::startAction(sInstance->mUIMessage, "Confirm", "State");
 }
-
 void Client::hideUIMessage() {
     if (!sInstance) {
         return;
@@ -336,6 +340,12 @@ void Client::readFunc() {
                 break;
             case PacketType::PLAYERCON:
                 updatePlayerConnect((PlayerConnect*)curPacket);
+            case PacketType::EXTRA:
+                Logger::log("Received Extras Packet.\n");
+                handleExtrasPacket(curPacket);
+                break;
+
+
 
                 // Send relevant info packets when another client is connected
 
@@ -884,6 +894,15 @@ void Client::updateGameInfo(GameInf* packet) {
         curInfo->is2D = packet->is2D;
     }
 }
+
+void Client::handleExtrasPacket(Packet* curPacket) {
+    if (auto* extras = static_cast<ExtrasPacket*>(curPacket)) {
+        gInfiniteCapBounce = extras->gInfiniteCapBounce;
+        Logger::log("Received Extras packet: InfiniteCapBounce = %s\n",
+                    gInfiniteCapBounce ? "true" : "false");
+    }
+}
+
 
 /**
  * @brief

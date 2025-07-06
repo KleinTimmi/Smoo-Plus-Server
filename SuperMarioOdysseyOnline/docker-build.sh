@@ -1,10 +1,11 @@
 #!/bin/bash
 set -euo pipefail
 
-ISEMU=${1:-0}
-if [ "$ISEMU" -ne "1" ] ; then
-  ISEMU="0"
-fi
+#
+#ISEMU=${1:-0}
+#if [ "$ISEMU" -ne "1" ] ; then
+#  ISEMU="0"
+#fi
 
 # clean up build artifacts when switching to/from emulator builds
 if [ "$ISEMU" -eq "1" ] && ! [ -f ./build100/.for_emulators ] ; then

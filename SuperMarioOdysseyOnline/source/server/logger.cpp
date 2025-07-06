@@ -15,7 +15,7 @@ void Logger::createInstance() {
     #ifdef SERVERIP
     sInstance = new Logger(TOSTRING(SERVERIP), 3080, "MainLogger");
     #else
-    sInstance = new Logger(0, 3080, "MainLogger");
+    sInstance = new Logger( 192.168.178.37,3080, "MainLogger");
     #endif
 }
 
