@@ -5,7 +5,8 @@ Port:4205
 
 - change Gamemode 
 - change parameter (speed,jumpheigt)
-- noclip infinite cap dives 
+- noclip  
+- infinite cap dives (fast geschafft)
 - change costumes 
 - black screen + nicht mehr bewegen können
  
