@@ -10,7 +10,10 @@ Welcome to the official repository for the Super Mario Odyssey Online mod! Have 
 * Moon Collection is shared between all players
 * Custom Configuration Menu (Accessible by holding ZL and selecting any option in the pause/start menu)
 * Support for custom gamemodes (WIP)
-	
+* New console Commands: infinite cap dives(⚠️),
+noclip(🚫), change costumes(🚫)
+	(⚠️ = working on, 🚫 = not implemented jet)
+
 
 ## Installation and Usage
 For the typical installation along with how to setup and use muliplayer/hide and seek, please visit the [Super Mario Odyssey Online website](https://smoo.it).
