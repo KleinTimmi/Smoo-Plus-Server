@@ -1,0 +1,15 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+      {
+        "label": "Build Solution",
+        "type": "shell",
+        "command": "dotnet build SmoOnlineServer-master/SmoMultiplayerServer.sln",
+        "group": {
+          "kind": "build",
+          "isDefault": true
+        },
+        "problemMatcher": []
+      }
+    ]
+  }
