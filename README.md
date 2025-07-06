@@ -10,6 +10,7 @@ Port:4205
 - infinite cap dives (fast geschafft)
 - change costumes 
 - black screen + nicht mehr bewegen können
+
  <details>
 
 # Gamemode Ideen:
