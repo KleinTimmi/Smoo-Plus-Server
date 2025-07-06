@@ -14,5 +14,7 @@ public enum PacketType : short {
     Capture, // = 10
     ChangeStage, // = 11
     Command, // = 12
-    Extra, // = 13
+    dummy,  // 13 This is a dummy packet type, used for testing or placeholder purposes
+    dummy2, // 14 This is a dummy packet type, used for testing or placeholder purposes
+    Extra, // = 15
 }

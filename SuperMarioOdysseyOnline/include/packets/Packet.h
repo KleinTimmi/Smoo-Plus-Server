@@ -10,22 +10,22 @@
 #define MAXPACKSIZE      0x100
 
 enum PacketType : short {
-    UNKNOWN,
-    CLIENTINIT,
-    PLAYERINF,
-    HACKCAPINF,
-    GAMEINF,
-    GAMEMODEINF,
-    PLAYERCON,
-    PLAYERDC,
-    COSTUMEINF,
-    SHINECOLL,
-    CAPTUREINF,
-    CHANGESTAGE,
-    CMD,
-    UDPINIT,
-    HOLEPUNCH,
-    EXTRA,
+    UNKNOWN, // = 0
+    CLIENTINIT,  // = 1
+    PLAYERINF,   // = 2
+    HACKCAPINF,  // = 3
+    GAMEINF,     // = 4
+    GAMEMODEINF,  // = 5
+    PLAYERCON,    // = 6
+    PLAYERDC,     // = 7
+    COSTUMEINF,   // = 8
+    SHINECOLL,    // = 9
+    CAPTUREINF,   // = 10
+    CHANGESTAGE,  // = 11
+    CMD,          // = 12
+    UDPINIT,      // = 13
+    HOLEPUNCH,    // = 14 
+    EXTRA,        // = 15
     End, // end of enum for bounds checking
 };
 
@@ -46,7 +46,7 @@ USED static const char* packetNames[] = {
     "Server Command",
     "Udp Initialization",
     "Hole punch",
-    "Extras ",
+    "Extras Packet",
 };
 
 enum SenderType {

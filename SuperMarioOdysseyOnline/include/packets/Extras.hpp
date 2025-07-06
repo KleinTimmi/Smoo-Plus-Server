@@ -1,14 +1,16 @@
 #pragma once
 
-#include "Extras.h"
 #include "Packet.h"
-#include "Packets/Extras.h"
 
-struct PACKED ExtrasPacket : Packet {
-    ExtrasPacket() : Packet() {
+#pragma pack(push, 1)  // Verhindert Padding komplett
+
+struct ExtrasPacket : Packet {
+    u8 InfiniteCapBounce = 0;  // 1 = true, 0 = false
+
+    ExtrasPacket() {
         this->mType = PacketType::EXTRA;
         mPacketSize = sizeof(ExtrasPacket) - sizeof(Packet);
-    };
-
-    bool gInfiniteCapBounce = false;
+    }
 };
+
+#pragma pack(pop)

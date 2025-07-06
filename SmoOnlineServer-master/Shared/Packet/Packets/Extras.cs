@@ -10,11 +10,11 @@ public struct Extras : IPacket
 {
     public bool InfiniteCapBounce;
 
-    public Extras (bool infiniteCapBounce)
-    {
-        InfiniteCapBounce = infiniteCapBounce;
-    }
-
+    /*  public Extras (bool infiniteCapBounce)
+      {
+          InfiniteCapBounce = infiniteCapBounce;
+      }
+    */
     public short Size => 1;
 
     public void Serialize(Span<byte> data)

@@ -1,6 +1,7 @@
 #include "server/Client.hpp"
 
 #include <stdlib.h>
+#include <type_traits>
 
 #include "al/async/FunctorV0M.hpp"
 #include "al/layout/SimpleLayoutAppearWaitEnd.h"
@@ -76,6 +77,9 @@ Client::Client() {
     Logger::log("Player Name: %s\n", playerName.name);
 
     Logger::log("%s Build Number: %s\n", playerName.name, TOSTRING(BUILDVERSTR));
+
+    static_assert(sizeof(ExtrasPacket) == sizeof(Packet) + 1,
+                  "ExtrasPacket must be exactly 1 byte after header");
 }
 
 /**
@@ -897,11 +901,12 @@ void Client::updateGameInfo(GameInf* packet) {
 
 void Client::handleExtrasPacket(Packet* curPacket) {
     if (auto* extras = static_cast<ExtrasPacket*>(curPacket)) {
-        gInfiniteCapBounce = extras->gInfiniteCapBounce;
+        gInfiniteCapBounce = extras->InfiniteCapBounce;
         Logger::log("Received Extras packet: InfiniteCapBounce = %s\n",
                     gInfiniteCapBounce ? "true" : "false");
     }
 }
+
 
 
 /**
