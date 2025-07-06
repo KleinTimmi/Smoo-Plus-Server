@@ -14,6 +14,9 @@ Port:4205
 - black screen + nicht mehr bewegen können
  </details>
 
+Mehr dazu https://github.com/KleinTimmi/Smoo_aaaaaaa/blob/master/SuperMarioOdysseyOnline%2FTODOS.md
+
+
 # Gamemode Ideen:
 
 ## Räuber und Gendarm:
