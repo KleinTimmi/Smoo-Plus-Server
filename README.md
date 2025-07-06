@@ -11,7 +11,7 @@ Port:4205
 - change costumes 
 - black screen + nicht mehr bewegen können
 
- <details>
+ </details>
 
 # Gamemode Ideen:
 
