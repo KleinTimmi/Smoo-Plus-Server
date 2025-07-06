@@ -13,7 +13,7 @@ Welcome to the official repository for the Super Mario Odyssey Online mod! Have 
 * New console Commands: infinite cap dives(⚠️),
 noclip(🚫), change costumes(🚫)
 
-	_(⚠️ = working on, 🚫 = not implemented jet)
+	_(⚠️ = working on, 🚫 = not implemented jet)_
 
 
 ## Installation and Usage
