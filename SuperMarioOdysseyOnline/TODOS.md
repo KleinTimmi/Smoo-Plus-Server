@@ -17,7 +17,7 @@
 
 
 
-
+<summary> test <summary>
 
 
 und als letztes: das der Host nur noch einen Befehl ausfürt (Host <player>) und ab da an diese Person die Befehle im Spiel im gui selbst machen kann (zb. sendall o.ä.).
