@@ -15,7 +15,7 @@
 
 - wenn alle seeker in der Odyssey sind wird der Timer automatisch pausiert
 
-
+<details>
 
 <summary> test <summary>
 
