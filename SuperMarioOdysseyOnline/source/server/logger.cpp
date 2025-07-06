@@ -1,6 +1,9 @@
 #include "logger.hpp"
+
 #include "helpers.hpp"
-#include "nn/result.h"
+#include "nn/nifm.h"
+#include "nn/socket.h"
+#include "nn/util.h"
 
 // If connection fails, try X ports above the specified one
 // Useful for debugging multple clients on the same machine
@@ -12,13 +15,13 @@ void Logger::createInstance() {
     #ifdef SERVERIP
     sInstance = new Logger(TOSTRING(SERVERIP), 3080, "MainLogger");
     #else
-    sInstance = new Logger(0, 3080, "MainLogger");
+    sInstance = new Logger( 192.168.178.37,3080, "MainLogger");
     #endif
 }
 
 nn::Result Logger::init(const char* ip, u16 port) {
 
-    sock_ip = ip;
+    strcpy(this->sock_ip, ip);
 
     this->port = port;
 

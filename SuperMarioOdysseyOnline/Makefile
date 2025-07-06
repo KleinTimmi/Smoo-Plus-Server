@@ -3,17 +3,27 @@
 
 .PHONY: all clean starlight send
 
+
+GIT_BRANCH := $(shell git rev-parse --abbrev-ref HEAD)
+GIT_COMMIT := $(shell git rev-parse --short HEAD)
+GIT_REV    := ${GIT_BRANCH}-${GIT_COMMIT}
+ifneq (,$(strip $(shell git status --porcelain 2>/dev/null)))
+GIT_REV := $(GIT_REV)-dirty
+endif
+
 SMOVER ?= 100
-BUILDVER ?= 101 
-BUILDVERSTR ?= 1.0.1 
-IP ?= 10.0.0.221 # ftp server ip (usually is switch's local IP)
-DEBUGLOG ?= 0 # defaults to disable debug logger 
-SERVERIP ?= 0.0.0.0 # put debug logger server IP here
-ISEMU ?= 0 # set to 1 to compile for emulators
+BUILDVER ?= 101
+BUILDVERSTR ?= $(GIT_REV)
+IP ?= 192.168.178.37 # ftp server ip (usually is switch's local IP)
+DEBUGLOG ?= 1 # defaults to disable debug logger 
+SERVERIP ?= 192.168.178.37 # put debug logger server IP here
+ISEMU ?= 1 # set to 1 to compile for emulators
+
 
 PROJNAME ?= StarlightBase
 
 all: starlight
+$(info EMU origin: $(origin EMU), value: $(EMU))
 
 starlight:
 	$(MAKE) all -f MakefileNSO SMOVER=$(SMOVER) BUILDVERSTR=$(BUILDVERSTR) BUILDVER=$(BUILDVER) DEBUGLOG=$(DEBUGLOG) SERVERIP=${SERVERIP} EMU=${ISEMU}
