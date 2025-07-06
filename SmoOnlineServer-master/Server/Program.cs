@@ -477,7 +477,9 @@ CommandHandler.RegisterCommand("infCapDive", args =>
         });
     }).Wait();
 
+
     return $"Gave player/s: {string.Join(", ", players.Select(p => p.Name))} Infinite Cap Bounce: {enable}";
+
 });
 
 CommandHandler.RegisterCommand("scenario", args => {

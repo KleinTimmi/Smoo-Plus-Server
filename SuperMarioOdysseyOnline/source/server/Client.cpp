@@ -897,11 +897,12 @@ void Client::updateGameInfo(GameInf* packet) {
 
 void Client::handleExtrasPacket(Packet* curPacket) {
     if (auto* extras = static_cast<ExtrasPacket*>(curPacket)) {
-        gInfiniteCapBounce = extras->gInfiniteCapBounce;
+        gInfiniteCapBounce = extras->InfiniteCapBounce;
         Logger::log("Received Extras packet: InfiniteCapBounce = %s\n",
                     gInfiniteCapBounce ? "true" : "false");
     }
 }
+
 
 
 /**
