@@ -71,7 +71,7 @@ void updatePlayerInfo(GameDataHolderAccessor holder, PlayerActorBase* playerBase
 
 
 if (playerBase && (debugMode)) {  // if debug mode == enabled, or if infinite cap bounce == enabled
-        if (debugMode || gInfiniteCapBounce) {
+        if (gInfiniteCapBounce) {
             PlayerActorHakoniwa* hakoniwa = static_cast<PlayerActorHakoniwa*>(playerBase);
             if (hakoniwa->mHackCap && hakoniwa->mHackCap->mCapActionHistory) 
             {
