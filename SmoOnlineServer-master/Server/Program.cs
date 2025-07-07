@@ -884,7 +884,8 @@ var webTask = Task.Run(async () =>
                 Banned = c.Banned,
                 Ignored = c.Ignored,
                 Cap = c.CurrentCostume?.CapName ?? "",
-                Body = c.CurrentCostume?.BodyName ?? ""
+                Body = c.CurrentCostume?.BodyName ?? "",
+                Stage = c.Metadata.ContainsKey("lastGamePacket") ? ((GamePacket)c.Metadata["lastGamePacket"]).Stage : ""
             }).ToArray();
 
                 string response = System.Text.Json.JsonSerializer.Serialize(new { Players = players });

@@ -130,14 +130,18 @@ async function renderPlayerTable() {
         <td>${c.IPv4 ? "Online" : "Offline"}</td>
         <td>${getCapImg(c.Cap)}</td>
         <td>${getBodyImg(c.Body)}</td>
-        <td>${c.Banned ? "Ja" : "Nein"}</td>
         <td>${c.Stage || "-"}</td>
         <td>${c.IPv4 || "-"}</td>
         <td>
           <button class="btn btn-sm btn-outline-danger" onclick="toggleBan(${i})">${
       c.Banned ? "Entbannen" : "Bannen"
     }</button>
-          <button class="btn btn-sm btn-outline-info" onclick="showDetails(${i})">Details</button>
+          <button class="btn btn-sm btn-outline-warning ms-1" onclick="crashPlayer('${
+            c.Name
+          }')">Crash</button>
+          <button class="btn btn-sm btn-outline-primary ms-1" onclick="openTeleportModal('${
+            c.Name
+          }')">Teleport</button>
         </td>
       </tr>
     `;
@@ -526,3 +530,159 @@ document.getElementById("sendinfcapbounceFalse").onclick = async function () {
     body: JSON.stringify({ command: `infCapDive ${player} false` }),
   });
 };
+
+// Crash-Button Funktion
+window.crashPlayer = function (name) {
+  fetch("/commands/exec", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ command: `crash ${name}` }),
+  });
+};
+
+// Teleport-Modal HTML einfügen, falls nicht vorhanden
+if (!document.getElementById("teleportModal")) {
+  const modalHtml = `
+    <div class="modal fade" id="teleportModal" tabindex="-1" aria-labelledby="teleportModalLabel" aria-hidden="true">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="teleportModalLabel">Teleport Spieler</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body">
+            <form id="teleportForm">
+              <div class="mb-2">
+                <label for="teleportKingdom" class="form-label">Kingdom</label>
+                <select class="form-select" id="teleportKingdom"></select>
+              </div>
+              <div class="mb-2">
+                <label for="teleportStage" class="form-label">Stage</label>
+                <select class="form-select" id="teleportStage"></select>
+              </div>
+              <div class="mb-2">
+                <label for="teleportScenario" class="form-label">Scenario</label>
+                <input type="number" class="form-control" id="teleportScenario" value="-1" min="-1" max="127" />
+              </div>
+              <input type="hidden" id="teleportPlayerName" />
+            </form>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Abbrechen</button>
+            <button type="button" class="btn btn-primary" id="teleportSendBtn">Teleportieren</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  `;
+  document.body.insertAdjacentHTML("beforeend", modalHtml);
+}
+
+// Kingdom- und Stage-Auswahl im Teleport-Modal befüllen
+window.openTeleportModal = function (playerName) {
+  document.getElementById("teleportPlayerName").value = playerName;
+  const kingdomSelect = document.getElementById("teleportKingdom");
+  const stageSelect = document.getElementById("teleportStage");
+  // Kingdoms befüllen
+  kingdomSelect.innerHTML = "";
+  Object.keys(stagesByKingdom).forEach((kingdom) => {
+    const opt = document.createElement("option");
+    opt.value = kingdom;
+    opt.textContent = kingdom;
+    kingdomSelect.appendChild(opt);
+  });
+  // Stage-Auswahl initialisieren
+  function updateTeleportStages() {
+    const kingdom = kingdomSelect.value;
+    stageSelect.innerHTML = "";
+    (stagesByKingdom[kingdom] || []).forEach((stage) => {
+      const opt = document.createElement("option");
+      opt.value = stage;
+      opt.textContent = stage;
+      stageSelect.appendChild(opt);
+    });
+  }
+  kingdomSelect.onchange = updateTeleportStages;
+  updateTeleportStages();
+  // Modal anzeigen
+  const modal = new bootstrap.Modal(document.getElementById("teleportModal"));
+  modal.show();
+};
+
+// Teleport ausführen
+if (!window.teleportModalHandlerAdded) {
+  document.getElementById("teleportSendBtn").onclick = async function () {
+    const player = document.getElementById("teleportPlayerName").value;
+    const stage = document.getElementById("teleportStage").value;
+    const scenario = document.getElementById("teleportScenario").value;
+    await fetch("/commands/exec", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        command: `send ${stage} "" ${scenario} ${player}`,
+      }),
+    });
+    // Modal schließen
+    bootstrap.Modal.getInstance(
+      document.getElementById("teleportModal")
+    ).hide();
+  };
+  window.teleportModalHandlerAdded = true;
+}
+
+// Theme-Settings-Button und Modal
+const settingsFab = document.getElementById("settingsFab");
+if (settingsFab) {
+  settingsFab.onclick = function () {
+    const modal = new bootstrap.Modal(document.getElementById("themeModal"));
+    // Aktuelles Theme im Modal auswählen
+    const theme = getSavedTheme();
+    document.getElementById("themeDark").checked = theme === "dark";
+    document.getElementById("themeLight").checked = theme === "light";
+    document.getElementById("themeSystem").checked = theme === "system";
+    modal.show();
+  };
+}
+
+// Theme-Wechsel-Logik
+function setTheme(theme) {
+  document.body.classList.remove("theme-dark", "theme-light");
+  if (theme === "dark") {
+    document.body.classList.add("theme-dark");
+  } else if (theme === "light") {
+    document.body.classList.add("theme-light");
+  } else {
+    // System: je nach prefers-color-scheme
+    if (window.matchMedia("(prefers-color-scheme: dark)").matches) {
+      document.body.classList.add("theme-dark");
+    } else {
+      document.body.classList.add("theme-light");
+    }
+  }
+}
+function getSavedTheme() {
+  return localStorage.getItem("theme") || "system";
+}
+function saveTheme(theme) {
+  localStorage.setItem("theme", theme);
+}
+// Theme-Radio-Buttons
+["themeDark", "themeLight", "themeSystem"].forEach((id) => {
+  const el = document.getElementById(id);
+  if (el) {
+    el.onchange = function () {
+      if (el.checked) {
+        saveTheme(el.value);
+        setTheme(el.value);
+      }
+    };
+  }
+});
+// Theme beim Laden setzen
+setTheme(getSavedTheme());
+// System-Theme-Änderung beachten
+window
+  .matchMedia("(prefers-color-scheme: dark)")
+  .addEventListener("change", function () {
+    if (getSavedTheme() === "system") setTheme("system");
+  });

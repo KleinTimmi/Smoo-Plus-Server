@@ -1,0 +1,4 @@
+## Todo
+
+- Alles Loggen
+- Map

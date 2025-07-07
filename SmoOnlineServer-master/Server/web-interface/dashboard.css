@@ -1,5 +1,6 @@
 body {
-  background: #f8f9fa;
+  background: #1e1e1f;
+  color: #ffffff;
 }
 .sidebar {
   min-height: 100vh;
@@ -23,11 +24,13 @@ button.flex-fill {
   max-width: 300px;
   margin: 0 auto 1.5rem auto;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.07);
-  border-radius: 10px;
-  border: 1px solid #e0e0e0;
+  color: #ffffff;
+  background: #303031;
 }
 .feature-box .card-body {
   padding: 1rem;
+  color: #ffffff;
+  background: #303031;
 }
 .sidebar .nav-link,
 .sidebar .navbar-brand {
@@ -40,6 +43,12 @@ button.flex-fill {
 }
 .card {
   margin-bottom: 1.5rem;
+  background: #303031;
+  color: #ffffff;
+}
+.card .card-body {
+  color: #ffffff;
+  background: #303031;
 }
 .dashboard-title {
   font-size: 2rem;
@@ -48,23 +57,410 @@ button.flex-fill {
 }
 .form-control,
 .form-select {
-  background: #fff;
+  background: #23232a;
+  color: #fff;
+  border: 1px solid #444;
+}
+.form-control:focus,
+.form-select:focus {
+  background: #23232a;
+  color: #fff;
+  border-color: #555;
+  box-shadow: none;
 }
 .btn {
   min-width: 120px;
+  background: #232946;
+  color: #fff;
+  border: 1px solid #444;
+}
+.btn:hover,
+.btn:focus {
+  background: #393a5a;
+  color: #fff;
+  border-color: #666;
 }
 #banListPlayers .list-group-item,
 #banListStages .list-group-item {
   border: none;
-  border-bottom: 1px solid #eee;
-  background: #f9f9f9;
+  border-bottom: 1px solid #222;
+  background: #23232a;
+  color: #fff;
 }
 #banListPlayers .btn,
 #banListStages .btn {
   min-width: 80px;
+  background: #232946;
+  color: #fff;
+  border: 1px solid #444;
 }
-
+#banListPlayers .btn:hover,
+#banListStages .btn:hover {
+  background: #393a5a;
+  color: #fff;
+  border-color: #666;
+}
 .outfit-img {
   height: 32px;
   max-width: 48px;
+}
+.table {
+  background: #23232a;
+  color: #fff;
+}
+.table-striped > tbody > tr:nth-of-type(odd) {
+  background-color: #28283a;
+}
+.table-striped > tbody > tr:nth-of-type(even) {
+  background-color: #23232a;
+}
+.table th,
+.table td {
+  border-color: #444;
+}
+.table thead th {
+  background: #232946;
+  color: #fff;
+  border-bottom: 2px solid #393a5a;
+}
+.table-striped tbody tr {
+  border-bottom: 1px solid #393a5a;
+}
+.table tbody {
+  background: #23232a;
+}
+.modal-content {
+  background: #23232a;
+  color: #fff;
+  border: 1px solid #444;
+}
+.modal-header,
+.modal-footer {
+  background: #232946;
+  color: #fff;
+  border-bottom: 1px solid #444;
+  border-top: 1px solid #444;
+}
+::-webkit-scrollbar {
+  width: 8px;
+  background: #23232a;
+}
+::-webkit-scrollbar-thumb {
+  background: #393a5a;
+  border-radius: 4px;
+}
+/* Playerlist Buttons: Bootstrap Farben erhalten */
+.table .btn-outline-danger {
+  color: #dc3545;
+  border-color: #dc3545;
+  background: transparent;
+}
+.table .btn-outline-danger:hover,
+.table .btn-outline-danger:focus {
+  background: #dc3545;
+  color: #fff;
+  border-color: #dc3545;
+}
+.table .btn-outline-warning {
+  color: #ffc107;
+  border-color: #ffc107;
+  background: transparent;
+}
+.table .btn-outline-warning:hover,
+.table .btn-outline-warning:focus {
+  background: #ffc107;
+  color: #23232a;
+  border-color: #ffc107;
+}
+.table .btn-outline-primary {
+  color: #0d6efd;
+  border-color: #0d6efd;
+  background: transparent;
+}
+.table .btn-outline-primary:hover,
+.table .btn-outline-primary:focus {
+  background: #0d6efd;
+  color: #fff;
+  border-color: #0d6efd;
+}
+
+/* Ban-List Tabs und Inhalt dunkler */
+.nav-tabs {
+  background: #23232a;
+  border-bottom: 1px solid #393a5a;
+}
+.nav-tabs .nav-link {
+  color: #bbb;
+  background: transparent;
+  border: 1px solid transparent;
+}
+.nav-tabs .nav-link.active,
+.nav-tabs .nav-link:hover {
+  color: #fff;
+  background: #393a5a;
+  border-color: #393a5a #393a5a #23232a;
+}
+.tab-content {
+  background: #23232a;
+  border: 1px solid #393a5a;
+  border-top: none;
+  color: #fff;
+  border-radius: 0 0 8px 8px;
+  padding-bottom: 0.5rem;
+}
+
+/* Playerlist: Alles dunkel */
+#playerlistSection {
+  background: #23232a !important;
+}
+#playerlistSection .card,
+#playerlistSection .card-body,
+#playerlistSection .table,
+#playerlistSection .table-striped,
+#playerlistSection .table tbody,
+#playerlistSection .table-striped > tbody,
+#playerlistSection .table-striped > tbody > tr,
+#playerlistSection .table-striped > tbody > tr:nth-of-type(odd),
+#playerlistSection .table-striped > tbody > tr:nth-of-type(even),
+#playerlistSection .table th,
+#playerlistSection .table td,
+#playerTable {
+  background: #23232a !important;
+  color: #fff !important;
+}
+#playerlistSection .table thead th {
+  background: #232946 !important;
+  color: #fff !important;
+  border-bottom: 2px solid #393a5a !important;
+}
+#playerlistSection .table-striped tbody tr {
+  border-bottom: 1px solid #393a5a !important;
+}
+
+/* Auch die .card selbst noch dunkler, falls nötig */
+.card {
+  background: #23232a !important;
+}
+
+/* Playerlist: Auch das .card-body um die Tabelle dunkel */
+.card .card-body {
+  background: #23232a !important;
+  color: #fff !important;
+}
+
+/* Settings-FAB unten rechts */
+.settings-fab {
+  position: fixed;
+  right: 32px;
+  bottom: 32px;
+  z-index: 1050;
+  width: 56px;
+  height: 56px;
+  background: #232946;
+  color: #fff;
+  border-radius: 50%;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 2rem;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.settings-fab:hover {
+  background: #393a5a;
+}
+
+/* Theme: Light Mode */
+body.theme-light,
+body.theme-light .card,
+body.theme-light .card-body,
+body.theme-light .feature-box,
+body.theme-light .sidebar,
+body.theme-light .table,
+body.theme-light .modal-content,
+body.theme-light .tab-content {
+  background: #f8f9fa !important;
+  color: #23232a !important;
+}
+body.theme-light .table th,
+body.theme-light .table thead th {
+  background: #e9ecef !important;
+  color: #23232a !important;
+}
+body.theme-light .btn,
+body.theme-light .btn-outline-primary,
+body.theme-light .btn-outline-danger,
+body.theme-light .btn-outline-warning {
+  color: #23232a !important;
+  background: #e9ecef !important;
+  border-color: #888 !important;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+}
+body.theme-light .btn:hover,
+body.theme-light .btn:focus {
+  background: #d1d5db !important;
+  color: #23232a !important;
+  border-color: #232946 !important;
+}
+body.theme-light .form-control,
+body.theme-light .form-select {
+  background: #fff !important;
+  color: #23232a !important;
+  border: 1px solid #bbb !important;
+}
+body.theme-light .form-control:focus,
+body.theme-light .form-select:focus {
+  border-color: #232946 !important;
+  box-shadow: 0 0 0 2px #b6c6ff33;
+}
+body.theme-light .table,
+body.theme-light .table-striped,
+body.theme-light .table tbody,
+body.theme-light .table-striped > tbody {
+  background: #fff !important;
+  color: #23232a !important;
+}
+body.theme-light .table th,
+body.theme-light .table thead th {
+  background: #e9ecef !important;
+  color: #23232a !important;
+  border-bottom: 2px solid #bbb !important;
+}
+body.theme-light .table-striped > tbody > tr:nth-of-type(odd) {
+  background-color: #f5f6fa !important;
+}
+body.theme-light .table-striped > tbody > tr:nth-of-type(even) {
+  background-color: #fff !important;
+}
+body.theme-light .table th,
+body.theme-light .table td {
+  border-color: #bbb !important;
+}
+body.theme-light .modal-content,
+body.theme-light .tab-content {
+  background: #fff !important;
+  color: #23232a !important;
+  border: 1px solid #bbb !important;
+}
+body.theme-light .modal-header,
+body.theme-light .modal-footer {
+  background: #e9ecef !important;
+  color: #23232a !important;
+  border-bottom: 1px solid #bbb !important;
+  border-top: 1px solid #bbb !important;
+}
+body.theme-light .sidebar .nav-link.active,
+body.theme-light .sidebar .nav-link:hover {
+  background: #d1d5db !important;
+  color: #23232a !important;
+}
+body.theme-light .feature-box {
+  background: #fff !important;
+  color: #23232a !important;
+  border: 1px solid #bbb !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+}
+body.theme-light .dashboard-title {
+  color: #232946 !important;
+}
+body.theme-light .settings-fab {
+  background: #e9ecef !important;
+  color: #23232a !important;
+  border: 1px solid #bbb !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+/* Ban-List Tabs und Tabelle im Light Mode */
+body.theme-light .nav-tabs,
+body.theme-light .tab-content,
+body.theme-light #banListPlayers .list-group-item,
+body.theme-light #banListStages .list-group-item {
+  background: #fff !important;
+  color: #23232a !important;
+  border-color: #bbb !important;
+}
+
+body.theme-light .nav-tabs .nav-link {
+  color: #23232a !important;
+  background: #e9ecef !important;
+  border: 1px solid #bbb !important;
+}
+body.theme-light .nav-tabs .nav-link.active,
+body.theme-light .nav-tabs .nav-link:hover {
+  background: #d1d5db !important;
+  color: #232946 !important;
+  border-color: #232946 #232946 #fff !important;
+}
+
+body.theme-light .sidebar,
+body.theme-light .sidebar .navbar-brand,
+body.theme-light .sidebar .nav-link {
+  color: #23232a !important;
+  background: #e9ecef !important;
+}
+body.theme-light .sidebar .nav-link.active,
+body.theme-light .sidebar .nav-link:hover {
+  background: #d1d5db !important;
+  color: #232946 !important;
+}
+
+body.theme-light .card,
+body.theme-light .card-body {
+  background: #fff !important;
+  color: #23232a !important;
+  border: 1px solid #bbb !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+}
+body.theme-light .dashboard-title {
+  color: #232946 !important;
+  font-weight: bold;
+}
+
+/* Playerlist Section im Light Mode - noch spezifischer */
+body.theme-light #playerlistSection .card,
+body.theme-light #playerlistSection .card-body,
+body.theme-light #playerlistSection .table,
+body.theme-light #playerlistSection .table-striped,
+body.theme-light #playerlistSection .table tbody,
+body.theme-light #playerlistSection .table-striped > tbody,
+body.theme-light #playerlistSection .table-striped > tbody > tr,
+body.theme-light
+  #playerlistSection
+  .table-striped
+  > tbody
+  > tr:nth-of-type(odd),
+body.theme-light
+  #playerlistSection
+  .table-striped
+  > tbody
+  > tr:nth-of-type(even),
+body.theme-light #playerlistSection .table th,
+body.theme-light #playerlistSection .table td,
+body.theme-light #playerlistSection .table thead th,
+body.theme-light #playerlistSection .dashboard-title {
+  background: #fff !important;
+  color: #23232a !important;
+  border-color: #bbb !important;
+}
+
+body.theme-light #playerlistSection .table thead th {
+  background: #e9ecef !important;
+  color: #23232a !important;
+  border-bottom: 2px solid #bbb !important;
+}
+body.theme-light #playerlistSection .table-striped tbody tr {
+  border-bottom: 1px solid #bbb !important;
+}
+body.theme-light #playerlistSection .dashboard-title {
+  background: transparent !important;
+  color: #232946 !important;
+  font-weight: bold;
+}
+
+body.theme-light #playerlistSection,
+body.theme-light #playerlistSection .row,
+body.theme-light #playerlistSection .row.mt-4,
+body.theme-light #playerlistSection .dashboard-title {
+  background: transparent !important;
 }
