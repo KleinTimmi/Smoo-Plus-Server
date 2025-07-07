@@ -17,4 +17,9 @@ public enum PacketType : short {
     dummy,  // 13 This is a dummy packet type, used for testing or placeholder purposes
     dummy2, // 14 This is a dummy packet type, used for testing or placeholder purposes
     Extra, // = 15
+    Noclip, // = 16 
 }
+
+/* this has to be the exact same Id as in the mod
+
+*/
