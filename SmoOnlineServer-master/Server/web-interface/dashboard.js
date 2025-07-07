@@ -481,3 +481,48 @@ window.toggleBan = async function (idx) {
   });
   renderPlayerTable();
 };
+
+//Features
+// Hilfsfunktion: infcapbouncePlayer Dropdown mit Spielern befüllen
+async function fillInfCapBounceDropdown() {
+  const select = document.getElementById("infcapbouncePlayer");
+  if (!select) return;
+  select.innerHTML = '<option value="All">All</option>';
+  const players = await fetchPlayers();
+  players.forEach((p) => {
+    if (p.Name) {
+      const opt = document.createElement("option");
+      opt.value = p.Name;
+      opt.textContent = p.Name;
+      select.appendChild(opt);
+    }
+  });
+}
+
+// Beim Laden der Seite und beim Öffnen des Features-Bereichs Dropdown befüllen
+document.addEventListener("DOMContentLoaded", fillInfCapBounceDropdown);
+document
+  .getElementById("navFeatures")
+  .addEventListener("click", fillInfCapBounceDropdown);
+
+//InfCapBounce True
+document.getElementById("sendinfcapbounceTrue").onclick = async function () {
+  let player = document.getElementById("infcapbouncePlayer").value;
+  if (player === "All") player = "*";
+  await fetch("/commands/exec", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ command: `infCapDive ${player} true` }),
+  });
+};
+
+//InfCapBounce False
+document.getElementById("sendinfcapbounceFalse").onclick = async function () {
+  let player = document.getElementById("infcapbouncePlayer").value;
+  if (player === "All") player = "*";
+  await fetch("/commands/exec", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ command: `infCapDive ${player} false` }),
+  });
+};
