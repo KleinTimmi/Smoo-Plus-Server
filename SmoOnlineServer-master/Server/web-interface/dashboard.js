@@ -370,30 +370,50 @@ async function renderPlayerTable() {
   const tbody = document.getElementById("playerTable");
   if (!tbody) return;
   const players = await fetchPlayers();
+  const now = Date.now();
+
+  // Update last seen
+  players.forEach((p) => {
+    lastSeenPlayers[p.Name] = now;
+  });
+
+  // Alle Spieler, die in den letzten 2 Sekunden gesehen wurden
+  const allNames = Object.keys(lastSeenPlayers);
   let html = "";
-  players.forEach((c, i) => {
-    html += `
-      <tr>
-        <td>${c.Name}</td>
-        <td>${getCapImg(c.Cap)}</td>
-        <td>${getBodyImg(c.Body)}</td>
-        <td>${getCaptureImg(c.Capture)}</td>
-        <td>${c.GameMode || "-"}</td>
-        <td>${c.Stage || "-"}</td>
-        <td>${c.IPv4 || "-"}</td>
-        <td>
-          <button class="btn btn-sm btn-outline-danger" onclick="toggleBan(${i})">${
-      c.Banned ? "Entbannen" : "Bannen"
-    }</button>
-          <button class="btn btn-sm btn-outline-warning ms-1" onclick="crashPlayer('${
-            c.Name
-          }')">Crash</button>
-          <button class="btn btn-sm btn-outline-primary ms-1" onclick="openTeleportModal('${
-            c.Name
-          }')">Teleport</button>
-        </td>
-      </tr>
-    `;
+  allNames.forEach((name) => {
+    const p = players.find((x) => x.Name === name);
+    const lastSeen = lastSeenPlayers[name];
+    if (p) {
+      // Spieler ist aktuell verbunden
+      html += `
+        <tr>
+          <td>${p.Name}</td>
+          <td>${getCapImg(p.Cap)}</td>
+          <td>${getBodyImg(p.Body)}</td>
+          <td>${getCaptureImg(p.Capture)}</td>
+          <td>${p.GameMode || "-"}</td>
+          <td>${p.Stage || "-"}</td>
+          <td>${p.IPv4 || "-"}</td>
+          <td>
+            <button class="btn btn-sm btn-outline-danger" onclick="toggleBan(${allNames.indexOf(
+              name
+            )})">${p.Banned ? "Entbannen" : "Bannen"}</button>
+            <button class="btn btn-sm btn-outline-warning ms-1" onclick="crashPlayer('${
+              p.Name
+            }')">Crash</button>
+            <button class="btn btn-sm btn-outline-primary ms-1" onclick="openTeleportModal('${
+              p.Name
+            }')">Teleport</button>
+          </td>
+        </tr>
+      `;
+    } else if (now - lastSeen < 2000) {
+      // Spieler ist gerade erst verschwunden, noch anzeigen (ausgegraut)
+      html += `<tr class="table-secondary"><td colspan="8">${name} (verbindet neu...)</td></tr>`;
+    } else {
+      // Spieler wirklich entfernen
+      delete lastSeenPlayers[name];
+    }
   });
   tbody.innerHTML = html;
 }
@@ -1010,3 +1030,5 @@ setInterval(function () {
     renderMap();
   }
 }, 2000);
+
+let lastSeenPlayers = {};
