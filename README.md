@@ -40,3 +40,7 @@ Mehr dazu [Smoo readme](https://github.com/KleinTimmi/Smoo_aaaaaaa/blob/master/S
 
 ### Features
 * Man kann die Zeit induviduel anpassen im Menü oder im Server.
+
+
+## Monde gleich einsammeln 
+siehe [YouTube](https://youtube.com/watch?v=i19xSaFKgN0)
