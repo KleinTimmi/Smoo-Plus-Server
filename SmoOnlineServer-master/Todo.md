@@ -6,7 +6,6 @@
 
 - Alles Loggen
 - Map (Kordinaten anpassen)
-- Dropdown Menü
 
 # Serversite Consolen Befehle
 
