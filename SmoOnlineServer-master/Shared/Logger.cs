@@ -27,7 +27,7 @@ public class Logger {
             foreach (var line in text.Split('\n'))
             {
                 outputBuffer.Add($"[{DateTime.Now}] {level} [{Name}] {line}");
-                if (outputBuffer.Count > 1000)
+                if (outputBuffer.Count > 10000)
                     outputBuffer.RemoveAt(0);
             }
         }

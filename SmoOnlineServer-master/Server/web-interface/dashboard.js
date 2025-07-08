@@ -19,6 +19,62 @@ const stagesByKingdom = {
   "Sand Kingdom": [],
 };
 
+const stageToKingdom = {
+  CapWorldHomeStage: "Cap Kingdom",
+  SandWorldHomeStage: "Sand Kingdom",
+  WaterfallWorldHomeStage: "Cascade Kingdom",
+  LakeWorldHomeStage: "Lake Kingdom",
+  ForestWorldHomeStage: "Wodded Kingdom",
+  CloudWorldHomeStage: "Cloud Kingdom",
+  CityWorldHomeStage: "City Kingdom",
+  SnowWorldHomeStage: "Snow Kingdom",
+  SeaWorldHomeStage: "Seaside Kingdom",
+  LavaWorldHomeStage: "Luncheon Kingdom",
+  BossRaidWorldHomeStage: "Ruin Kingdom",
+  KoopaWorldHomeStage: "Bowser Kingdom",
+  MoonWorldHomeStage: "Moon Kingdom",
+  DarkWorldHomeStage: "Dark Side",
+  DarkerWorldHomeStage: "Darker Side",
+};
+
+const kingdomToStage = {
+  Odyssey: "HomeShipInsideStage",
+  "Cap Kingdom": "CapWorldHomeStage",
+  "Cascade Kingdom": "WaterfallWorldHomeStage",
+  "Sand Kingdom": "SandWorldHomeStage",
+  "Lake Kingdom": "LakeWorldHomeStage",
+  "Wodded Kingdom": "ForestWorldHomeStage",
+  "Cloud Kingdom": "CloudWorldHomeStage",
+  "City Kingdom": "CityWorldHomeStage",
+  "Snow Kingdom": "SnowWorldHomeStage",
+  "Seaside Kingdom": "SeaWorldHomeStage",
+  "Luncheon Kingdom": "LavaWorldHomeStage",
+  "Ruin Kingdom": "BossRaidWorldHomeStage",
+  "Bowser Kingdom": "KoopaWorldHomeStage",
+  "Moon Kingdom": "MoonWorldHomeStage",
+  "Dark Side": "DarkWorldHomeStage",
+  "Darker Side": "DarkerWorldHomeStage",
+};
+
+const mapImages = {
+  HomeShipInsideStage: "Odyssey.png",
+  CapWorldHomeStage: "CapKingdom.png",
+  WaterfallWorldHomeStage: "CascadeKingdom.png",
+  SandWorldHomeStage: "SandKingdom.png",
+  LakeWorldHomeStage: "LakeKingdom.png",
+  ForestWorldHomeStage: "WoodedKingdom.png",
+  CloudWorldHomeStage: "CloudKingdom.png",
+  CityWorldHomeStage: "MetroKingdom.png",
+  SnowWorldHomeStage: "SnowKingdom.png",
+  SeaWorldHomeStage: "SeasideKingdom.png",
+  LavaWorldHomeStage: "LuncheonKingdom.png",
+  BossRaidWorldHomeStage: "RuinedKingdom.png",
+  KoopaWorldHomeStage: "BowserKingdom.png",
+  MoonWorldHomeStage: "MoonKingdom.png",
+  DarkWorldHomeStage: "DarkSide.png",
+  DarkerWorldHomeStage: "DarkerSide.png",
+};
+
 //dropdown menu logic
 function fillKingdomDropdowns() {
   const kingdomNames = Object.keys(stagesByKingdom);
@@ -162,6 +218,8 @@ function showSection(section) {
     section === "features" ? "block" : "none";
   document.getElementById("consoleSection").style.display =
     section === "console" ? "block" : "none";
+  document.getElementById("mapSection").style.display =
+    section === "map" ? "block" : "none";
   // Active-Klasse setzen
   document
     .getElementById("navDashboard")
@@ -175,6 +233,9 @@ function showSection(section) {
   document
     .getElementById("navConsole")
     .classList.toggle("active", section === "console");
+  document
+    .getElementById("navMap")
+    .classList.toggle("active", section === "map");
 }
 
 document.getElementById("navDashboard").onclick = function (e) {
@@ -198,6 +259,11 @@ document.getElementById("navConsole").onclick = function (e) {
   e.preventDefault();
   showSection("console");
   updateConsoleOutput();
+};
+document.getElementById("navMap").onclick = function (e) {
+  e.preventDefault();
+  showSection("map");
+  renderMap();
 };
 
 async function loadServerInfo() {
@@ -554,7 +620,11 @@ if (!document.getElementById("teleportModal")) {
             <form id="teleportForm">
               <div class="mb-2">
                 <label for="teleportKingdom" class="form-label">Kingdom</label>
-                <select class="form-select" id="teleportKingdom"></select>
+                <select class="form-select" id="teleportKingdom">
+                  <option value="Cap Kingdom">Cap Kingdom</option>
+                  <option value="Cascade Kingdom">Cascade Kingdom</option>
+                  <option value="Wodded Kingdom">Wodded Kingdom</option>
+                </select>
               </div>
               <div class="mb-2">
                 <label for="teleportStage" class="form-label">Stage</label>
@@ -686,3 +756,64 @@ window
   .addEventListener("change", function () {
     if (getSavedTheme() === "system") setTheme("system");
   });
+
+let selectedKingdom = document.getElementById("mapKingdomSelect").value;
+document
+  .getElementById("mapKingdomSelect")
+  .addEventListener("change", function () {
+    selectedKingdom = this.value;
+    renderMap();
+  });
+
+async function renderMap() {
+  const players = await fetchPlayers();
+  console.log("selectedKingdom:", selectedKingdom);
+  let stageName = kingdomToStage[selectedKingdom];
+  console.log("stageName:", stageName);
+  let mapFile = mapImages[stageName] || "CapWorld.png";
+  console.log("mapFile:", mapFile);
+  document.getElementById("mapImage").src = "images/map/" + mapFile;
+
+  // Titel setzen
+  document.getElementById("mapTitle").textContent = "Map – " + selectedKingdom;
+
+  // Marker-Overlay leeren
+  const markerDiv = document.getElementById("playerMarkers");
+  markerDiv.innerHTML = "";
+
+  // Nur Spieler im aktuellen Kingdom anzeigen
+  players
+    .filter((p) => stageToKingdom[p.Stage] === selectedKingdom)
+    .forEach((p) => {
+      if (p.PosX !== undefined && p.PosY !== undefined) {
+        const bounds = mapBounds[stageName];
+        if (bounds && p.PosX !== undefined && p.PosY !== undefined) {
+          // X von Spielkoordinate auf Prozent im Bild
+          let x = (p.PosX - bounds.minX) / (bounds.maxX - bounds.minX);
+          let y = 1 - (p.PosY - bounds.minY) / (bounds.maxY - bounds.minY); // ggf. Y invertieren!
+          let marker = document.createElement("div");
+          marker.style.position = "absolute";
+          marker.style.left = x * 100 + "%";
+          marker.style.top = y * 100 + "%";
+          marker.style.transform = "translate(-50%, -50%)";
+          marker.style.width = "32px";
+          marker.style.height = "32px";
+          marker.innerHTML = `<img src="images/cap/${p.Cap}.png" title="${p.Name}" style="width:100%;border-radius:50%;">`;
+          markerDiv.appendChild(marker);
+        }
+      }
+    });
+
+  if (!stageName) {
+    console.error("Kein stageName für Kingdom:", selectedKingdom);
+  }
+  if (!mapImages[stageName]) {
+    console.error("Kein Bild für stageName:", stageName);
+  }
+}
+
+setInterval(function () {
+  if (document.getElementById("mapSection").style.display === "block") {
+    renderMap();
+  }
+}, 2000);

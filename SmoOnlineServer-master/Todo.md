@@ -1,14 +1,14 @@
 ## Todo
 
-# mehr Dokumentation 
+# mehr Dokumentation
 
-# Website 
+# Website
 
 - Alles Loggen
-- Map
-- Dropdown Menü 
+- Map (Kordinaten anpassen)
+- Dropdown Menü
 
-# Serversite Consolen Befehle 
+# Serversite Consolen Befehle
 
-- TP zu bestümten Player 
-- TP zu bestimmter cordinate 
+- TP zu bestümten Player
+- TP zu bestimmter cordinate

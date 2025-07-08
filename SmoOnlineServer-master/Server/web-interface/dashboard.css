@@ -464,3 +464,32 @@ body.theme-light #playerlistSection .row.mt-4,
 body.theme-light #playerlistSection .dashboard-title {
   background: transparent !important;
 }
+
+#mapSection .card-body {
+  position: relative;
+  width: 100%;
+  height: 80vh; /* oder 70vh, je nach Geschmack */
+  max-height: 80vh;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+}
+#mapImage {
+  width: auto;
+  height: 100%;
+  max-width: 100vw;
+  max-height: 80vh;
+  display: block;
+  margin: 0 auto;
+  object-fit: contain;
+}
+#playerMarkers {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}

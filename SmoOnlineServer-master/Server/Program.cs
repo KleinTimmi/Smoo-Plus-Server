@@ -878,15 +878,25 @@ var webTask = Task.Run(async () =>
             // API: Playerlist
             if (urlPath.StartsWith("api/players"))
             {
-            var players = server.Clients.Select(c => new {
-                Name = c.Name,
-                IPv4 = c.Connected ? ((IPEndPoint)c.Socket?.RemoteEndPoint!).Address.ToString() : null,
-                Banned = c.Banned,
-                Ignored = c.Ignored,
-                Cap = c.CurrentCostume?.CapName ?? "",
-                Body = c.CurrentCostume?.BodyName ?? "",
-                Stage = c.Metadata.ContainsKey("lastGamePacket") ? ((GamePacket)c.Metadata["lastGamePacket"]).Stage : ""
-            }).ToArray();
+                var players = server.Clients.Select(c => {
+                    float? posX = null, posY = null;
+                    if (c.Metadata.ContainsKey("lastPlayerPacket")) {
+                        var pp = (PlayerPacket)c.Metadata["lastPlayerPacket"];
+                        posX = pp.Position.X;
+                        posY = pp.Position.Y;
+                    }
+                    return new {
+                        Name = c.Name,
+                        IPv4 = c.Connected ? ((IPEndPoint)c.Socket?.RemoteEndPoint!).Address.ToString() : null,
+                        Banned = c.Banned,
+                        Ignored = c.Ignored,
+                        Cap = c.CurrentCostume?.CapName ?? "",
+                        Body = c.CurrentCostume?.BodyName ?? "",
+                        Stage = c.Metadata.ContainsKey("lastGamePacket") ? ((GamePacket)c.Metadata["lastGamePacket"]).Stage : "",
+                        PosX = posX,
+                        PosY = posY
+                    };
+                }).ToArray();
 
                 string response = System.Text.Json.JsonSerializer.Serialize(new { Players = players });
                 context.Response.ContentType = "application/json";
