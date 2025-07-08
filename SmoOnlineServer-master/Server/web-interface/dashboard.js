@@ -361,6 +361,11 @@ function getBodyImg(bodyName) {
   return `<img src="images/body/${bodyName}.png" alt="${bodyName}" class="outfit-img">`;
 }
 
+function getCaptureImg(captureName) {
+  if (!captureName) return "-";
+  return `<img src="images/capture/${captureName}.png" alt="${captureName}" class="outfit-img">`;
+}
+
 async function renderPlayerTable() {
   const tbody = document.getElementById("playerTable");
   if (!tbody) return;
@@ -370,9 +375,10 @@ async function renderPlayerTable() {
     html += `
       <tr>
         <td>${c.Name}</td>
-        <td>${c.IPv4 ? "Online" : "Offline"}</td>
         <td>${getCapImg(c.Cap)}</td>
         <td>${getBodyImg(c.Body)}</td>
+        <td>${getCaptureImg(c.Capture)}</td>
+        <td>${c.GameMode || "-"}</td>
         <td>${c.Stage || "-"}</td>
         <td>${c.IPv4 || "-"}</td>
         <td>
@@ -436,7 +442,7 @@ document.getElementById("navPlayerlist").onclick = async function (e) {
   await renderPlayerTable();
   showSection("playerlist");
   clearInterval(playerlistInterval);
-  playerlistInterval = setInterval(renderPlayerTable, 2000); // alle 2 Sekunden aktualisieren
+  playerlistInterval = setInterval(renderPlayerTable, 500); // alle 0,5 Sekunden aktualisieren
 };
 document.getElementById("navFeatures").onclick = function (e) {
   e.preventDefault();

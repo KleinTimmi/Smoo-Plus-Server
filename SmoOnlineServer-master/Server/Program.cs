@@ -70,7 +70,11 @@ server.ClientJoined += (c, _) =>
     c.Metadata["scenario"] = (byte?)0;
     c.Metadata["2d"] = false;
     c.Metadata["disableShineSync"] = false;
-    
+    c.Metadata["lives"] = 3;
+    c.Metadata["coins"] = 0;
+    c.Metadata["outfit"] = "";
+    c.Metadata["speed"] = 1.0f;
+    c.Metadata["jumpHeight"] = 1.0f;
 };
 
 async Task ClientSyncShineBag(Client client) {
@@ -885,16 +889,70 @@ var webTask = Task.Run(async () =>
                         posX = pp.Position.X;
                         posY = pp.Position.Y;
                     }
+                    // Capture-Objekt auslesen
+                    string capture = "";
+                    if (c.Metadata.ContainsKey("lastCapturePacket") && c.Metadata["lastCapturePacket"] is CapturePacket cp && cp.ModelName != null) {
+                        capture = cp.ModelName;
+                    }
+                    // GameMode auslesen
+                    string gameMode = "";
+                    if (c.Metadata.ContainsKey("gameMode") && c.Metadata["gameMode"] != null) {
+                        var gmObj = c.Metadata["gameMode"];
+                        Shared.Packet.Packets.GameMode? gmEnum = null;
+                        if (gmObj is Shared.Packet.Packets.GameMode gme) {
+                            gmEnum = gme;
+                        } else if (gmObj is int gmi) {
+                            gmEnum = (Shared.Packet.Packets.GameMode)gmi;
+                        } else if (gmObj is sbyte gmsb) {
+                            gmEnum = (Shared.Packet.Packets.GameMode)gmsb;
+                        } else if (gmObj is string gms && Enum.TryParse<Shared.Packet.Packets.GameMode>(gms, out var parsed)) {
+                            gmEnum = parsed;
+                        }
+                        if (gmEnum != null) {
+                            gameMode = gmEnum.ToString();
+                            if ((gmEnum == Shared.Packet.Packets.GameMode.HideAndSeek || gmEnum == Shared.Packet.Packets.GameMode.Sardines || gmEnum == Shared.Packet.Packets.GameMode.FreezeTag) && c.Metadata.ContainsKey("seeking") && c.Metadata["seeking"] != null) {
+                                bool isSeeker = false;
+                                if (bool.TryParse(c.Metadata["seeking"].ToString(), out bool parsedSeek)) isSeeker = parsedSeek;
+                                if (gmEnum == Shared.Packet.Packets.GameMode.HideAndSeek) {
+                                    gameMode += isSeeker ? " (Seeker)" : " (Hider)";
+                                } else if (gmEnum == Shared.Packet.Packets.GameMode.FreezeTag) {
+                                    gameMode += isSeeker ? " (Chaser)" : " (Runner)";
+                                } else if (gmEnum == Shared.Packet.Packets.GameMode.Sardines) {
+                                    gameMode += isSeeker ? " (Büchse)" : " (Sardine)";
+                                }
+                            }
+                        } else {
+                            gameMode = gmObj.ToString();
+                        }
+                    }
+                    // Neue Stats auslesen
+                    int lives = c.Metadata.ContainsKey("lives") ? Convert.ToInt32(c.Metadata["lives"]) : 0;
+                    int coins = c.Metadata.ContainsKey("coins") ? Convert.ToInt32(c.Metadata["coins"]) : 0;
+                    string outfit = c.Metadata.ContainsKey("outfit") ? c.Metadata["outfit"].ToString() ?? "" : "";
+                    float speed = c.Metadata.ContainsKey("speed") ? Convert.ToSingle(c.Metadata["speed"]) : 1.0f;
+                    float jumpHeight = c.Metadata.ContainsKey("jumpHeight") ? Convert.ToSingle(c.Metadata["jumpHeight"]) : 1.0f;
+                    // Cap/Body ggf. Override verwenden
+                    string cap = c.Metadata.ContainsKey("capOverride") && c.Metadata["capOverride"] is string co && !string.IsNullOrEmpty(co)
+                        ? co : (c.CurrentCostume?.CapName ?? "");
+                    string body = c.Metadata.ContainsKey("bodyOverride") && c.Metadata["bodyOverride"] is string bo && !string.IsNullOrEmpty(bo)
+                        ? bo : (c.CurrentCostume?.BodyName ?? "");
                     return new {
                         Name = c.Name,
                         IPv4 = c.Connected ? ((IPEndPoint)c.Socket?.RemoteEndPoint!).Address.ToString() : null,
                         Banned = c.Banned,
                         Ignored = c.Ignored,
-                        Cap = c.CurrentCostume?.CapName ?? "",
-                        Body = c.CurrentCostume?.BodyName ?? "",
+                        Cap = cap,
+                        Body = body,
+                        Capture = capture,
+                        GameMode = gameMode,
                         Stage = c.Metadata.ContainsKey("lastGamePacket") ? ((GamePacket)c.Metadata["lastGamePacket"]).Stage : "",
                         PosX = posX,
-                        PosY = posY
+                        PosY = posY,
+                        Lives = lives,
+                        Coins = coins,
+                        Outfit = outfit,
+                        Speed = speed,
+                        JumpHeight = jumpHeight
                     };
                 }).ToArray();
 
