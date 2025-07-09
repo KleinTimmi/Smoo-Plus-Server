@@ -1,15 +1,15 @@
 {
-    "version": "2.0.0",
-    "tasks": [
-      {
-        "label": "Build Solution",
-        "type": "shell",
-        "command": "dotnet build SmoOnlineServer-master/SmoMultiplayerServer.sln",
-        "group": {
-          "kind": "build",
-          "isDefault": true
-        },
-        "problemMatcher": []
-      }
-    ]
-  }
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "Build Solution",
+      "type": "shell",
+      "command": "taskkill /IM Server.exe /F; dotnet build SmoOnlineServer-master/SmoMultiplayerServer.sln; Start-Process 'C:\\Users\\Sam\\Documents\\GitHub\\Smoo_aaaaaaa\\SmoOnlineServer-master\\Server\\bin\\Debug\\net6.0\\Server.exe'",
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      },
+      "problemMatcher": []
+    }
+  ]
+}

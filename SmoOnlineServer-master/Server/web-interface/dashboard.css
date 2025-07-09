@@ -493,3 +493,13 @@ body.theme-light #playerlistSection .dashboard-title {
   height: 100%;
   pointer-events: none;
 }
+
+.img-dropdown {
+  position: relative;
+}
+.img-dropdown-menu {
+  /* siehe JS für Details */
+}
+.img-dropdown-current {
+  /* siehe JS für Details */
+}

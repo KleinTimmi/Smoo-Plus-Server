@@ -1,3 +1,103 @@
+// --- Cap- und Body-Bildnamen (aus images/cap und images/body) ---
+const caps = [
+  "MarioZombie",
+  "MarioTuxedo",
+  "MarioTopper",
+  "MarioTailCoat",
+  "MarioSwimwear",
+  "MarioSunshine",
+  "MarioSuit",
+  "MarioSpaceSuit",
+  "MarioSnowSuit",
+  "MarioShopMan",
+  "MarioScientist",
+  "MarioSanta",
+  "MarioSailor",
+  "MarioRango",
+  "MarioRacer",
+  "MarioPrimitiveMan",
+  "MarioPoncho",
+  "MarioPirate",
+  "MarioPilot",
+  "MarioPeach",
+  "MarioPainter",
+  "MarioNew3DS",
+  "MarioMechanic",
+  "MarioMaker",
+  "MarioKoopa",
+  "MarioKing",
+  "MarioHappi",
+  "MarioGunman",
+  "MarioGolf",
+  "MarioFootball",
+  "MarioExplorer",
+  "MarioDoctor",
+  "MarioDiddyKong",
+  "MarioCook",
+  "MarioColorWario",
+  "MarioColorWaluigi",
+  "MarioColorLuigi",
+  "MarioColorGold",
+  "MarioColorClassic",
+  "MarioClown",
+  "MarioCaptain",
+  "MarioArmor",
+  "MarioAloha",
+  "Mario64Metal",
+  "Mario64",
+  "Mario",
+];
+const bodies = [
+  "MarioZombie",
+  "MarioUnderwear",
+  "MarioTuxedo",
+  "MarioTopper",
+  "MarioTailCoat",
+  "MarioSwimwear",
+  "MarioSunshine",
+  "MarioSuit",
+  "MarioSpaceSuit",
+  "MarioSnowSuit",
+  "MarioShopMan",
+  "MarioScientist",
+  "MarioSanta",
+  "MarioSailor",
+  "MarioRango",
+  "MarioRacer",
+  "MarioPrimitiveMan",
+  "MarioPoncho",
+  "MarioPirate",
+  "MarioPilot",
+  "MarioPeach",
+  "MarioPainter",
+  "MarioNew3DS",
+  "MarioMechanic",
+  "MarioMaker",
+  "MarioKoopa",
+  "MarioKing",
+  "MarioHappi",
+  "MarioHakama",
+  "MarioGunman",
+  "MarioGolf",
+  "MarioFootball",
+  "MarioExplorer",
+  "MarioDoctor",
+  "MarioDiddyKong",
+  "MarioCook",
+  "MarioColorWario",
+  "MarioColorWaluigi",
+  "MarioColorLuigi",
+  "MarioColorGold",
+  "MarioColorClassic",
+  "MarioClown",
+  "MarioBone",
+  "MarioArmor",
+  "MarioAloha",
+  "Mario64Metal",
+  "Mario64",
+  "Mario",
+];
+
 const stagesByKingdom = {
   Odyssey: ["HomeShipInsideStage"],
   "Cap Kingdom": [
@@ -404,6 +504,9 @@ async function renderPlayerTable() {
             <button class="btn btn-sm btn-outline-primary ms-1" onclick="openTeleportModal('${
               p.Name
             }')">Teleport</button>
+            <button class="btn btn-sm btn-outline-success ms-1" onclick="openParamEditor('${
+              p.Name
+            }')">Parameter</button>
           </td>
         </tr>
       `;
@@ -913,6 +1016,338 @@ if (!window.teleportModalHandlerAdded) {
   window.teleportModalHandlerAdded = true;
 }
 
+// Modal für Parameter-Editor einfügen, falls nicht vorhanden
+if (!document.getElementById("paramEditorModal")) {
+  const paramModalHtml = `
+    <div class="modal fade" id="paramEditorModal" tabindex="-1" aria-labelledby="paramEditorModalLabel" aria-hidden="true">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="paramEditorModalLabel">Parameter bearbeiten</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body">
+            <div style="display:flex;justify-content:space-between;align-items:flex-start;">
+              <div id="paramCoinSVG"></div>
+              <div id="paramLifeSVG"></div>
+            </div>
+            <form id="paramEditorForm">
+              <div class="d-flex flex-row justify-content-center align-items-end gap-3">
+                <div>
+                  <label for="paramCap" class="form-label">Cap</label>
+                  <select id="paramCap" class="form-select" style="width:120px;"></select>
+                </div>
+                <div>
+                  <label for="paramBody" class="form-label">Body</label>
+                  <select id="paramBody" class="form-select" style="width:120px;"></select>
+                </div>
+              </div>
+              <div id="outfitPreview" style="margin-top:8px;display:flex;justify-content:center;gap:16px;"></div>
+              <input type="hidden" id="paramLives" value="3" />
+              <input type="hidden" id="paramCoins" value="0" />
+              <div class="d-flex justify-content-between mt-4">
+                <div style="width:48%">
+                  <label for="paramSpeed" class="form-label">Speed</label>
+                  <input type="number" step="0.01" class="form-control" id="paramSpeed" min="0.1" />
+                </div>
+                <div style="width:48%">
+                  <label for="paramJumpHeight" class="form-label">Sprunghöhe</label>
+                  <input type="number" step="0.01" class="form-control" id="paramJumpHeight" min="0.1" />
+                </div>
+              </div>
+              <input type="hidden" id="paramPlayerName" />
+            </form>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Abbrechen</button>
+            <button type="button" class="btn btn-primary" id="paramEditorSendBtn">Speichern</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  `;
+  document.body.insertAdjacentHTML("beforeend", paramModalHtml);
+}
+
+// Lebens- und Münzanzeige für das Param-Modal (Segment-Kreis, Herz, Zahl, Münze, interaktiv)
+function renderLifeAndCoinSVG(lives, coins) {
+  const maxLives = 6;
+  const segs = 6;
+  const segAngle = 360 / segs;
+  let segments = "";
+  let color = "#00e600"; // Standard: grün
+  if (lives >= 4) {
+    color = "#00e6e6"; // cyan/blau
+  } else if (lives === 2) {
+    color = "#ffe066"; // gelb
+  } else if (lives === 1) {
+    color = "#ff3c28"; // rot
+  }
+  for (let i = 0; i < segs; i++) {
+    const filled = i < lives;
+    const start = ((i * segAngle - 90) * Math.PI) / 180;
+    const end = (((i + 1) * segAngle - 90) * Math.PI) / 180;
+    const r = 30,
+      cx = 35,
+      cy = 35;
+    const x1 = cx + r * Math.cos(start);
+    const y1 = cy + r * Math.sin(start);
+    const x2 = cx + r * Math.cos(end);
+    const y2 = cy + r * Math.sin(end);
+    segments += `<path d="M${cx},${cy} L${x1},${y1} A${r},${r} 0 0,1 ${x2},${y2} Z" fill="${
+      filled ? color : "#222"
+    }" />`;
+  }
+  // Herzform und Zahl (Zahl ist interaktiv)
+  const heart = `<path d="M35 50 Q22 38 29 28 Q35 20 41 28 Q48 38 35 50 Z" fill="white" stroke="#222" stroke-width="2.5" />`;
+  const lifeText = `<text id="lifeScrubber" x="35" y="43" text-anchor="middle" font-size="28" font-family="Arial" font-weight="bold" fill="#222" style="cursor:ns-resize;user-select:none;">${lives}</text>`;
+  // Münzenanzeige (SVG-Icon, Zahl, Strich, Zahl ist interaktiv)
+  const coinIcon = `<circle cx="15" cy="20" r="10" fill="#ffe066" stroke="#bfa600" stroke-width="3" /><text x="15" y="25" text-anchor="middle" font-size="14" font-family="Arial" font-weight="bold" fill="#bfa600">C</text>`;
+  const coinText = `<text id="coinScrubber" x="35" y="27" text-anchor="start" font-size="22" font-family="Arial" font-weight="bold" fill="white" style="cursor:ew-resize;user-select:none;">${coins
+    .toString()
+    .padStart(4, "0")}</text>`;
+  const coinLine = `<rect x="15" y="32" width="55" height="4" rx="2" fill="white" />`;
+  return `
+    <div style="position:absolute;top:18px;right:24px;z-index:10;display:flex;gap:18px;align-items:center;">
+      <div style="background:rgba(30,30,35,0.95);border-radius:18px;padding:8px 18px 8px 8px;min-width:110px;box-shadow:0 2px 8px #0006;display:flex;align-items:center;">
+        <svg width="70" height="38" viewBox="0 0 70 38">
+          ${coinIcon}
+          ${coinText}
+          ${coinLine}
+        </svg>
+      </div>
+      <div style="background:rgba(30,30,35,0.95);border-radius:50%;width:70px;height:70px;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 8px #0006;">
+        <svg width="60" height="60" viewBox="0 0 70 70">
+          ${segments}
+          ${heart}
+          ${lifeText}
+        </svg>
+      </div>
+    </div>
+  `;
+}
+function renderCoinSVG(coins) {
+  // Münzenanzeige (SVG-Icon, Zahl, Strich, Zahl ist interaktiv)
+  const coinIcon = `<circle cx="15" cy="20" r="10" fill="#ffe066" stroke="#bfa600" stroke-width="3" /><text x="15" y="25" text-anchor="middle" font-size="14" font-family="Arial" font-weight="bold" fill="#bfa600">C</text>`;
+  const coinText = `<text id="coinScrubber" x="45" y="27" text-anchor="start" font-size="22" font-family="Arial" font-weight="bold" fill="white" style="cursor:ew-resize;user-select:none;">${coins
+    .toString()
+    .padStart(4, "0")}</text>`;
+  const coinLine = `<rect x="15" y="32" width="75" height="4" rx="2" fill="white" />`;
+  return `
+    <div style="background:rgba(30,30,35,0.95);border-radius:18px;padding:8px 24px 8px 8px;min-width:140px;box-shadow:0 2px 8px #0006;display:flex;align-items:center;">
+      <svg width="100" height="38" viewBox="0 0 100 38">
+        ${coinIcon}
+        ${coinText}
+        ${coinLine}
+      </svg>
+    </div>
+  `;
+}
+function renderLifeSVG(lives) {
+  // Die Lebensanzeige nutzt jetzt die Original-Bilder aus images/Layout
+  // Die Zahl wird mittig über das Herz gelegt
+  return `
+    <div style="position:relative;width:90px;height:90px;display:flex;align-items:center;justify-content:center;">
+      <img src="images/Layout/NyLifeGauge00s.png" style="position:absolute;left:0;top:0;width:100%;height:100%;pointer-events:none;">
+      <img src="images/Layout/NyIconLifes.png" style="position:absolute;left:0;top:0;width:100%;height:100%;pointer-events:none;">
+      <span style="position:absolute;left:0;top:0;width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:36px;font-weight:bold;color:#fff;text-shadow:0 0 6px #000,0 0 2px #fff;user-select:none;cursor:ns-resize;" id="lifeScrubber">${lives}</span>
+    </div>
+  `;
+}
+// Interaktive Scrubber-Logik für Leben und Münzen (robust, immer nach Render aufrufen)
+function setupScrubbers() {
+  const lifeText = document.getElementById("lifeScrubber");
+  const coinText = document.getElementById("coinScrubber");
+  // Vorherige Listener entfernen
+  if (lifeText) {
+    lifeText.onmousedown = null;
+    lifeText.onclick = null;
+    let startY, startVal;
+    let dragging = false;
+    lifeText.onmousedown = function (e) {
+      dragging = true;
+      startY = e.clientY;
+      startVal = parseInt(document.getElementById("paramLives").value) || 0;
+      document.body.style.cursor = "ns-resize";
+      function move(ev) {
+        let diff = Math.round((startY - ev.clientY) / 8);
+        let newVal = Math.max(0, Math.min(6, startVal + diff));
+        document.getElementById("paramLives").value = newVal;
+        document.getElementById("paramLifeSVG").innerHTML =
+          renderLifeSVG(newVal);
+        setupScrubbers();
+      }
+      function up() {
+        dragging = false;
+        document.removeEventListener("mousemove", move);
+        document.removeEventListener("mouseup", up);
+        document.body.style.cursor = "";
+      }
+      document.addEventListener("mousemove", move);
+      document.addEventListener("mouseup", up);
+    };
+    // Fallback: Klick auf Zahl → Prompt
+    lifeText.onclick = function (e) {
+      if (!dragging) {
+        let val = prompt(
+          "Leben eingeben (0-6):",
+          document.getElementById("paramLives").value
+        );
+        if (val !== null) {
+          let newVal = Math.max(0, Math.min(6, parseInt(val) || 0));
+          document.getElementById("paramLives").value = newVal;
+          document.getElementById("paramLifeSVG").innerHTML =
+            renderLifeSVG(newVal);
+          setupScrubbers();
+        }
+      }
+    };
+  }
+  if (coinText) {
+    coinText.onmousedown = null;
+    coinText.onclick = null;
+    let startX, startVal;
+    let dragging = false;
+    coinText.onmousedown = function (e) {
+      dragging = true;
+      startX = e.clientX;
+      startVal = parseInt(document.getElementById("paramCoins").value) || 0;
+      document.body.style.cursor = "ew-resize";
+      function move(ev) {
+        let diff = Math.round((ev.clientX - startX) / 6);
+        let newVal = Math.max(0, Math.min(9999, startVal + diff));
+        document.getElementById("paramCoins").value = newVal;
+        document.getElementById("paramCoinSVG").innerHTML =
+          renderCoinSVG(newVal);
+        setupScrubbers();
+      }
+      function up() {
+        dragging = false;
+        document.removeEventListener("mousemove", move);
+        document.removeEventListener("mouseup", up);
+        document.body.style.cursor = "";
+      }
+      document.addEventListener("mousemove", move);
+      document.addEventListener("mouseup", up);
+    };
+    // Fallback: Klick auf Zahl → Prompt
+    coinText.onclick = function (e) {
+      if (!dragging) {
+        let val = prompt(
+          "Münzen eingeben (0-9999):",
+          document.getElementById("paramCoins").value
+        );
+        if (val !== null) {
+          let newVal = Math.max(0, Math.min(9999, parseInt(val) || 0));
+          document.getElementById("paramCoins").value = newVal;
+          document.getElementById("paramCoinSVG").innerHTML =
+            renderCoinSVG(newVal);
+          setupScrubbers();
+        }
+      }
+    };
+  }
+}
+// Funktion zum Öffnen des Parameter-Editors
+window.openParamEditor = async function (playerName) {
+  // Modal-HTML ggf. einfügen, falls nicht vorhanden
+  if (!document.getElementById("paramEditorModal")) {
+    // (Modal-HTML wie oben einfügen, ggf. aus Template-String)
+    // ... (hier ggf. den Modal-HTML-Block einfügen, wie in der letzten Version)
+    // Für diese Demo: alert("Fehler: Modal-HTML fehlt!"); return;
+    alert(
+      "Fehler: Das Parameter-Modal konnte nicht gefunden werden. Bitte Seite neu laden."
+    );
+    return;
+  }
+  document.getElementById("paramPlayerName").value = playerName;
+  // Spielerwerte laden
+  const players = await fetchPlayers();
+  const player = players.find((p) => p.Name === playerName);
+  if (player) {
+    document.getElementById("paramSpeed").value = player.Speed;
+    document.getElementById("paramJumpHeight").value = player.JumpHeight;
+    currentLives = player.Lives;
+    currentCoins = player.Coins;
+    if (
+      !document.getElementById("paramCoinSVG") ||
+      !document.getElementById("paramLifeSVG")
+    ) {
+      alert(
+        "Fehler: Ein zentrales Anzeige-Element fehlt im Modal. Bitte Seite neu laden."
+      );
+      return;
+    }
+    document.getElementById("paramCoinSVG").innerHTML =
+      renderCoinSVG(currentCoins);
+    document.getElementById("paramLifeSVG").innerHTML =
+      renderLifeSVG(currentLives);
+    setupScrubbers();
+    await fillCapAndBodyDropdowns(player.Cap, player.Body);
+  }
+  const modal = new bootstrap.Modal(
+    document.getElementById("paramEditorModal")
+  );
+  modal.show();
+};
+// Event-Listener für das Leben- und Münzen-Feld, um SVG zu aktualisieren
+if (!window.paramLifeSVGHandlerAdded) {
+  document.addEventListener("input", function (e) {
+    if (
+      e.target &&
+      (e.target.id === "paramLives" || e.target.id === "paramCoins")
+    ) {
+      const lives = parseInt(document.getElementById("paramLives").value) || 0;
+      const coins = parseInt(document.getElementById("paramCoins").value) || 0;
+      document.getElementById("paramLifeSVG").innerHTML = renderLifeSVG(lives);
+      document.getElementById("paramCoinSVG").innerHTML = renderCoinSVG(coins);
+      setupScrubbers();
+    }
+  });
+  window.paramLifeSVGHandlerAdded = true;
+}
+// Senden-Button im Parameter-Editor
+if (!window.paramEditorHandlerAdded) {
+  document.getElementById("paramEditorSendBtn").onclick = async function () {
+    const player = document.getElementById("paramPlayerName").value;
+    const outfit = document.getElementById("paramOutfit").value;
+    const speed = document.getElementById("paramSpeed").value;
+    const jumpHeight = document.getElementById("paramJumpHeight").value;
+    await fetch("/commands/exec", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ command: `setlives ${player} ${currentLives}` }),
+    });
+    await fetch("/commands/exec", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ command: `setcoins ${player} ${currentCoins}` }),
+    });
+    await fetch("/commands/exec", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ command: `setoutfit ${player} ${outfit}` }),
+    });
+    await fetch("/commands/exec", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ command: `setspeed ${player} ${speed}` }),
+    });
+    await fetch("/commands/exec", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        command: `setjumpheight ${player} ${jumpHeight}`,
+      }),
+    });
+    bootstrap.Modal.getInstance(
+      document.getElementById("paramEditorModal")
+    ).hide();
+    renderPlayerTable();
+  };
+  window.paramEditorHandlerAdded = true;
+}
+
 // Theme-Settings-Button und Modal
 const settingsFab = document.getElementById("settingsFab");
 if (settingsFab) {
@@ -1032,3 +1467,201 @@ setInterval(function () {
 }, 2000);
 
 let lastSeenPlayers = {};
+
+// Lebensanzeige-Overlay oben rechts
+function renderLifeOverlay(lives) {
+  const filterId = "glowLifeOverlay"; // oder: "glowLifeOverlay" + Math.random().toString(36).substr(2, 5);
+  const maxLives = 6;
+  const segs = 6;
+  const r = 44;
+  const ringWidth = 14;
+  const totalLength = 2 * Math.PI * r;
+  const segLength = totalLength / segs;
+  const gap = segLength * 0.1;
+  const dash = segLength - gap;
+
+  // Farbwechsel
+  let ringColor = "#00e600";
+  let glowColor = "#00ff00";
+  if (lives === 2) {
+    ringColor = "#ffe066";
+    glowColor = "#ffe066";
+  }
+  if (lives === 1) {
+    ringColor = "#ff3c28";
+    glowColor = "#ff3c28";
+  }
+
+  // Dasharray für die Segmente
+  let dashArrayFilled = [];
+  for (let i = 0; i < segs; i++) {
+    if (i < lives) {
+      dashArrayFilled.push(dash, gap);
+    } else {
+      dashArrayFilled.push(0, dash + gap);
+    }
+  }
+
+  // Herz und Zahl
+  const heart = `<path d="M50 72 Q28 52 40 34 Q50 20 60 34 Q72 52 50 72 Z" fill="white" stroke="black" stroke-width="3"/>`;
+  const lifeText = `
+    <text x="50" y="60" text-anchor="middle" font-size="34" font-family="Arial" font-weight="bold" fill="white" opacity="0.7" stroke="white" stroke-width="3">${lives}</text>
+    <text x="50" y="60" text-anchor="middle" font-size="34" font-family="Arial" font-weight="bold" fill="black">${lives}</text>
+  `;
+
+  // SVG mit Glow-Filter
+  return `
+    <div style="width:100px;height:100px;">
+      <svg width="100" height="100" viewBox="0 0 100 100">
+        <defs>
+          <filter id="${filterId}" x="-40%" y="-40%" width="180%" height="180%">
+            <feDropShadow dx="0" dy="0" stdDeviation="3" flood-color="${glowColor}" flood-opacity="0.7"/>
+          </filter>
+        </defs>
+        <circle cx="50" cy="50" r="${r}" stroke="#222" stroke-width="${ringWidth}" fill="none"/>
+        <circle
+          cx="50" cy="50" r="${r}"
+          stroke="${ringColor}"
+          stroke-width="${ringWidth}"
+          fill="none"
+          stroke-dasharray="${dashArrayFilled.join(",")}"
+          stroke-dashoffset="0"
+          transform="rotate(-90 50 50)"
+          filter="url(#${filterId})"
+        />
+        ${heart}
+        ${lifeText}
+      </svg>
+    </div>
+  `;
+}
+async function updateLifeOverlay() {
+  const overlay = document.getElementById("lifeOverlay");
+  if (!overlay) return;
+  const players = await fetchPlayers();
+  if (!players.length) {
+    overlay.innerHTML = "";
+    return;
+  }
+  const lives = players[0].Lives || 0;
+  overlay.innerHTML = renderLifeOverlay(lives);
+  console.log("updateLifeOverlay wird aufgerufen!", lives);
+}
+setInterval(updateLifeOverlay, 1000);
+
+// --- Hilfsfunktion: Bild-Dropdown für Cap/Body ---
+function makeImageDropdown(selectId, images, selectedValue, folder) {
+  const select = document.getElementById(selectId);
+  if (!select) return;
+  select.style.display = "none"; // Verstecke das echte Dropdown
+
+  // Container für das Custom-Dropdown
+  let custom = document.getElementById(selectId + "_imgdropdown");
+  if (!custom) {
+    custom = document.createElement("div");
+    custom.id = selectId + "_imgdropdown";
+    custom.className = "img-dropdown";
+    custom.style.position = "relative";
+    select.parentNode.insertBefore(custom, select.nextSibling);
+  }
+  custom.innerHTML = "";
+
+  // Aktuell gewähltes Bild anzeigen
+  let current = images.find((img) => img === selectedValue) || images[0];
+  const currentDiv = document.createElement("div");
+  currentDiv.className = "img-dropdown-current";
+  currentDiv.style.cursor = "pointer";
+  currentDiv.style.display = "flex";
+  currentDiv.style.alignItems = "center";
+  currentDiv.style.gap = "8px";
+  currentDiv.style.border = "1px solid #444";
+  currentDiv.style.borderRadius = "6px";
+  currentDiv.style.background = "#23232a";
+  currentDiv.style.padding = "2px 8px";
+  currentDiv.innerHTML = `<img src="images/${folder}/${current}.png" style="height:32px;"> <span style="color:#fff;">${current}</span>`;
+  custom.appendChild(currentDiv);
+
+  // Das "Dropdown"-Menü (unsichtbar bis Klick)
+  const menu = document.createElement("div");
+  menu.className = "img-dropdown-menu";
+  menu.style.position = "absolute";
+  menu.style.left = "0";
+  menu.style.top = "140%";
+  menu.style.background = "#23232a";
+  menu.style.border = "1px solid #444";
+  menu.style.borderRadius = "6px";
+  menu.style.boxShadow = "0 2px 8px #0008";
+  menu.style.zIndex = "1000";
+  menu.style.display = "none";
+  menu.style.minWidth = "120px";
+  menu.style.maxHeight = "600px";
+  menu.style.overflowY = "auto";
+  images.forEach((img) => {
+    const item = document.createElement("div");
+    item.style.display = "flex";
+    item.style.alignItems = "center";
+    item.style.gap = "8px";
+    item.style.padding = "4px 8px";
+    item.style.cursor = "pointer";
+    item.innerHTML = `<img src="images/${folder}/${img}.png" style="height:28px;"> <span style="color:#fff;">${img}</span>`;
+    if (img === current) item.style.background = "#393a5a";
+    item.onclick = function () {
+      select.value = img;
+      select.dispatchEvent(new Event("change"));
+      menu.style.display = "none";
+      makeImageDropdown(selectId, images, img, folder); // neu rendern
+    };
+    menu.appendChild(item);
+  });
+  custom.appendChild(menu);
+
+  // Klick auf das aktuelle Bild öffnet das Menü
+  currentDiv.onclick = function (e) {
+    menu.style.display = menu.style.display === "block" ? "none" : "block";
+    e.stopPropagation();
+  };
+  // Klick außerhalb schließt das Menü
+  document.addEventListener("click", function closeMenu(e) {
+    if (!custom.contains(e.target)) {
+      menu.style.display = "none";
+      document.removeEventListener("click", closeMenu);
+    }
+  });
+}
+
+// --- Outfit-Dropdown für Parameter-Editor (mit Bildern) ---
+async function fillCapAndBodyDropdowns(selectedCap, selectedBody) {
+  const capSelect = document.getElementById("paramCap");
+  const bodySelect = document.getElementById("paramBody");
+  if (!capSelect || !bodySelect) return;
+  capSelect.innerHTML = "";
+  bodySelect.innerHTML = "";
+  caps.forEach((cap) => {
+    const opt = document.createElement("option");
+    opt.value = cap;
+    opt.textContent = cap;
+    if (cap === selectedCap) opt.selected = true;
+    capSelect.appendChild(opt);
+  });
+  bodies.forEach((body) => {
+    const opt = document.createElement("option");
+    opt.value = body;
+    opt.textContent = body;
+    if (body === selectedBody) opt.selected = true;
+    bodySelect.appendChild(opt);
+  });
+  // Custom Image-Dropdowns erzeugen
+  makeImageDropdown("paramCap", caps, selectedCap, "cap");
+  makeImageDropdown("paramBody", bodies, selectedBody, "body");
+  // Vorschau
+  const preview = document.getElementById("outfitPreview");
+  function updatePreview() {
+    preview.innerHTML = `
+      <img src="images/cap/${capSelect.value}.png" style="height:48px;">
+      <img src="images/body/${bodySelect.value}.png" style="height:48px;">
+    `;
+  }
+  capSelect.onchange = updatePreview;
+  bodySelect.onchange = updatePreview;
+  updatePreview();
+}
