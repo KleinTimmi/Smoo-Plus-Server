@@ -44,3 +44,6 @@ Mehr dazu [Smoo readme](https://github.com/KleinTimmi/Smoo_aaaaaaa/blob/master/S
 
 ## Monde gleich einsammeln 
 siehe [YouTube](https://youtube.com/watch?v=i19xSaFKgN0)
+
+## Prophunt integrieren 
+* ganz normal im modmenu switchen 
