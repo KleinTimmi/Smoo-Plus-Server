@@ -46,5 +46,4 @@ Mehr dazu [Smoo readme](https://github.com/KleinTimmi/Smoo_aaaaaaa/blob/master/S
 siehe [YouTube](https://youtube.com/watch?v=i19xSaFKgN0)
 
 ## Prophunt integrieren 
-* ganz normal im modmenu switchen 
-😃
+* ganz normal im modmenu switchen
