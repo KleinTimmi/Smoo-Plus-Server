@@ -566,13 +566,18 @@ CommandHandler.RegisterCommand("tag", args => {
             if (seekers.Length != seekerNames.Length)
                 return
                     $"Couldn't find seeker{(seekerNames.Length > 1 ? "s" : "")}: {string.Join(", ", seekerNames.Where(name => server.Clients.All(c => c.Name != name)))}";
+            // GameMode bestimmen: Wenn mindestens ein Spieler FreezeTag hat, dann FreezeTag, sonst Legacy
+            var mode = server.Clients.Select(c => c.Metadata.ContainsKey("gameMode") ? c.Metadata["gameMode"] : null)
+                .FirstOrDefault(gm => gm != null && gm.ToString() == "FreezeTag");
+            var tagMode = mode != null ? Shared.Packet.Packets.GameMode.FreezeTag : Shared.Packet.Packets.GameMode.Legacy;
+            consoleLogger.Info($"[DEBUG] tagMode={tagMode}");
             Task.Run(async () => {
                 int realTime = 1000 * time;
                 await Task.Delay(realTime);
                 await Task.WhenAll(
                     Parallel.ForEachAsync(seekers, async (seeker, _) => {
                         TagPacket packet = new TagPacket {
-                            GameMode   = GameMode.Legacy,
+                            GameMode   = tagMode,
                             UpdateType = TagPacket.TagUpdate.State,
                             IsIt       = true,
                         };
@@ -581,7 +586,7 @@ CommandHandler.RegisterCommand("tag", args => {
                     }),
                     Parallel.ForEachAsync(server.Clients.Except(seekers), async (hider, _) => {
                         TagPacket packet = new TagPacket {
-                            GameMode   = GameMode.Legacy,
+                            GameMode   = tagMode,
                             UpdateType = TagPacket.TagUpdate.State,
                             IsIt       = false,
                         };
@@ -589,9 +594,9 @@ CommandHandler.RegisterCommand("tag", args => {
                         await hider.Send(packet);
                     })
                 );
-                consoleLogger.Info($"Started game with seekers {string.Join(", ", seekerNames)}");
+                consoleLogger.Info($"Started game with seekers {string.Join(", ", seekerNames)} (Mode: {tagMode})");
             });
-            return $"Starting game in {time} seconds with seekers {string.Join(", ", seekerNames)}";
+            return $"Starting game in {time} seconds with seekers {string.Join(", ", seekerNames)} (Mode: {tagMode})";
         }
         default:
             return optionUsage;
@@ -913,7 +918,8 @@ var webTask = Task.Run(async () =>
                             }
                             if (gmEnum != null) {
                                 gameMode = gmEnum.ToString();
-                                if ((gmEnum == Shared.Packet.Packets.GameMode.HideAndSeek || gmEnum == Shared.Packet.Packets.GameMode.Sardines || gmEnum == Shared.Packet.Packets.GameMode.FreezeTag) && c.Metadata.ContainsKey("seeking") && c.Metadata["seeking"] != null) {
+                                if ((gmEnum == Shared.Packet.Packets.GameMode.HideAndSeek || gmEnum == Shared.Packet.Packets.GameMode.Sardines || gmEnum == Shared.Packet.Packets.GameMode.FreezeTag) 
+                                    && c.Metadata.ContainsKey("seeking") && c.Metadata["seeking"] != null) {
                                     bool isSeeker = false;
                                     if (bool.TryParse(c.Metadata["seeking"].ToString(), out bool parsedSeek)) isSeeker = parsedSeek;
                                     if (gmEnum == Shared.Packet.Packets.GameMode.HideAndSeek) {

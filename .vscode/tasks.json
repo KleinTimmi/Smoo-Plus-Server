@@ -10,6 +10,16 @@
         "isDefault": true
       },
       "problemMatcher": []
+    },
+    {
+      "label": "Compile Smoo",
+      "type": "shell",
+      "command": "Start-Process C:\\Games\\Switch\\Smoo\\Bat\\smo.bat",
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      },
+      "problemMatcher": []
     }
   ]
 }
