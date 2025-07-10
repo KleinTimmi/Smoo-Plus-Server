@@ -4,7 +4,10 @@
     {
       "label": "Build Solution",
       "type": "shell",
-      "command": "powershell -ExecutionPolicy Bypass -File run-server.ps1",
+      "command": "powershell -ExecutionPolicy Bypass -File .vscode\\Server-Build.ps1",
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
       "group": {
         "kind": "build",
         "isDefault": true
@@ -14,7 +17,7 @@
     {
       "label": "Compile Smoo",
       "type": "shell",
-      "command": "Start-Process C:\\Games\\Switch\\Smoo\\Bat\\smo.bat",
+      "command": "powershell -ExecutionPolicy Bypass -File .vscode\\Smoo-bat.ps1",
       "group": {
         "kind": "build",
         "isDefault": true
