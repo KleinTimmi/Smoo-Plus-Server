@@ -107,6 +107,7 @@ public class Client : IDisposable {
         if (   gmode != GameMode.Legacy
             && gmode != GameMode.HideAndSeek
             && gmode != GameMode.Sardines
+            && gmode != GameMode.FreezeTag
         ) { return null; }
 
         var time = (Time?) (this.Metadata.ContainsKey("time")    ? this.Metadata["time"]    : null);

@@ -209,6 +209,7 @@ server.PacketHandler = (c, p) => {
             if (  (tagPacket.GameMode == GameMode.Legacy && tagPacket.UpdateType == TagPacket.TagUpdate.Both)
                 || tagPacket.GameMode == GameMode.HideAndSeek
                 || tagPacket.GameMode == GameMode.Sardines
+                || tagPacket.GameMode == GameMode.FreezeTag
             ) {
                 // c.Logger.Info($"Got tag packet: {tagPacket.GameMode} {tagPacket.UpdateType} {tagPacket.IsIt} {tagPacket.Minutes}:{tagPacket.Seconds}");
                 if ((tagPacket.UpdateType & TagPacket.TagUpdate.State) != 0) {

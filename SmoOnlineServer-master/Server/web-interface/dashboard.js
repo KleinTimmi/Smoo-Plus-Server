@@ -497,7 +497,7 @@ async function renderPlayerTable() {
           <td>
             <button class="btn btn-sm btn-outline-danger" onclick="toggleBan(${allNames.indexOf(
               name
-            )})">${p.Banned ? "Entbannen" : "Bannen"}</button>
+            )})">${p.Banned ? "Unban" : "Ban"}</button>
             <button class="btn btn-sm btn-outline-warning ms-1" onclick="crashPlayer('${
               p.Name
             }')">Crash</button>
@@ -506,7 +506,7 @@ async function renderPlayerTable() {
             }')">Teleport</button>
             <button class="btn btn-sm btn-outline-success ms-1" onclick="openParamEditor('${
               p.Name
-            }')">Parameter</button>
+            }')">Param Editor</button>
           </td>
         </tr>
       `;
@@ -1071,37 +1071,7 @@ if (!document.getElementById("paramEditorModal")) {
 
 // Lebens- und Münzanzeige für das Param-Modal (Segment-Kreis, Herz, Zahl, Münze, interaktiv)
 function renderLifeAndCoinSVG(lives, coins) {
-  const maxLives = 6;
-  const segs = 6;
-  const segAngle = 360 / segs;
-  let segments = "";
-  let color = "#00e600"; // Standard: grün
-  if (lives >= 4) {
-    color = "#00e6e6"; // cyan/blau
-  } else if (lives === 2) {
-    color = "#ffe066"; // gelb
-  } else if (lives === 1) {
-    color = "#ff3c28"; // rot
-  }
-  for (let i = 0; i < segs; i++) {
-    const filled = i < lives;
-    const start = ((i * segAngle - 90) * Math.PI) / 180;
-    const end = (((i + 1) * segAngle - 90) * Math.PI) / 180;
-    const r = 30,
-      cx = 35,
-      cy = 35;
-    const x1 = cx + r * Math.cos(start);
-    const y1 = cy + r * Math.sin(start);
-    const x2 = cx + r * Math.cos(end);
-    const y2 = cy + r * Math.sin(end);
-    segments += `<path d="M${cx},${cy} L${x1},${y1} A${r},${r} 0 0,1 ${x2},${y2} Z" fill="${
-      filled ? color : "#222"
-    }" />`;
-  }
-  // Herzform und Zahl (Zahl ist interaktiv)
-  const heart = `<path d="M35 50 Q22 38 29 28 Q35 20 41 28 Q48 38 35 50 Z" fill="white" stroke="#222" stroke-width="2.5" />`;
-  const lifeText = `<text id="lifeScrubber" x="35" y="43" text-anchor="middle" font-size="28" font-family="Arial" font-weight="bold" fill="#222" style="cursor:ns-resize;user-select:none;">${lives}</text>`;
-  // Münzenanzeige (SVG-Icon, Zahl, Strich, Zahl ist interaktiv)
+  // Nur noch die Münzenanzeige als SVG, das Herz wird durch renderLifeSVG ersetzt
   const coinIcon = `<circle cx="15" cy="20" r="10" fill="#ffe066" stroke="#bfa600" stroke-width="3" /><text x="15" y="25" text-anchor="middle" font-size="14" font-family="Arial" font-weight="bold" fill="#bfa600">C</text>`;
   const coinText = `<text id="coinScrubber" x="35" y="27" text-anchor="start" font-size="22" font-family="Arial" font-weight="bold" fill="white" style="cursor:ew-resize;user-select:none;">${coins
     .toString()
@@ -1116,13 +1086,7 @@ function renderLifeAndCoinSVG(lives, coins) {
           ${coinLine}
         </svg>
       </div>
-      <div style="background:rgba(30,30,35,0.95);border-radius:50%;width:70px;height:70px;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 8px #0006;">
-        <svg width="60" height="60" viewBox="0 0 70 70">
-          ${segments}
-          ${heart}
-          ${lifeText}
-        </svg>
-      </div>
+      <div id="lifeSVGContainer">${renderLifeSVG(lives)}</div>
     </div>
   `;
 }
