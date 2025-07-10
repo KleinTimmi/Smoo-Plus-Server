@@ -4,7 +4,7 @@
     {
       "label": "Build Solution",
       "type": "shell",
-      "command": "taskkill /IM Server.exe /F; dotnet build SmoOnlineServer-master/SmoMultiplayerServer.sln; Start-Process 'C:\\Users\\Sam\\Documents\\GitHub\\Smoo_aaaaaaa\\SmoOnlineServer-master\\Server\\bin\\Debug\\net6.0\\Server.exe'",
+      "command": "powershell -ExecutionPolicy Bypass -File run-server.ps1",
       "group": {
         "kind": "build",
         "isDefault": true
