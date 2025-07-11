@@ -362,6 +362,7 @@ const mapImages = {
   DarkerWorldHomeStage: "DarkerSide.png",
 };
 
+
 //dropdown menu logic
 function fillKingdomDropdowns() {
   const kingdomNames = Object.keys(stagesByKingdom);
@@ -427,6 +428,13 @@ function updateConsoleOutput() {
       const logDiv = document.getElementById("log");
       logDiv.scrollTop = logDiv.scrollHeight;
     });
+}
+function fetchIp() {
+fetch('https://api.ipify.org?format=json')
+  .then(response => response.json())
+  .then(data => {
+    document.getElementById('myIpBox').textContent = "Deine öffentliche IP: " + data.ip;
+  });
 }
 
 // Bereich-Umschaltung
@@ -589,11 +597,22 @@ async function loadServerInfo() {
     const response = await fetch("/api/serverinfo");
     if (!response.ok) throw new Error("Fehler beim Laden der Serverdaten");
     const data = await response.json();
-    box.innerHTML = `
-      <b>Server-Address:</b> ${data.host}<br>
-      <b>Port:</b> ${data.port}<br>
-      <b>Max. Players:</b> ${data.maxPlayers}
-    `;
+
+    fetch('https://api.ipify.org?format=json')
+      .then(response => response.json())
+      .then(ipData => {
+        let addressLine = "";
+        if (data.host && data.host !== "0.0.0.0") {
+          addressLine = `<b>Server-Address:</b> ${data.host} / ${ipData.ip}<br>`;
+        } else {
+          addressLine = `<b>Server-Address:</b> ${ipData.ip}<br>`;
+        }
+        box.innerHTML = `
+          ${addressLine}
+          <b>Port:</b> ${data.port}<br>
+          <b>Max. Players:</b> ${data.maxPlayers}
+        `;
+      });
   } catch (e) {
     box.innerHTML = "Serverdaten konnten nicht geladen werden.";
   }
@@ -1629,3 +1648,17 @@ async function fillCapAndBodyDropdowns(selectedCap, selectedBody) {
   bodySelect.onchange = updatePreview;
   updatePreview();
 }
+
+document.getElementById('szsUploadForm').addEventListener('submit', async function(e) {
+  e.preventDefault();
+  const fileInput = document.getElementById('szsFileInput');
+  if (!fileInput.files.length) return;
+  const formData = new FormData();
+  formData.append('szsfile', fileInput.files[0]);
+  const res = await fetch('/api/upload-szs', {
+    method: 'POST',
+    body: formData
+  });
+  const text = await res.text();
+  document.getElementById('uploadResult').textContent = text;
+});

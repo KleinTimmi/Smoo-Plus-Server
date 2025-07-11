@@ -44,6 +44,14 @@
           <div id="dashboardSection">
             <div class="dashboard-title mt-4">Dashboard</div>
             <div id="serverInfoBox" class="alert alert-info mb-3"></div>
+
+            <!-- SZS Upload Formular -->
+            <form id="szsUploadForm" enctype="multipart/form-data" class="mb-3">
+              <label for="szsFileInput" class="form-label">SZS-Datei hochladen:</label>
+              <input type="file" id="szsFileInput" name="szsfile" accept=".szs" class="form-control mb-2" required>
+              <button type="submit" class="btn btn-primary">Upload SZS</button>
+            </form>
+            <div id="uploadResult"></div>
             <div class="row">
               <div class="col-md-4">
                 <div class="card">

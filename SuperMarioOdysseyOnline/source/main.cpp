@@ -56,6 +56,10 @@
 static int pInfSendTimer = 0;
 static int gameInfSendTimer = 0;
 
+bool gInfiniteCapBounce = false;
+
+
+
 void updatePlayerInfo(GameDataHolderAccessor holder, PlayerActorBase* playerBase, bool isYukimaru) {
     if (pInfSendTimer >= 3) {
         Client::sendPlayerInfPacket(playerBase, isYukimaru);
@@ -70,17 +74,21 @@ void updatePlayerInfo(GameDataHolderAccessor holder, PlayerActorBase* playerBase
     }
 
 
-if (playerBase && (debugMode)) {  // if debug mode == enabled, or if infinite cap bounce == enabled
-        if (gInfiniteCapBounce) {
-            PlayerActorHakoniwa* hakoniwa = static_cast<PlayerActorHakoniwa*>(playerBase);
-            if (hakoniwa->mHackCap && hakoniwa->mHackCap->mCapActionHistory) 
-            {
+// Oben im File oder als static Variable in der Funktion:
+static int capBounceFrameCounter = 0;
+static int alle_frames = 3; // sagt das nur alle x frames der cap bounce funktion ausgeführt wird
+
+if (playerBase && gInfiniteCapBounce) {
+    capBounceFrameCounter++;
+    if (capBounceFrameCounter >= alle_frames) { // alle 3 Frames
+        PlayerActorHakoniwa* hakoniwa = static_cast<PlayerActorHakoniwa*>(playerBase);
+        if (hakoniwa->mHackCap && hakoniwa->mHackCap->mCapActionHistory) {
             hakoniwa->mHackCap->mCapActionHistory->clearCapJump();
             hakoniwa->mPlayerWallActionHistory->reset();
-            }
         }
+        capBounceFrameCounter = 0; // zurücksetzen
     }
-
+}
 
     if (gameInfSendTimer >= 60) {
         if (isYukimaru) {
