@@ -4,7 +4,7 @@ switch ($pcName) {
     "NEO-PC" {
         $smoBatPath = "C:\Games\Switch\Smoo\Bat\smo.bat"
     }
-    "Tom Tom" {
+    "DESKTOP-0M36AO4" {
         $smoBatPath = "C:\Users\Jens\Desktop\smo.bat"
     }
     default {
