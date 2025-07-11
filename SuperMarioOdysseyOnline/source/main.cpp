@@ -106,7 +106,7 @@ if (playerBase && gNoclip) {
     al::setVelocityZero(hakoniwa);
 
     sead::Vector3f* playerPos = al::getTransPtr(hakoniwa);
-    sead::Vector3f* cameraPos = al::getCameraPos(hakoniwa, 0);
+    sead::Vector3f* cameraPos = al::getCameraUp(hakoniwa, 0);
     sead::Vector2f* leftStick = al::getLeftStick(-1);
 
     // Mario leicht anheben, um das Absinken zu verhindern

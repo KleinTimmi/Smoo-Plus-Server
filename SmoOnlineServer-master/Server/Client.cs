@@ -25,6 +25,12 @@ public class Client : IDisposable {
     public Server Server { get; init; } = null!; //init'd in object initializer
     public Logger Logger { get; }
 
+    public Extras? CurrentExtras { get; set; } = new Extras
+    {
+        InfiniteCapBounce = false,
+        Noclip = false
+    };
+
     public Client(Socket socket) {
         Socket = socket;
         Logger = new Logger("Unknown User");

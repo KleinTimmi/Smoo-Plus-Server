@@ -477,8 +477,11 @@ CommandHandler.RegisterCommand("infCapDive", args =>{
     {
         await c.Send(new Extras
         {
-            InfiniteCapBounce = enable
+            InfiniteCapBounce = enable,
+            Noclip = c.CurrentExtras?.Noclip ?? false
         });
+        if (c.CurrentExtras != null)
+            c.CurrentExtras.InfiniteCapBounce = enable;
     }).Wait();
 
 
@@ -508,8 +511,11 @@ CommandHandler.RegisterCommand("noclip", args => {
     Parallel.ForEachAsync(players, async (c, _) => {    
         await c.Send(new Extras
         {
+            InfiniteCapBounce = c.CurrentExtras?.InfiniteCapBounce ?? false,
             Noclip = enable
         });
+        if (c.CurrentExtras != null)
+            c.CurrentExtras.Noclip = enable;
     }).Wait();
 
     return $"Gave player/s: {string.Join(", ", players.Select(p => p.Name))} Noclip: {enable}"; 
