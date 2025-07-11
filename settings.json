@@ -2,7 +2,7 @@
   "Server": {
     "Address": "0.0.0.0",
     "Port": 1027,
-    "MaxPlayers": 8
+    "MaxPlayers": 4
   },
   "Flip": {
     "Enabled": true,
@@ -10,7 +10,7 @@
     "Pov": "both"
   },
   "Scenario": {
-    "MergeEnabled": false
+    "MergeEnabled": true
   },
   "BanList": {
     "Enabled": false,

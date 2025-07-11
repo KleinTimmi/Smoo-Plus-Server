@@ -55,6 +55,11 @@ button.flex-fill {
   font-weight: 600;
   margin-bottom: 1.5rem;
 }
+.alert-info {
+  --bs-alert-color: #fff;
+  --bs-alert-bg: #112030;
+  --bs-alert-border-color: #0056b3;
+}
 .form-control,
 .form-select {
   background: #23232a;
@@ -344,18 +349,18 @@ body.theme-light .tab-content {
   border: 1px solid #bbb !important;
 }
 body.theme-light .modal-header,
-body.theme-light .modal-footer {
+body.theme-light .modal-footer {  /* Modal */
   background: #e9ecef !important;
   color: #23232a !important;
   border-bottom: 1px solid #bbb !important;
   border-top: 1px solid #bbb !important;
 }
-body.theme-light .sidebar .nav-link.active,
-body.theme-light .sidebar .nav-link:hover {
+body.theme-light .sidebar .nav-link.active, 
+body.theme-light .sidebar .nav-link:hover {  /* Sidebar */
   background: #d1d5db !important;
   color: #23232a !important;
 }
-body.theme-light .feature-box {
+body.theme-light .feature-box {  /* Feature Box */
   background: #fff !important;
   color: #23232a !important;
   border: 1px solid #bbb !important;
@@ -364,7 +369,12 @@ body.theme-light .feature-box {
 body.theme-light .dashboard-title {
   color: #232946 !important;
 }
-body.theme-light .settings-fab {
+body.theme-light .alert-info {  /* Info Box */
+  --bs-alert-color: #000000;
+  --bs-alert-bg: #cfe2ff;
+  --bs-alert-border-color: #0f1319;
+}
+body.theme-light .settings-fab {  /* Settings FAB */
   background: #e9ecef !important;
   color: #23232a !important;
   border: 1px solid #bbb !important;
@@ -502,10 +512,4 @@ body.theme-light #playerlistSection .dashboard-title {
 }
 .img-dropdown-current {
   /* siehe JS für Details */
-}
-
-.alert-info {
-    --bs-alert-color: #fff;
-    --bs-alert-bg: #112030;
-    --bs-alert-border-color: #0056b3;
 }
