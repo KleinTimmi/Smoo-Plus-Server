@@ -4,8 +4,8 @@ switch ($pcName) {
     "NEO-PC" {
         $smoBatPath = "C:\Games\Switch\Smoo\Bat\smo.bat"
     }
-    "KleinTimmi" {
-        $smoBatPath = "Pfad\anpassen\smo.bat"
+    "Tom Tom" {
+        $smoBatPath = "C:\Users\Jens\Desktop\smo.bat"
     }
     default {
         Write-Host "Unbekannter Computername: $pcName"

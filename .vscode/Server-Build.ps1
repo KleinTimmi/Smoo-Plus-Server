@@ -4,8 +4,8 @@ switch ($pcName) {
     "NEO-PC" {
         $serverPath = "C:\Users\Sam\Documents\GitHub\Smoo_aaaaaaa\SmoOnlineServer-master\Server\bin\Debug\net6.0\Server.exe"
     }
-    "KleinTimmi" {
-        $serverPath = "Pfad\anpassen\server.exe"
+    "DESKTOP-0M36AO4" {
+        $serverPath = "G:\exefs\SmoOnlineServer-master\Server\bin\Debug\net6.0\Server.exe"
     }
     default {
         Write-Host "Unbekannter Computername: $pcName"

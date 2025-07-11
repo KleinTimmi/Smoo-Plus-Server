@@ -503,3 +503,9 @@ body.theme-light #playerlistSection .dashboard-title {
 .img-dropdown-current {
   /* siehe JS für Details */
 }
+
+.alert-info {
+    --bs-alert-color: #fff;
+    --bs-alert-bg: #112030;
+    --bs-alert-border-color: #0056b3;
+}
