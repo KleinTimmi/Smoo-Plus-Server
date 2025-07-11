@@ -362,7 +362,6 @@ const mapImages = {
   DarkerWorldHomeStage: "DarkerSide.png",
 };
 
-
 //dropdown menu logic
 function fillKingdomDropdowns() {
   const kingdomNames = Object.keys(stagesByKingdom);
@@ -430,11 +429,12 @@ function updateConsoleOutput() {
     });
 }
 function fetchIp() {
-fetch('https://api.ipify.org?format=json')
-  .then(response => response.json())
-  .then(data => {
-    document.getElementById('myIpBox').textContent = "Deine öffentliche IP: " + data.ip;
-  });
+  fetch("https://api.ipify.org?format=json")
+    .then((response) => response.json())
+    .then((data) => {
+      document.getElementById("myIpBox").textContent =
+        "Deine öffentliche IP: " + data.ip;
+    });
 }
 
 // Bereich-Umschaltung
@@ -485,48 +485,38 @@ async function renderPlayerTable() {
     lastSeenPlayers[p.Name] = now;
   });
 
-  // Alle Spieler, die in den letzten 2 Sekunden gesehen wurden
-  const allNames = Object.keys(lastSeenPlayers);
+  // Sichtbare Spalten bestimmen
+  const visibleColumns = playerTableColumns.filter(
+    (col) =>
+      !document.querySelector(`th.${col.class}`).classList.contains("hidden")
+  );
+
   let html = "";
-  allNames.forEach((name) => {
+  const allNames = Object.keys(lastSeenPlayers);
+  allNames.forEach((name, idx) => {
     const p = players.find((x) => x.Name === name);
     const lastSeen = lastSeenPlayers[name];
     if (p) {
-      // Spieler ist aktuell verbunden
-      html += `
-        <tr>
-          <td>${p.Name}</td>
-          <td>${getCapImg(p.Cap)}</td>
-          <td>${getBodyImg(p.Body)}</td>
-          <td>${getCaptureImg(p.Capture)}</td>
-          <td>${p.GameMode || "-"}</td>
-          <td>${p.Stage || "-"}</td>
-          <td>${p.IPv4 || "-"}</td>
-          <td>
-            <button class="btn btn-sm btn-outline-danger" onclick="toggleBan(${allNames.indexOf(
-              name
-            )})">${p.Banned ? "Unban" : "Ban"}</button>
-            <button class="btn btn-sm btn-outline-warning ms-1" onclick="crashPlayer('${
-              p.Name
-            }')">Crash</button>
-            <button class="btn btn-sm btn-outline-primary ms-1" onclick="openTeleportModal('${
-              p.Name
-            }')">Teleport</button>
-            <button class="btn btn-sm btn-outline-success ms-1" onclick="openParamEditor('${
-              p.Name
-            }')">Param Editor</button>
-          </td>
-        </tr>
-      `;
+      html += `<tr>`;
+      visibleColumns.forEach((col) => {
+        html += `<td class="${col.class}">${col.render(
+          p,
+          allNames.indexOf(name)
+        )}</td>`;
+      });
+      html += `</tr>`;
     } else if (now - lastSeen < 2000) {
-      // Spieler ist gerade erst verschwunden, noch anzeigen (ausgegraut)
-      html += `<tr class="table-secondary"><td colspan="8">${name} (verbindet neu...)</td></tr>`;
+      html += `<tr class="table-secondary"><td colspan="${visibleColumns.length}">${name} (verbindet neu...)</td></tr>`;
     } else {
-      // Spieler wirklich entfernen
       delete lastSeenPlayers[name];
     }
   });
-  tbody.innerHTML = html;
+
+  if (visibleColumns.length === 0) {
+    tbody.innerHTML = `<tr><td colspan="1" class="text-center text-muted">Keine Spalten ausgewählt</td></tr>`;
+  } else {
+    tbody.innerHTML = html;
+  }
 }
 
 const logDiv = document.getElementById("log");
@@ -572,6 +562,7 @@ document.getElementById("navPlayerlist").onclick = async function (e) {
   e.preventDefault();
   await renderPlayerTable();
   showSection("playerlist");
+  initializeColumnVisibility(); // Spalten-Sichtbarkeit initialisieren
   clearInterval(playerlistInterval);
   playerlistInterval = setInterval(renderPlayerTable, 500); // alle 0,5 Sekunden aktualisieren
 };
@@ -598,9 +589,9 @@ async function loadServerInfo() {
     if (!response.ok) throw new Error("Fehler beim Laden der Serverdaten");
     const data = await response.json();
 
-    fetch('https://api.ipify.org?format=json')
-      .then(response => response.json())
-      .then(ipData => {
+    fetch("https://api.ipify.org?format=json")
+      .then((response) => response.json())
+      .then((ipData) => {
         let addressLine = "";
         if (data.host && data.host !== "0.0.0.0") {
           addressLine = `<b>Server-Address:</b> ${data.host} / ${ipData.ip}<br>`;
@@ -929,6 +920,28 @@ document.getElementById("sendinfcapbounceFalse").onclick = async function () {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ command: `infCapDive ${player} false` }),
+  });
+};
+
+//Noclip True
+document.getElementById("sendnoclipTrue").onclick = async function () {
+  let player = document.getElementById("noclipPlayer").value;
+  if (player === "All") player = "*";
+  await fetch("/commands/exec", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ command: `noclip ${player} true` }),
+  });
+};
+
+//Noclip False
+document.getElementById("sendnoclipFalse").onclick = async function () {
+  let player = document.getElementById("noclipPlayer").value;
+  if (player === "All") player = "*";
+  await fetch("/commands/exec", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ command: `noclip ${player} false` }),
   });
 };
 
@@ -1649,24 +1662,24 @@ async function fillCapAndBodyDropdowns(selectedCap, selectedBody) {
   updatePreview();
 }
 
-const dropZone = document.getElementById('szsDropZone');
-const fileInput = document.getElementById('szsFileInput');
+const dropZone = document.getElementById("szsDropZone");
+const fileInput = document.getElementById("szsFileInput");
 
 // Klick auf Dropzone öffnet Dateiauswahl
-dropZone.addEventListener('click', () => fileInput.click());
+dropZone.addEventListener("click", () => fileInput.click());
 
 // Drag & Drop Events
-dropZone.addEventListener('dragover', (e) => {
+dropZone.addEventListener("dragover", (e) => {
   e.preventDefault();
-  dropZone.classList.add('dragover');
+  dropZone.classList.add("dragover");
 });
-dropZone.addEventListener('dragleave', (e) => {
+dropZone.addEventListener("dragleave", (e) => {
   e.preventDefault();
-  dropZone.classList.remove('dragover');
+  dropZone.classList.remove("dragover");
 });
-dropZone.addEventListener('drop', (e) => {
+dropZone.addEventListener("drop", (e) => {
   e.preventDefault();
-  dropZone.classList.remove('dragover');
+  dropZone.classList.remove("dragover");
   if (e.dataTransfer.files.length) {
     fileInput.files = e.dataTransfer.files;
     dropZone.textContent = e.dataTransfer.files[0].name;
@@ -1674,10 +1687,436 @@ dropZone.addEventListener('drop', (e) => {
 });
 
 // Wenn Datei per Dialog gewählt wird, zeige Name an
-fileInput.addEventListener('change', () => {
+fileInput.addEventListener("change", () => {
   if (fileInput.files.length) {
     dropZone.textContent = fileInput.files[0].name;
   } else {
-    dropZone.textContent = 'Datei hierher ziehen oder klicken';
+    dropZone.textContent = "Datei hierher ziehen oder klicken";
   }
 });
+
+// --- Drag & Drop für Feature-Boxen ---
+function initializeDraggableFeatures() {
+  const featureBoxes = document.querySelectorAll(".feature-box");
+
+  // Grid-Einstellungen
+  const gridSize = 50; // Größe des Rasters in Pixeln
+  let isShiftPressed = false;
+
+  // Shift-Key Event-Listener
+  document.addEventListener("keydown", function (e) {
+    if (e.key === "Shift") {
+      isShiftPressed = true;
+      // Visuelle Rückmeldung aktivieren
+      document.getElementById("featuresSection").classList.add("grid-mode");
+      featureBoxes.forEach((box) => {
+        box.classList.add("grid-active");
+      });
+    }
+  });
+
+  document.addEventListener("keyup", function (e) {
+    if (e.key === "Shift") {
+      isShiftPressed = false;
+      // Visuelle Rückmeldung deaktivieren
+      document.getElementById("featuresSection").classList.remove("grid-mode");
+      featureBoxes.forEach((box) => {
+        box.classList.remove("grid-active");
+      });
+    }
+  });
+
+  featureBoxes.forEach((box) => {
+    // Gespeicherte Position laden
+    const savedPosition = localStorage.getItem(`featureBox_${box.id}`);
+    if (savedPosition) {
+      const pos = JSON.parse(savedPosition);
+      box.style.left = pos.x + "px";
+      box.style.top = pos.y + "px";
+    }
+
+    let isDragging = false;
+    let startX, startY, startLeft, startTop;
+
+    const dragHandle = box.querySelector(".drag-handle");
+
+    function startDrag(e) {
+      e.preventDefault();
+      isDragging = true;
+      box.classList.add("dragging");
+
+      const rect = box.getBoundingClientRect();
+      startX = e.clientX;
+      startY = e.clientY;
+      startLeft = rect.left;
+      startTop = rect.top;
+
+      document.addEventListener("mousemove", drag);
+      document.addEventListener("mouseup", stopDrag);
+    }
+
+    function snapToGrid(value, gridSize) {
+      return Math.round(value / gridSize) * gridSize;
+    }
+
+    function drag(e) {
+      if (!isDragging) return;
+
+      const deltaX = e.clientX - startX;
+      const deltaY = e.clientY - startY;
+
+      const container = document.getElementById("featuresSection");
+      const containerRect = container.getBoundingClientRect();
+      const boxRect = box.getBoundingClientRect();
+
+      // Neue Position berechnen
+      let newLeft = startLeft + deltaX - containerRect.left;
+      let newTop = startTop + deltaY - containerRect.top;
+
+      // Snap-to-Grid wenn Shift gedrückt ist
+      if (isShiftPressed) {
+        newLeft = snapToGrid(newLeft, gridSize);
+        newTop = snapToGrid(newTop, gridSize);
+      }
+
+      // Grenzen einhalten - jetzt bis zum unteren Rand der Seite
+      const maxLeft = containerRect.width - boxRect.width;
+      const maxTop = window.innerHeight - boxRect.height - 50; // 50px Abstand vom unteren Rand
+
+      newLeft = Math.max(0, Math.min(newLeft, maxLeft));
+      newTop = Math.max(0, Math.min(newTop, maxTop));
+
+      // Kollisionserkennung mit anderen Boxen
+      const otherBoxes = Array.from(featureBoxes).filter((b) => b !== box);
+      let hasCollision = false;
+
+      otherBoxes.forEach((otherBox) => {
+        const otherRect = otherBox.getBoundingClientRect();
+        const otherLeft = otherRect.left - containerRect.left;
+        const otherTop = otherRect.top - containerRect.top;
+
+        // Prüfe ob sich die Boxen überlappen
+        if (
+          newLeft < otherLeft + otherRect.width &&
+          newLeft + boxRect.width > otherLeft &&
+          newTop < otherTop + otherRect.height &&
+          newTop + boxRect.height > otherTop
+        ) {
+          hasCollision = true;
+        }
+      });
+
+      // Nur setzen wenn keine Kollision
+      if (!hasCollision) {
+        box.style.left = newLeft + "px";
+        box.style.top = newTop + "px";
+      }
+    }
+
+    function stopDrag() {
+      if (!isDragging) return;
+
+      isDragging = false;
+      box.classList.remove("dragging");
+
+      // Position speichern
+      const rect = box.getBoundingClientRect();
+      const containerRect = document
+        .getElementById("featuresSection")
+        .getBoundingClientRect();
+      const savedPos = {
+        x: rect.left - containerRect.left,
+        y: rect.top - containerRect.top,
+      };
+      localStorage.setItem(`featureBox_${box.id}`, JSON.stringify(savedPos));
+
+      document.removeEventListener("mousemove", drag);
+      document.removeEventListener("mouseup", stopDrag);
+    }
+
+    // Event-Listener für Drag-Handle
+    if (dragHandle) {
+      dragHandle.addEventListener("mousedown", startDrag);
+    }
+
+    // Auch die gesamte Box als Drag-Bereich (optional)
+    box.addEventListener("mousedown", function (e) {
+      // Nur starten wenn nicht auf einem Button oder Select geklickt wurde
+      if (
+        e.target.tagName !== "BUTTON" &&
+        e.target.tagName !== "SELECT" &&
+        !e.target.closest(".drag-handle")
+      ) {
+        startDrag(e);
+      }
+    });
+  });
+}
+
+// Feature-Boxen initialisieren wenn Features-Sektion geladen wird
+document.getElementById("navFeatures").onclick = function (e) {
+  e.preventDefault();
+  showSection("features");
+  // Kurz warten bis DOM aktualisiert ist
+  setTimeout(initializeDraggableFeatures, 100);
+};
+
+// Auch beim ersten Laden initialisieren falls Features-Sektion sichtbar ist
+document.addEventListener("DOMContentLoaded", function () {
+  if (document.getElementById("featuresSection").style.display !== "none") {
+    initializeDraggableFeatures();
+  }
+});
+
+// --- Spalten-Ein-/Ausblendung für Playerlist ---
+function initializeColumnVisibility() {
+  // Gespeicherte Einstellungen laden
+  const savedSettings = localStorage.getItem("playerlistColumns");
+  const defaultSettings = {
+    name: true,
+    cap: true,
+    body: true,
+    capture: true,
+    gamemode: true,
+    stage: true,
+    ip: true,
+    actions: true,
+  };
+
+  const settings = savedSettings ? JSON.parse(savedSettings) : defaultSettings;
+
+  // Checkboxen entsprechend setzen
+  Object.keys(settings).forEach((key) => {
+    const checkbox = document.getElementById(
+      `col${key.charAt(0).toUpperCase() + key.slice(1)}`
+    );
+    if (checkbox) {
+      checkbox.checked = settings[key];
+      updateColumnVisibility(key, settings[key]);
+    }
+  });
+
+  // Event-Listener für Checkboxen
+  const checkboxes = [
+    "colName",
+    "colCap",
+    "colBody",
+    "colCapture",
+    "colGameMode",
+    "colStage",
+    "colIP",
+    "colActions",
+  ];
+
+  checkboxes.forEach((id) => {
+    const checkbox = document.getElementById(id);
+    if (checkbox) {
+      checkbox.addEventListener("change", function () {
+        const columnName = id.replace("col", "").toLowerCase();
+        updateColumnVisibility(columnName, this.checked);
+        saveColumnSettings();
+      });
+    }
+  });
+
+  // "Alle anzeigen" Button
+  document
+    .getElementById("showAllColumns")
+    .addEventListener("click", function () {
+      checkboxes.forEach((id) => {
+        const checkbox = document.getElementById(id);
+        if (checkbox) {
+          checkbox.checked = true;
+          const columnName = id.replace("col", "").toLowerCase();
+          updateColumnVisibility(columnName, true);
+        }
+      });
+      saveColumnSettings();
+    });
+
+  // "Alle verstecken" Button
+  document
+    .getElementById("hideAllColumns")
+    .addEventListener("click", function () {
+      checkboxes.forEach((id) => {
+        const checkbox = document.getElementById(id);
+        if (checkbox) {
+          checkbox.checked = false;
+          const columnName = id.replace("col", "").toLowerCase();
+          updateColumnVisibility(columnName, false);
+        }
+      });
+      saveColumnSettings();
+    });
+
+  // Toggle-Button für Ausklapp-Menü
+  const toggleButton = document.getElementById("toggleColumnSettings");
+  const toggleIcon = document.getElementById("toggleIcon");
+  const content = document.getElementById("columnSettingsContent");
+
+  // Gespeicherten Zustand laden
+  const isExpanded =
+    localStorage.getItem("playerlistSettingsExpanded") === "true";
+  if (isExpanded) {
+    content.style.display = "block";
+    toggleIcon.classList.add("rotated");
+  }
+
+  toggleButton.addEventListener("click", function () {
+    const isVisible = content.style.display !== "none";
+
+    if (isVisible) {
+      // Einklappen
+      content.style.display = "none";
+      toggleIcon.classList.remove("rotated");
+      localStorage.setItem("playerlistSettingsExpanded", "false");
+    } else {
+      // Ausklappen
+      content.style.display = "block";
+      toggleIcon.classList.add("rotated");
+      localStorage.setItem("playerlistSettingsExpanded", "true");
+    }
+  });
+}
+
+function updateColumnVisibility(columnName, visible) {
+  const className = `col-${columnName}`;
+  const elements = document.querySelectorAll(`.${className}`);
+
+  elements.forEach((element) => {
+    if (visible) {
+      element.classList.remove("hidden");
+    } else {
+      element.classList.add("hidden");
+    }
+  });
+
+  // Nach jedem Spaltenwechsel prüfen!
+  checkAllColumnsHidden();
+}
+
+function saveColumnSettings() {
+  const settings = {
+    name: document.getElementById("colName").checked,
+    cap: document.getElementById("colCap").checked,
+    body: document.getElementById("colBody").checked,
+    capture: document.getElementById("colCapture").checked,
+    gamemode: document.getElementById("colGameMode").checked,
+    stage: document.getElementById("colStage").checked,
+    ip: document.getElementById("colIP").checked,
+    actions: document.getElementById("colActions").checked,
+  };
+
+  localStorage.setItem("playerlistColumns", JSON.stringify(settings));
+}
+
+// Universelle Funktion: Alle Selects mit .player-dropdown befüllen
+async function fillAllPlayerDropdowns() {
+  const selects = document.querySelectorAll("select.player-dropdown");
+  const players = await fetchPlayers();
+  selects.forEach((select) => {
+    const currentValue = select.value;
+    select.innerHTML = '<option value="All">All</option>';
+    players.forEach((p) => {
+      if (p.Name) {
+        const opt = document.createElement("option");
+        opt.value = p.Name;
+        opt.textContent = p.Name;
+        select.appendChild(opt);
+      }
+    });
+    // Auswahl beibehalten, falls möglich
+    if ([...select.options].some((opt) => opt.value === currentValue)) {
+      select.value = currentValue;
+    }
+  });
+}
+
+// Beim Laden der Seite und beim Öffnen des Features-Bereichs Dropdowns befüllen
+document.addEventListener("DOMContentLoaded", fillAllPlayerDropdowns);
+document
+  .getElementById("navFeatures")
+  .addEventListener("click", fillAllPlayerDropdowns);
+
+// Nach dem Rendern prüfen, ob alle Spalten ausgeblendet sind
+function checkAllColumnsHidden() {
+  const visibleColumns = [
+    "col-name",
+    "col-cap",
+    "col-body",
+    "col-capture",
+    "col-gamemode",
+    "col-stage",
+    "col-ip",
+    "col-actions",
+  ].filter(
+    (cls) => !document.querySelector(`th.${cls}`).classList.contains("hidden")
+  );
+  const table = document.querySelector("#playerTable").closest("table");
+  const thead = table.querySelector("thead");
+  if (visibleColumns.length === 0) {
+    // Kopfzeile und alle Zeilen ausblenden, nur Info anzeigen
+    thead.style.display = "none";
+    document.getElementById(
+      "playerTable"
+    ).innerHTML = `<tr><td colspan="8" class="text-center text-muted">Keine Spalten ausgewählt</td></tr>`;
+  } else {
+    // Kopfzeile wieder anzeigen
+    thead.style.display = "";
+  }
+}
+checkAllColumnsHidden();
+
+const playerTableColumns = [
+  { key: "name", label: "Name", class: "col-name", render: (p) => p.Name },
+  {
+    key: "cap",
+    label: "Cap",
+    class: "col-cap",
+    render: (p) => getCapImg(p.Cap),
+  },
+  {
+    key: "body",
+    label: "Body",
+    class: "col-body",
+    render: (p) => getBodyImg(p.Body),
+  },
+  {
+    key: "capture",
+    label: "Capture",
+    class: "col-capture",
+    render: (p) => getCaptureImg(p.Capture),
+  },
+  {
+    key: "gamemode",
+    label: "Game Mode",
+    class: "col-gamemode",
+    render: (p) => p.GameMode || "-",
+  },
+  {
+    key: "stage",
+    label: "Stage",
+    class: "col-stage",
+    render: (p) => p.Stage || "-",
+  },
+  { key: "ip", label: "IP", class: "col-ip", render: (p) => p.IPv4 || "-" },
+  {
+    key: "actions",
+    label: "Aktionen",
+    class: "col-actions",
+    render: (p, idx) => `
+    <button class="btn btn-sm btn-outline-danger" onclick="toggleBan(${idx})">${
+      p.Banned ? "Unban" : "Ban"
+    }</button>
+    <button class="btn btn-sm btn-outline-warning ms-1" onclick="crashPlayer('${
+      p.Name
+    }')">Crash</button>
+    <button class="btn btn-sm btn-outline-primary ms-1" onclick="openTeleportModal('${
+      p.Name
+    }')">Teleport</button>
+    <button class="btn btn-sm btn-outline-success ms-1" onclick="openParamEditor('${
+      p.Name
+    }')">Param Editor</button>
+  `,
+  },
+];
