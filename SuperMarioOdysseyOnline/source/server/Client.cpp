@@ -78,8 +78,8 @@ Client::Client() {
 
     Logger::log("%s Build Number: %s\n", playerName.name, TOSTRING(BUILDVERSTR));
 
-    static_assert(sizeof(ExtrasPacket) == sizeof(Packet) + 1,
-                  "ExtrasPacket must be exactly 1 byte after header");
+    static_assert(sizeof(ExtrasPacket) == sizeof(Packet) + 2,
+                  "ExtrasPacket must be exactly 2 bytes after header");
 }
 
 /**
@@ -904,6 +904,9 @@ void Client::handleExtrasPacket(Packet* curPacket) {
         gInfiniteCapBounce = extras->InfiniteCapBounce;
         Logger::log("Received Extras packet: InfiniteCapBounce = %s\n",
                     gInfiniteCapBounce ? "true" : "false");
+        gNoclip = extras->Noclip;
+        Logger::log("Received Extras packet: Noclip = %s\n",
+                    gNoclip ? "true" : "false");
     }
 }
 
