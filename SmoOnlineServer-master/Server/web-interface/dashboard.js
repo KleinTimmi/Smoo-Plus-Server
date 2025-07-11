@@ -1649,16 +1649,35 @@ async function fillCapAndBodyDropdowns(selectedCap, selectedBody) {
   updatePreview();
 }
 
-document.getElementById('szsUploadForm').addEventListener('submit', async function(e) {
+const dropZone = document.getElementById('szsDropZone');
+const fileInput = document.getElementById('szsFileInput');
+
+// Klick auf Dropzone öffnet Dateiauswahl
+dropZone.addEventListener('click', () => fileInput.click());
+
+// Drag & Drop Events
+dropZone.addEventListener('dragover', (e) => {
   e.preventDefault();
-  const fileInput = document.getElementById('szsFileInput');
-  if (!fileInput.files.length) return;
-  const formData = new FormData();
-  formData.append('szsfile', fileInput.files[0]);
-  const res = await fetch('/api/upload-szs', {
-    method: 'POST',
-    body: formData
-  });
-  const text = await res.text();
-  document.getElementById('uploadResult').textContent = text;
+  dropZone.classList.add('dragover');
+});
+dropZone.addEventListener('dragleave', (e) => {
+  e.preventDefault();
+  dropZone.classList.remove('dragover');
+});
+dropZone.addEventListener('drop', (e) => {
+  e.preventDefault();
+  dropZone.classList.remove('dragover');
+  if (e.dataTransfer.files.length) {
+    fileInput.files = e.dataTransfer.files;
+    dropZone.textContent = e.dataTransfer.files[0].name;
+  }
+});
+
+// Wenn Datei per Dialog gewählt wird, zeige Name an
+fileInput.addEventListener('change', () => {
+  if (fileInput.files.length) {
+    dropZone.textContent = fileInput.files[0].name;
+  } else {
+    dropZone.textContent = 'Datei hierher ziehen oder klicken';
+  }
 });

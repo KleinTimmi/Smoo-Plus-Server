@@ -9,9 +9,11 @@ app.post('/api/upload-szs', upload.single('szsfile'), (req, res) => {
   if (!file) return res.status(400).send('No file uploaded.');
 
   // Dateiname prüfen
-  if (file.originalname === 'StageA.szs') {
+  if (file.originalname === 'HackListTexture.szs') {
     // Aktion A
-    res.send('StageA.szs erkannt! Aktion A ausgeführt.');
+    res.send('HackListTexture.szs erkannt! Aktion A ausgeführt.');
+
+    
   } else if (file.originalname === 'StageB.szs') {
     // Aktion B
     res.send('StageB.szs erkannt! Aktion B ausgeführt.');

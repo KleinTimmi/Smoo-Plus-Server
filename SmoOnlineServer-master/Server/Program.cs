@@ -455,8 +455,7 @@ CommandHandler.RegisterCommand("sendall", args => {
     return $"Sent players to {stage}:{-1}";
 });
 
-CommandHandler.RegisterCommand("infCapDive", args =>
-{
+CommandHandler.RegisterCommand("infCapDive", args =>{
     const string optionUsage = "Usage: infCapBounce <Player/*> <true/false>";
     if (args.Length != 2)
     {
@@ -485,6 +484,35 @@ CommandHandler.RegisterCommand("infCapDive", args =>
 
     return $"Gave player/s: {string.Join(", ", players.Select(p => p.Name))} Infinite Cap Bounce: {enable}";
 
+});
+
+CommandHandler.RegisterCommand("noclip", args => {
+
+    const string optionUsage = "Usage: noclip <Player/*> <true/false>";
+    if (args.Length != 2)
+    {
+        return optionUsage;
+    }
+
+    string playerArg = args[0];
+    if (!bool.TryParse(args[1], out bool enable))
+        return optionUsage;
+
+    Client[] players = playerArg == "*"
+        ? server.Clients.Where(c => c.Connected).ToArray()
+        : server.Clients.Where(c => c.Connected && c.Name.StartsWith(playerArg, StringComparison.OrdinalIgnoreCase)).ToArray();
+
+    if (players.Length == 0)
+        return $"No player(s) found for '{playerArg}'";
+
+    Parallel.ForEachAsync(players, async (c, _) => {    
+        await c.Send(new Extras
+        {
+            Noclip = enable
+        });
+    }).Wait();
+
+    return $"Gave player/s: {string.Join(", ", players.Select(p => p.Name))} Noclip: {enable}"; 
 });
 
 CommandHandler.RegisterCommand("scenario", args => {

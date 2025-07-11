@@ -57,6 +57,7 @@ static int pInfSendTimer = 0;
 static int gameInfSendTimer = 0;
 
 bool gInfiniteCapBounce = false;
+bool gNoclip = false;
 
 
 
@@ -73,8 +74,7 @@ void updatePlayerInfo(GameDataHolderAccessor holder, PlayerActorBase* playerBase
         pInfSendTimer = 0;
     }
 
-
-// Oben im File oder als static Variable in der Funktion:
+//Cap Bounce Logik
 static int capBounceFrameCounter = 0;
 static int alle_frames = 3; // sagt das nur alle x frames der cap bounce funktion ausgeführt wird
 
@@ -89,6 +89,52 @@ if (playerBase && gInfiniteCapBounce) {
         capBounceFrameCounter = 0; // zurücksetzen
     }
 }
+
+
+    static float speed = 20.0f;
+    static float speedMax = 250.0f;
+    static float vspeed = 10.0f;
+    static float speedGain = 0.0f;
+
+//Noclip Logik
+if (playerBase && gNoclip) {
+    PlayerActorHakoniwa* hakoniwa = static_cast<PlayerActorHakoniwa*>(playerBase);
+
+    // Kollisionsabfrage deaktivieren
+    al::offCollide(hakoniwa);
+    al::setVelocityZero(hakoniwa);
+
+    sead::Vector3f* playerPos = al::getTransPtr(hakoniwa);
+    sead::Vector3f* cameraPos = al::getCameraPos(hakoniwa, 0);
+    sead::Vector2f* leftStick = al::getLeftStick(-1);
+
+    // Mario leicht anheben, um das Absinken zu verhindern
+    playerPos->y += 1.5f;
+
+    // Richtung und Geschwindigkeit berechnen
+    float d = sqrt(al::powerIn(playerPos->x - cameraPos->x, 2) + (al::powerIn(playerPos->z - cameraPos->z, 2)));
+    float vx = ((speed + speedGain) / d) * (playerPos->x - cameraPos->x);
+    float vz = ((speed + speedGain) / d) * (playerPos->z - cameraPos->z);
+
+    playerPos->x -= leftStick->x * vz;
+    playerPos->z += leftStick->x * vx;
+
+    playerPos->x += leftStick->y * vx;
+    playerPos->z += leftStick->y * vz;
+
+    if (al::isPadHoldX(-1) || al::isPadHoldY(-1)) speedGain += 0.5f;
+    if (al::isPadHoldA(-1) || al::isPadHoldB(-1)) speedGain -= 0.5f;
+    if (speedGain <= 0.0f) speedGain = 0.0f;
+    if (speedGain >= speedMax) speedGain = speedMax;
+
+    if (al::isPadHoldZL(-1)) playerPos->y -= (vspeed + speedGain / 3);
+    if (al::isPadHoldZR(-1)) playerPos->y += (vspeed + speedGain / 3);
+
+} else if (playerBase && !gNoclip) {
+    PlayerActorHakoniwa* hakoniwa = static_cast<PlayerActorHakoniwa*>(playerBase);
+    al::onCollide(hakoniwa);
+}
+
 
     if (gameInfSendTimer >= 60) {
         if (isYukimaru) {

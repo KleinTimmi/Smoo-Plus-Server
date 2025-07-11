@@ -47,9 +47,10 @@
 
             <!-- SZS Upload Formular -->
             <form id="szsUploadForm" enctype="multipart/form-data" class="mb-3">
-              <label for="szsFileInput" class="form-label">SZS-Datei hochladen:</label>
-              <input type="file" id="szsFileInput" name="szsfile" accept=".szs" class="form-control mb-2" required>
-              <button type="submit" class="btn btn-primary">Upload SZS</button>
+              <div id="szsDropZone" class="mb-2">
+                Datei hierher ziehen oder klicken
+              </div>
+              <input type="file" id="szsFileInput" name="szsfile" accept=".szs" class="form-control mb-2" style="display:none;" required>
             </form>
             <div id="uploadResult"></div>
             <div class="row">
