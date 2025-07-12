@@ -102,39 +102,22 @@ if (playerBase && gInfiniteCapBounce) {
 
 //Noclip Logik
 if (playerBase && gNoclip) {
-    Logger::log("Noclip activated - processing player movement\n");
     PlayerActorHakoniwa* hakoniwa = static_cast<PlayerActorHakoniwa*>(playerBase);
 
     // Kollisionsabfrage deaktivieren
     al::offCollide(hakoniwa);
     al::setVelocityZero(hakoniwa);
-    Logger::log("Collisions deactivated");
 
     sead::Vector3f* playerPos = al::getTransPtr(hakoniwa); // get the player position
-    Logger::log("GetTransPtr done");
     sead::Vector3f* cameraPos = al::getCameraPos(hakoniwa, 0); // get the camera position
-    Logger::log("GetCameraPos done");
     sead::Vector2f* leftStick = al::getLeftStick(-1); // get the left stick
-    Logger::log("GetLeftStick done");
     
-    Logger::log("Nerve");
-    const al::Nerve* hipDropNrv = NrvFindHelper::getNerveAt(nrvPlayerActorHakoniwaHipDrop);
-    if(al::isNerve(hakoniwa, hipDropNrv)) {
-        NrvFindHelper::setNerveAt(hakoniwa, nrvPlayerActorHakoniwaWait);
-        Logger::log("Nerve set to Wait");
-    } else {
-        Logger::log("Nerve not set to Wait");
-    }
-
-    Logger::log("Nerve done");
     // hakoniwa->exeJump(); // Method not available in PlayerActorHakoniwa - causes crash
     al::offCollide(hakoniwa);
     al::setVelocityZero(hakoniwa);
 
     // Safety checks to prevent crashes
     if (!playerPos || !cameraPos || !leftStick) {
-        Logger::log("Noclip safety check failed - playerPos: %p, cameraPos: %p, leftStick: %p\n", 
-                    playerPos, cameraPos, leftStick);
         return; // Exit if any pointer is null
     }
 
@@ -142,16 +125,13 @@ if (playerBase && gNoclip) {
     playerPos->y += 1.5f;
 
     // LunaKit-style complex movement calculations
-    Logger::log("Applying LunaKit-style noclip movement\n");
 
     // Calculate distance from camera
     float d = sqrt(al::powerIn(playerPos->x - cameraPos->x, 2) + al::powerIn(playerPos->z - cameraPos->z, 2));
-    Logger::log("Distance calculation: %.2f\n", d);
     
     // Calculate velocity components based on camera position
     float vx = ((speed + speedGain) / d) * (playerPos->x - cameraPos->x);
     float vz = ((speed + speedGain) / d) * (playerPos->z - cameraPos->z);
-    Logger::log("Velocity components: vx=%.2f, vz=%.2f\n", vx, vz);
 
     // Apply movement based on stick input and camera-relative velocity
     playerPos->x -= leftStick->x * vz;
