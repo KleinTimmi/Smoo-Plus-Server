@@ -32,8 +32,6 @@
 #include "game/Player/Actions/PlayerWallActionHistory.h"
 #include "game/StageScene/StageScene.h"
 
-#include "helpers.hpp"
-
 #include "logger.hpp"
 
 #include "puppets/PuppetInfo.h"
@@ -50,9 +48,14 @@
 
 #include "rs/util.hpp"
 
-#include "Packets/Extras.h"
-#include "Packets/Extras.hpp"
+#include "packets/Extras.h"
+#include "packets/Extras.hpp"
 #include "al/util/ControllerUtil.h"
+
+#include "helpers.hpp"
+#include "helpers/GetHelper.h"
+#include "helpers/NrvFind/NrvFindHelper.h"
+#include "helpers/NrvFind/player/NrvPlayerActorHakoniwa.h"
 
 static int pInfSendTimer = 0;
 static int gameInfSendTimer = 0;
@@ -83,7 +86,7 @@ if (playerBase && gInfiniteCapBounce) {
     capBounceFrameCounter++;
     if (capBounceFrameCounter >= alle_frames) { // alle 3 Frames
         PlayerActorHakoniwa* hakoniwa = static_cast<PlayerActorHakoniwa*>(playerBase);
-        if (hakoniwa->mHackCap && hakoniwa->mHackCap->mCapActionHistory) {
+        if (hakoniwa && hakoniwa->mHackCap && hakoniwa->mHackCap->mCapActionHistory && hakoniwa->mPlayerWallActionHistory) {    //
             hakoniwa->mHackCap->mCapActionHistory->clearCapJump();
             hakoniwa->mPlayerWallActionHistory->reset();
         }
@@ -99,37 +102,77 @@ if (playerBase && gInfiniteCapBounce) {
 
 //Noclip Logik
 if (playerBase && gNoclip) {
+    Logger::log("Noclip activated - processing player movement\n");
     PlayerActorHakoniwa* hakoniwa = static_cast<PlayerActorHakoniwa*>(playerBase);
 
     // Kollisionsabfrage deaktivieren
     al::offCollide(hakoniwa);
     al::setVelocityZero(hakoniwa);
+    Logger::log("Collisions deactivated");
 
-    sead::Vector3f* playerPos = al::getTransPtr(hakoniwa);
-    sead::Vector3f* cameraPos = al::getCameraUp(hakoniwa, 0);
-    sead::Vector2f* leftStick = al::getLeftStick(-1);
+    sead::Vector3f* playerPos = al::getTransPtr(hakoniwa); // get the player position
+    Logger::log("GetTransPtr done");
+    sead::Vector3f* cameraPos = al::getCameraPos(hakoniwa, 0); // get the camera position
+    Logger::log("GetCameraPos done");
+    sead::Vector2f* leftStick = al::getLeftStick(-1); // get the left stick
+    Logger::log("GetLeftStick done");
+    
+    Logger::log("Nerve");
+    const al::Nerve* hipDropNrv = NrvFindHelper::getNerveAt(nrvPlayerActorHakoniwaHipDrop);
+    if(al::isNerve(hakoniwa, hipDropNrv)) {
+        NrvFindHelper::setNerveAt(hakoniwa, nrvPlayerActorHakoniwaWait);
+        Logger::log("Nerve set to Wait");
+    } else {
+        Logger::log("Nerve not set to Wait");
+    }
+
+    Logger::log("Nerve done");
+    // hakoniwa->exeJump(); // Method not available in PlayerActorHakoniwa - causes crash
+    al::offCollide(hakoniwa);
+    al::setVelocityZero(hakoniwa);
+
+    // Safety checks to prevent crashes
+    if (!playerPos || !cameraPos || !leftStick) {
+        Logger::log("Noclip safety check failed - playerPos: %p, cameraPos: %p, leftStick: %p\n", 
+                    playerPos, cameraPos, leftStick);
+        return; // Exit if any pointer is null
+    }
 
     // Mario leicht anheben, um das Absinken zu verhindern
     playerPos->y += 1.5f;
 
-    // Richtung und Geschwindigkeit berechnen
-    float d = sqrt(al::powerIn(playerPos->x - cameraPos->x, 2) + (al::powerIn(playerPos->z - cameraPos->z, 2)));
+    // LunaKit-style complex movement calculations
+    Logger::log("Applying LunaKit-style noclip movement\n");
+
+    // Calculate distance from camera
+    float d = sqrt(al::powerIn(playerPos->x - cameraPos->x, 2) + al::powerIn(playerPos->z - cameraPos->z, 2));
+    Logger::log("Distance calculation: %.2f\n", d);
+    
+    // Calculate velocity components based on camera position
     float vx = ((speed + speedGain) / d) * (playerPos->x - cameraPos->x);
     float vz = ((speed + speedGain) / d) * (playerPos->z - cameraPos->z);
+    Logger::log("Velocity components: vx=%.2f, vz=%.2f\n", vx, vz);
 
+    // Apply movement based on stick input and camera-relative velocity
     playerPos->x -= leftStick->x * vz;
     playerPos->z += leftStick->x * vx;
-
     playerPos->x += leftStick->y * vx;
     playerPos->z += leftStick->y * vz;
 
+    // Speed gain controls
     if (al::isPadHoldX(-1) || al::isPadHoldY(-1)) speedGain += 0.5f;
     if (al::isPadHoldA(-1) || al::isPadHoldB(-1)) speedGain -= 0.5f;
     if (speedGain <= 0.0f) speedGain = 0.0f;
     if (speedGain >= speedMax) speedGain = speedMax;
 
+    // Vertical movement
     if (al::isPadHoldZL(-1)) playerPos->y -= (vspeed + speedGain / 3);
     if (al::isPadHoldZR(-1)) playerPos->y += (vspeed + speedGain / 3);
+
+    // Spieler auf Mindesthöhe halten
+    if (playerPos->y < 5.0f) {
+        playerPos->y = 5.0f;
+    }
 
 } else if (playerBase && !gNoclip) {
     PlayerActorHakoniwa* hakoniwa = static_cast<PlayerActorHakoniwa*>(playerBase);
@@ -167,8 +210,8 @@ void drawMainHook(HakoniwaSequence* curSequence, sead::Viewport* viewport, sead:
         Time::calcTime(); // this needs to be ran every frame, so running it here works
     }
 
-    if (!debugMode) {
-        al::executeDraw(curSequence->mLytKit, "２Ｄバック（メイン画面）");
+    if (!debugMode) { // if debug mode is not enabled, we don't need to draw anything
+        al::executeDraw(curSequence->mLytKit, "２Ｄバック（メイン画面）");  // this is the 2d background for the main menu
         return;
     }
 
@@ -176,45 +219,45 @@ void drawMainHook(HakoniwaSequence* curSequence, sead::Viewport* viewport, sead:
     SocketClient* socket      = client->mSocket;
     bool          isConnected = socket->isConnected();
 
-    int dispHeight = al::getLayoutDisplayHeight();
+    int dispHeight = al::getLayoutDisplayHeight(); // get the height of the display
 
-    gTextWriter->mViewport = viewport;
+    gTextWriter->mViewport = viewport; // set the viewport to the one we passed in
 
-    gTextWriter->mColor = sead::Color4f(1.f, 1.f, 1.f, 0.8f);
+    gTextWriter->mColor = sead::Color4f(1.f, 1.f, 1.f, 0.8f); // set the color to white
 
-    drawBackground((agl::DrawContext*)drawContext);
+    drawBackground((agl::DrawContext*)drawContext); // draw the background
 
-    gTextWriter->beginDraw();
-    gTextWriter->setCursorFromTopLeft(sead::Vector2f(10.f, 10.f));
+    gTextWriter->beginDraw(); // begin drawing
+    gTextWriter->setCursorFromTopLeft(sead::Vector2f(10.f, 10.f)); // set the cursor to the top left
 
-    gTextWriter->printf("FPS: %d\n", static_cast<int>(round(Application::sInstance->mFramework->calcFps())));
+    gTextWriter->printf("FPS: %d\n", static_cast<int>(round(Application::sInstance->mFramework->calcFps()))); // print the fps
 
-    gTextWriter->setCursorFromTopLeft(sead::Vector2f(10.f, (dispHeight / 3) + 30.f));
-    gTextWriter->setScaleFromFontHeight(20.f);
+    gTextWriter->setCursorFromTopLeft(sead::Vector2f(10.f, (dispHeight / 3) + 30.f)); // set the cursor to the top left
+    gTextWriter->setScaleFromFontHeight(20.f); // set the scale to 20
 
-    if (Client::isServerHidden()) {
+    if (Client::isServerHidden()) { // if the server is hidden, we need to print that
         gTextWriter->printf(
-            isConnected ? "Server: <hidden> | %d/%d Players\n" : "Server: <hidden>\n",
+            isConnected ? "Server: <hidden> | %d/%d Players\n" : "Server: <hidden>\n", // if the server is connected, we need to print the number of players
             isConnected ? Client::getConnectCount() + 1 : 0,
-            isConnected ? Client::getMaxPlayerCount()   : 0
+            isConnected ? Client::getMaxPlayerCount() : 0
         );
     } else {
         gTextWriter->printf(
-            isConnected ? "Server: %s:%d | %d/%d Players\n" : "Server: %s:%d\n",
+            isConnected ? "Server: %s:%d | %d/%d Players\n" : "Server: %s:%d\n", // if the server is connected, we need to print the number of players
             socket->getIP(),
             socket->getPort(),
-            isConnected ? Client::getConnectCount() + 1 : 0,
-            isConnected ? Client::getMaxPlayerCount()   : 0
+            isConnected ? Client::getConnectCount() + 1 : 0, // if the server is connected, we need to print the number of players
+            isConnected ? Client::getMaxPlayerCount()   : 0 // if the server is connected, we need to print the number of players
         );
     }
-    gTextWriter->printf("Your TCP status: %s\n", socket->getStateChar());
-    gTextWriter->printf("Your UDP status: %s\n", socket->getUdpStateChar());
+    gTextWriter->printf("Your TCP status: %s\n", socket->getStateChar()); // print the tcp status
+    gTextWriter->printf("Your UDP status: %s\n", socket->getUdpStateChar()); // print the udp status
 
     sead::Heap* clientHeap = Client::getClientHeap();
     if (clientHeap) {
         sead::Heap* gmHeap = GameModeManager::instance()->getHeap();
         gTextWriter->printf(
-            "Heap Use: %.1f/%.0f (Client) %.1f/%.0f (Gmode)\n",
+            "Heap Use: %.1f/%.0f (Client) %.1f/%.0f (Gmode)\n", // print the heap use
             0.0009765625 * (clientHeap->getSize() - clientHeap->getFreeSize()),
             0.0009765625 * clientHeap->getSize(),
             0.0009765625 * (gmHeap->getSize() - gmHeap->getFreeSize()),
@@ -223,7 +266,7 @@ void drawMainHook(HakoniwaSequence* curSequence, sead::Viewport* viewport, sead:
     }
 
     gTextWriter->printf(
-        "Queue Count: %d/%d (Send) %d/%d (Receive)\n",
+        "Queue Count: %d/%d (Send) %d/%d (Receive)\n", // print the queue count
         socket->getSendCount(),
         socket->getSendMaxCount(),
         socket->getRecvCount(),
@@ -231,74 +274,78 @@ void drawMainHook(HakoniwaSequence* curSequence, sead::Viewport* viewport, sead:
     );
 
 #if EMU
-    gTextWriter->printf("Mod version: %s for Emulators\n", TOSTRING(BUILDVERSTR));
+    gTextWriter->printf("Mod version: %s for Emulators\n", TOSTRING(BUILDVERSTR)); // print the mod version
 #else
-    gTextWriter->printf("Mod version: %s for Switch\n", TOSTRING(BUILDVERSTR));
+    gTextWriter->printf("Mod version: %s for Switch\n", TOSTRING(BUILDVERSTR)); // print the mod version
 #endif
 
     al::Scene* curScene = curSequence->curScene;
 
-    if (curScene && isInGame) {
+    if (curScene && isInGame) { // if the scene is not null and we're in game, we need to print the player info
         sead::LookAtCamera* cam        = al::getLookAtCamera(curScene, 0);
         sead::Projection*   projection = al::getProjectionSead(curScene, 0);
 
         PlayerActorBase* playerBase = rs::getPlayerActor(curScene);
 
-        PuppetActor* curPuppet   = Client::getPuppet(debugPuppetIndex - 1);
-        PuppetActor* debugPuppet = Client::getDebugPuppet();
-        if (debugPuppet) {
+        PuppetActor* curPuppet   = Client::getPuppet(debugPuppetIndex - 1); // get the current puppet
+        PuppetActor* debugPuppet = Client::getDebugPuppet(); // get the debug puppet
+        if (debugPuppet) { // if the debug puppet is not null, we need to set the current puppet to the debug puppet
             curPuppet = debugPuppet;
         }
 
-        sead::PrimitiveRenderer* renderer = sead::PrimitiveRenderer::instance();
-        renderer->setDrawContext(drawContext);
-        renderer->setCamera(*cam);
-        renderer->setProjection(*projection);
+        sead::PrimitiveRenderer* renderer = sead::PrimitiveRenderer::instance(); // get the primitive renderer
+        renderer->setDrawContext(drawContext); // set the draw context
+        renderer->setCamera(*cam); // set the camera
+        renderer->setProjection(*projection); // set the projection
 
-        GameMode      gameMode     = GameModeManager::instance()->getGameMode();
-        GameModeBase* gameModeBase = GameModeManager::instance()->getMode<GameModeBase>();
+        GameMode      gameMode     = GameModeManager::instance()->getGameMode(); // get the game mode
+        GameModeBase* gameModeBase = GameModeManager::instance()->getMode<GameModeBase>(); // get the game mode base
 
-        gTextWriter->printf("(ZR ←)------------ Page %d/%d -------------(ZR →)\n", pageIndex + 1, maxPages);
+        gTextWriter->printf("(ZR ←)------------ Page %d/%d -------------(ZR →)\n", pageIndex + 1, maxPages); // print the page index
 
-        switch (pageIndex)
+        switch (pageIndex) // switch on the page index
         {
-        case 0:
+        case 0: // if the page index is 0, we need to print the player info
             {
                 gTextWriter->printf(
                     "(ZL ←)----------%s Player %d/%d %s-----------(ZL →)\n\n",
-                    debugPuppetIndex + 1 < 10 ? "-" : "",
-                    debugPuppetIndex + 1,
-                    Client::getMaxPlayerCount(),
-                    Client::getMaxPlayerCount() < 10 ? "-" : ""
+                    debugPuppetIndex + 1 < 10 ? "-" : "", // if the debug puppet index is less than 10, we need to print a dash
+                    debugPuppetIndex + 1, // print the debug puppet index
+                    Client::getMaxPlayerCount(), // print the max player count
+                    Client::getMaxPlayerCount() < 10 ? "-" : "" // if the max player count is less than 10, we need to print a dash
                 );
 
                 if (debugPuppetIndex == 0) {
-                    gTextWriter->printf("Player Name: %s\n",       Client::getClientName());
-                    gTextWriter->printf("Connection Status: %s\n", isConnected ? "Online" : "Offline");
-                    gTextWriter->printf("Game mode: %i | %s\n",    gameMode, GameModeFactory::getModeName(gameMode));
-                    gTextWriter->printf("Is in same Stage: Yes\n");
-                    gTextWriter->printf("Stage: %s\n",            client->getLastGameInfPacket()->stageName);
-                    gTextWriter->printf("Scenario: %u\n",         client->getLastGameInfPacket()->scenarioNo);
-                    gTextWriter->printf("Costume: H: %s B: %s\n", client->getLastCostumeInfPacket()->capModel, client->getLastCostumeInfPacket()->bodyModel);
-                    gTextWriter->printf("Capture: %s\n",          client->getLastCaptureInfPacket()->hackName);
+                    gTextWriter->printf("Player Name: %s\n",       Client::getClientName()); // print the client name
+                    gTextWriter->printf("Connection Status: %s\n", isConnected ? "Online" : "Offline"); // print the connection status
+                    gTextWriter->printf("Game mode: %i | %s\n",    gameMode, GameModeFactory::getModeName(gameMode)); // print the game mode
+                    gTextWriter->printf("Is in same Stage: Yes\n"); // print the is in same stage
+                    gTextWriter->printf("Stage: %s\n",            client->getLastGameInfPacket()->stageName); // print the stage name
+                    gTextWriter->printf("Scenario: %u\n",         client->getLastGameInfPacket()->scenarioNo); // print the scenario no
+                    gTextWriter->printf("Costume: H: %s B: %s\n", client->getLastCostumeInfPacket()->capModel, client->getLastCostumeInfPacket()->bodyModel); // print the costume
+                    gTextWriter->printf("Capture: %s\n",          client->getLastCaptureInfPacket()->hackName); // print the capture name
 
-                    PlayerHackKeeper* hackKeeper = playerBase->getPlayerHackKeeper();
-                    if (hackKeeper) {
-                        PlayerActorHakoniwa* p1 = (PlayerActorHakoniwa*)playerBase;
-                        if (hackKeeper->currentHackActor) {
-                            gTextWriter->printf("Animation: %s\n", al::getActionName(hackKeeper->currentHackActor));
-                        } else {
-                            gTextWriter->printf("Animation: %s\n", p1->mPlayerAnimator->mAnimFrameCtrl->getActionName());
+                    PlayerHackKeeper* hackKeeper = playerBase->getPlayerHackKeeper(); // get the player hack keeper
+                    if (hackKeeper) { // if the player hack keeper is not null, we need to print the animation
+                        PlayerActorHakoniwa* p1 = (PlayerActorHakoniwa*)playerBase; // get the player actor hakoniwa
+                        if (hackKeeper->currentHackActor) { // if the current hack actor is not null, we need to print the animation
+                            gTextWriter->printf("Animation: %s\n", al::getActionName(hackKeeper->currentHackActor)); // print the animation
+                        } else { // if the current hack actor is null, we need to print the animation
+                            gTextWriter->printf("Animation: %s\n", p1->mPlayerAnimator->mAnimFrameCtrl->getActionName()); // print the animation
                         }
                     }
 
-                    if (gameModeBase) {
-                        gameModeBase->debugMenuPlayer(gTextWriter);
+                    gTextWriter->printf("Extras: InfiniteCapBounce=%s Noclip=%s\n", 
+                        gInfiniteCapBounce ? "true" : "false", 
+                        gNoclip ? "true" : "false");
+                    
+                    if (gameModeBase) { // if the game mode base is not null, we need to print the player info
+                        gameModeBase->debugMenuPlayer(gTextWriter); // print the player info
                     }
-                } else if (curPuppet) {
-                    al::LiveActor* curModel = curPuppet->getCurrentModel();
+                } else if (curPuppet) { // if the current puppet is not null, we need to print the player info
+                    al::LiveActor* curModel = curPuppet->getCurrentModel(); // get the current model
 
-                    PuppetInfo* curPupInfo = curPuppet->getInfo();
+                    PuppetInfo* curPupInfo = curPuppet->getInfo(); // get the current puppet info
 
                     if (curModel && curPupInfo) {
                         gTextWriter->printf("Player Name: %s\n",       curPupInfo->puppetName);
@@ -310,6 +357,9 @@ void drawMainHook(HakoniwaSequence* curSequence, sead::Viewport* viewport, sead:
                         gTextWriter->printf("Costume: H: %s B: %s\n",  curPupInfo->costumeHead, curPupInfo->costumeBody);
                         gTextWriter->printf("Capture: %s\n",           curPupInfo->isCaptured ? curPupInfo->curHack : "");
                         gTextWriter->printf("Animation:  %d  %s\n",    curPupInfo->curAnim, curPupInfo->curAnimStr);
+                        gTextWriter->printf("Extras: InfiniteCapBounce=%s Noclip=%s\n", 
+                            gInfiniteCapBounce ? "true" : "false", 
+                            gNoclip ? "true" : "false");
                         if (!curPupInfo->isCaptured) {
                             gTextWriter->printf("Model Animation: %s\n", al::getActionName(curModel));
                         }

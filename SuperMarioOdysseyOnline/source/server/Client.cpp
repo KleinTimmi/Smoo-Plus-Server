@@ -901,12 +901,17 @@ void Client::updateGameInfo(GameInf* packet) {
 
 void Client::handleExtrasPacket(Packet* curPacket) {
     if (auto* extras = static_cast<ExtrasPacket*>(curPacket)) {
+        Logger::log("Processing Extras packet - InfiniteCapBounce: %d, Noclip: %d\n", 
+                    extras->InfiniteCapBounce, extras->Noclip);
+        
         gInfiniteCapBounce = extras->InfiniteCapBounce;
         Logger::log("Received Extras packet: InfiniteCapBounce = %s\n",
                     gInfiniteCapBounce ? "true" : "false");
         gNoclip = extras->Noclip;
         Logger::log("Received Extras packet: Noclip = %s\n",
                     gNoclip ? "true" : "false");
+    } else {
+        Logger::log("Failed to cast packet to ExtrasPacket\n");
     }
 }
 

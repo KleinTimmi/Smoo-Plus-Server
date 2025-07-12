@@ -76,8 +76,9 @@ HOOK_DEFINE_TRAMPOLINE(NoclipMovementHook) {
             const al::Nerve* hipDropNrv = NrvFindHelper::getNerveAt(nrvPlayerActorHakoniwaHipDrop);
             if(al::isNerve(player, hipDropNrv))
                 NrvFindHelper::setNerveAt(player, nrvPlayerActorHakoniwaWait);
-
+            Logger::log("exeJump");
             player->exeJump();
+            Logger::log("exeJump done");
             al::offCollide(player);
             al::setVelocityZero(player);
 

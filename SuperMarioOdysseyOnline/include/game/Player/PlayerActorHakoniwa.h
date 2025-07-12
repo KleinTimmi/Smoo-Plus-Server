@@ -37,6 +37,7 @@ class PlayerActorHakoniwa : public PlayerActorBase , public IUseDimension {
         void startDemoPuppetable(void);
         void startPlayerPuppet(void);
         void initPlayer(al::ActorInitInfo const&, PlayerInitInfo const&);
+        void exeJump();
 
         PlayerInfo *mPlayerInfo; // 0x128
         PlayerConst *mPlayerConst; // 0x130
