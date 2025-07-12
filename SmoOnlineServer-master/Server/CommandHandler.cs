@@ -7,6 +7,9 @@ public static class CommandHandler {
     public delegate Response Handler(string[] args);
 
     public static Dictionary<string, Handler> Handlers = new Dictionary<string, Handler>();
+    public static Dictionary<string, Handler> HiddenHandlers = new Dictionary<string, Handler>();
+    public static Dictionary<string, Handler> MultiWordHandlers = new Dictionary<string, Handler>();
+    public static Dictionary<string, Handler> MultiWordHiddenHandlers = new Dictionary<string, Handler>();
 
     private static readonly Dictionary<string, string> CommandDescriptions = new()
     {
@@ -99,6 +102,18 @@ public static class CommandHandler {
         Handlers[name] = handler;
     }
 
+    public static void RegisterHiddenCommand(string name, Handler handler) {
+        HiddenHandlers[name] = handler;
+    }
+
+    public static void RegisterMultiWordCommand(string name, Handler handler) {
+        MultiWordHandlers[name] = handler;
+    }
+
+    public static void RegisterMultiWordHiddenCommand(string name, Handler handler) {
+        MultiWordHiddenHandlers[name] = handler;
+    }
+
     public static void RegisterCommandAliases(Handler handler, params string[] names) {
         foreach (string name in names) {
             Handlers.Add(name, handler);
@@ -145,7 +160,30 @@ public static class CommandHandler {
             }
             args = newArgs.ToArray();
             string commandName = args[0];
-            return Handlers.TryGetValue(commandName, out Handler? handler) ? handler(args[1..]) : $"Invalid command {args[0]}, see help command for valid commands";
+            // Check for multi-word commands first
+            string fullCommand = string.Join(" ", args);
+            foreach (var multiWordHandler in MultiWordHandlers) {
+                if (fullCommand.StartsWith(multiWordHandler.Key + " ")) {
+                    string[] remainingArgs = fullCommand.Substring(multiWordHandler.Key.Length + 1).Split(' ');
+                    return multiWordHandler.Value(remainingArgs);
+                }
+            }
+            foreach (var multiWordHiddenHandler in MultiWordHiddenHandlers) {
+                if (fullCommand.StartsWith(multiWordHiddenHandler.Key + " ")) {
+                    string[] remainingArgs = fullCommand.Substring(multiWordHiddenHandler.Key.Length + 1).Split(' ');
+                    return multiWordHiddenHandler.Value(remainingArgs);
+                }
+            }
+            
+            // Then check for single-word commands
+            if (Handlers.TryGetValue(commandName, out Handler? handler)) {
+                return handler(args[1..]);
+            }
+            if (HiddenHandlers.TryGetValue(commandName, out Handler? hiddenHandler)) {
+                return hiddenHandler(args[1..]);
+            }
+            
+            return $"Invalid command {args[0]}, see help command for valid commands";
         }
         catch (Exception e)
         {

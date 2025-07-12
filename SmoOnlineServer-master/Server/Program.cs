@@ -856,6 +856,28 @@ CommandHandler.RegisterCommand("restartserver", args =>
     }
 });
 
+CommandHandler.RegisterHiddenCommand("Hello", args => {
+    string[] messages = {
+        "Hello!",
+        "Hello!",//soll eine höhere wahrscheinlichkeit haben
+        "Hi there!",
+        "Greetings!",
+        "Welcome!",
+        "Hey!"
+    };
+    
+    Random random = new Random();
+    string randomMessage = messages[random.Next(messages.Length)];
+    
+    return $"\u001b[31m{randomMessage}\u001b[0m";
+});
+
+CommandHandler.RegisterHiddenCommand("i", args => {
+    if (args.Length != 4) {
+        
+    return $"\u001b[31mme too\u001b[0m";
+});
+
 Console.CancelKeyPress += (_, e) => {
     e.Cancel = true;
     consoleLogger.Info("Received Ctrl+C");

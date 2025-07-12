@@ -348,7 +348,7 @@ void Client::readFunc() {
                 Logger::log("Received Extras Packet.\n");
                 handleExtrasPacket(curPacket);
                 break;
-            case PacketType::HEALTHCOINS:
+            case PacketType::HEALTH_COINS:
                 Logger::log("Received Health_Coins Packet.\n");
                 handleHealthCoinsPacket(curPacket);
                 break;
@@ -920,18 +920,18 @@ void Client::handleExtrasPacket(Packet* curPacket) {
 }
 
 void Client::handleHealthCoinsPacket(Packet* curPacket) {
-    if (auto* healthCoins = static_cast<Health_CoinsPacket*>(curPacket)) {
+    if (auto* healthCoins = static_cast<Health_Coins*>(curPacket)) {
         Logger::log("Processing Health_Coins packet - Health: %d, Coins: %d\n", 
-                    healthCoins->Health, healthCoins->Coins);
+                    healthCoins->health, healthCoins->coins);
         
-        gHealth = healthCoins->Health;
+        gHealth = healthCoins->health;
         Logger::log("Received Health_Coins packet: Health = %d\n",
                     gHealth);
-        gCoins = healthCoins->Coins;
+        gCoins = healthCoins->coins;
         Logger::log("Received Health_Coins packet: Coins = %d\n",
                     gCoins);
     } else {
-        Logger::log("Failed to cast packet to Health_CoinsPacket\n");
+        Logger::log("Failed to cast packet to Health_Coins\n");
     }
 }
 
