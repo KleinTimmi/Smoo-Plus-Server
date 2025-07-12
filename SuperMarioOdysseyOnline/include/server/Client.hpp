@@ -42,6 +42,7 @@
 #include "packets/PlayerInfPacket.h"
 #include "packets/ShineCollect.h"
 #include "packets/Extras.hpp"
+#include "packets/Health_Coins.hpp"
 
 #include "puppets/PuppetHolder.hpp"
 
@@ -184,6 +185,7 @@ class Client {
         void updateCaptureInfo(CaptureInf* packet);
         void sendToStage(ChangeStagePacket* packet);
         void handleExtrasPacket(Packet* curPacket);
+        void handleHealthCoinsPacket(Packet* curPacket);
         void sendUdpHolePunch();
         void sendUdpInit();
         void disconnectPlayer(PlayerDC* packet);
@@ -216,6 +218,7 @@ class Client {
         GameInf emptyGameInfPacket = GameInf();
         CostumeInf lastCostumeInfPacket = CostumeInf();
         CaptureInf lastCaptureInfPacket = CaptureInf();
+        Health_Coins lastHealthCoinsPacket = Health_CoinsPacket();
 
         Keyboard* mKeyboard = nullptr; // keyboard for setting server IP
 

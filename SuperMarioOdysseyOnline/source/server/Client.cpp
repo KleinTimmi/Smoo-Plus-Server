@@ -17,7 +17,7 @@
 #include "packets/UdpPacket.h"
 #include "packets/Extras.h"
 #include "packets/Extras.hpp"
-
+#include "packets/Health_Coins.hpp"
 
 #include "sead/heap/seadHeapMgr.h"
 
@@ -347,6 +347,10 @@ void Client::readFunc() {
             case PacketType::EXTRA:
                 Logger::log("Received Extras Packet.\n");
                 handleExtrasPacket(curPacket);
+                break;
+            case PacketType::HEALTHCOINS:
+                Logger::log("Received Health_Coins Packet.\n");
+                handleHealthCoinsPacket(curPacket);
                 break;
 
 
@@ -912,6 +916,22 @@ void Client::handleExtrasPacket(Packet* curPacket) {
                     gNoclip ? "true" : "false");
     } else {
         Logger::log("Failed to cast packet to ExtrasPacket\n");
+    }
+}
+
+void Client::handleHealthCoinsPacket(Packet* curPacket) {
+    if (auto* healthCoins = static_cast<Health_CoinsPacket*>(curPacket)) {
+        Logger::log("Processing Health_Coins packet - Health: %d, Coins: %d\n", 
+                    healthCoins->Health, healthCoins->Coins);
+        
+        gHealth = healthCoins->Health;
+        Logger::log("Received Health_Coins packet: Health = %d\n",
+                    gHealth);
+        gCoins = healthCoins->Coins;
+        Logger::log("Received Health_Coins packet: Coins = %d\n",
+                    gCoins);
+    } else {
+        Logger::log("Failed to cast packet to Health_CoinsPacket\n");
     }
 }
 

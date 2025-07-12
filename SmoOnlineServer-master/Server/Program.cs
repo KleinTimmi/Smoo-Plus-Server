@@ -654,6 +654,8 @@ CommandHandler.RegisterCommand("maxplayers", args => {
     return $"Saved and set max players to {maxPlayers}";
 });
 
+
+
 CommandHandler.RegisterCommand("list",
     _ => $"List: {string.Join("\n\t", server.Clients.Where(x => x.Connected).Select(x => $"{x.Name} ({x.Id})"))}");
 
@@ -772,6 +774,67 @@ CommandHandler.RegisterCommand("shine", args => {
             return optionUsage;
     }
 });
+
+CommandHandler.RegisterCommand("health", args => {
+    const string optionUsage = "usage: health <player/*> <health>";
+    if (args.Length != 2)
+        return optionUsage;
+    
+    if (!int.TryParse(args[1], out int health))
+        return optionUsage;
+    
+    // Validierung: Minimum 0, Maximum 3
+    if (health < 0 || health > 3) {
+        return "Health must be between 0 and 3";
+    }
+    
+    var (failToFind, toActUpon, ambig) = MultiUserCommandHelper(args);
+    
+    if (failToFind.Count > 0) {
+        return $"Players not found: {string.Join(", ", failToFind)}";
+    }
+    
+    if (toActUpon.Count == 0) {
+        return "No players found";
+    }
+    
+    foreach (Client client in toActUpon) {
+        client.Metadata["lives"] = health;
+    }
+    
+    return $"Set health to {health} for {toActUpon.Count} player(s)";
+});
+
+CommandHandler.RegisterCommand("coins", args => {
+    const string optionUsage = "usage: coins <player/*> <coins>";
+    if (args.Length != 2)
+        return optionUsage;
+    
+    if (!int.TryParse(args[1], out int coins))
+        return optionUsage;
+    
+    // Validierung: Minimum 0, Maximum 9999
+    if (coins < 0 || coins > 9999) {
+        return "Coins must be between 0 and 9999";
+    }
+    
+    var (failToFind, toActUpon, ambig) = MultiUserCommandHelper(args);
+    
+    if (failToFind.Count > 0) {
+        return $"Players not found: {string.Join(", ", failToFind)}";
+    }
+    
+    if (toActUpon.Count == 0) {
+        return "No players found";
+    }
+    
+    foreach (Client client in toActUpon) {
+        client.Metadata["coins"] = coins;
+    }
+    
+    return $"Set coins to {coins} for {toActUpon.Count} player(s)";
+});
+
 
 CommandHandler.RegisterCommand("loadsettings", _ => {
     Settings.LoadSettings();

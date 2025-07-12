@@ -93,6 +93,15 @@ void updatePlayerInfo(GameDataHolderAccessor holder, PlayerActorBase* playerBase
         pInfSendTimer = 0;
     }
 
+    PlayerActorHakoniwa* hakoniwa = static_cast<PlayerActorHakoniwa*>(playerBase);
+    if (hakoniwa && hakoniwa->mCurCoins != gCoins) {
+        gCoins = hakoniwa->mCurCoins;
+        Client::sendHealthCoinsPacket(hakoniwa);
+    }
+    if (hakoniwa && hakoniwa->mCurHealth != gHealth) {
+        gHealth = hakoniwa->mCurHealth;
+        Client::sendHealthCoinsPacket(hakoniwa);
+    }
 
 /*
     // Noclip direkt implementieren ohne Hook
