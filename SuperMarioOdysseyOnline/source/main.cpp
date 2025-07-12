@@ -95,11 +95,11 @@ void updatePlayerInfo(GameDataHolderAccessor holder, PlayerActorBase* playerBase
 
     PlayerActorHakoniwa* hakoniwa = static_cast<PlayerActorHakoniwa*>(playerBase);
     if (hakoniwa && hakoniwa->mCurCoins != gCoins) {
-        gCoins = hakoniwa->mCurCoins;
+        gCoins = hakoniwa->mFinalCoins;
         Client::sendHealthCoinsPacket(hakoniwa);
     }
     if (hakoniwa && hakoniwa->mCurHealth != gHealth) {
-        gHealth = hakoniwa->mCurHealth;
+        gHealth = hakoniwa->mFinalLives;
         Client::sendHealthCoinsPacket(hakoniwa);
     }
 

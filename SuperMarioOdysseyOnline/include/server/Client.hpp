@@ -218,7 +218,7 @@ class Client {
         GameInf emptyGameInfPacket = GameInf();
         CostumeInf lastCostumeInfPacket = CostumeInf();
         CaptureInf lastCaptureInfPacket = CaptureInf();
-        Health_Coins lastHealthCoinsPacket = Health_CoinsPacket();
+        Health_Coins lastHealthCoinsPacket = Health_Coins();
 
         Keyboard* mKeyboard = nullptr; // keyboard for setting server IP
 
