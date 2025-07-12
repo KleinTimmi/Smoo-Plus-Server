@@ -26,6 +26,8 @@ enum PacketType : short {
     UDPINIT,      // = 13
     HOLEPUNCH,    // = 14 
     EXTRA,        // = 15
+    HEALTH_COINS, // = 16
+    MODS,         // = 17
     End, // end of enum for bounds checking
 };
 
@@ -47,6 +49,8 @@ USED static const char* packetNames[] = {
     "Udp Initialization",
     "Hole punch",
     "Extras Packet",
+    "Health & Coins",
+    "Mods",
 };
 
 enum SenderType {

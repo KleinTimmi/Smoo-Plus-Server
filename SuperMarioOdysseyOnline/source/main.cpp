@@ -89,7 +89,7 @@ void updatePlayerInfo(GameDataHolderAccessor holder, PlayerActorBase* playerBase
 
         pInfSendTimer = 0;
     }
-
+/*
     // Noclip direkt implementieren ohne Hook
     if (gNoclip && playerBase && !isYukimaru) {
         PlayerActorHakoniwa* hakoniwa = static_cast<PlayerActorHakoniwa*>(playerBase);
@@ -142,7 +142,7 @@ void updatePlayerInfo(GameDataHolderAccessor holder, PlayerActorBase* playerBase
             }
         }
     }
-
+*/
 
     if (playerBase && gInfiniteCapBounce) {
     capBounceFrameCounter++;
