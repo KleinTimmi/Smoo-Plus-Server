@@ -1013,6 +1013,84 @@ var webTask = Task.Run(async () =>
                 context.Response.OutputStream.Close();
                 continue;
             }
+
+            // API: Stages
+            if (urlPath.StartsWith("api/stages"))
+            {
+                try
+                {
+                    // Erstelle die Stage-Daten aus der Stages-Klasse
+                    var stagesByKingdom = new Dictionary<string, List<string>>();
+                    var stageToKingdom = new Dictionary<string, string>();
+                    var kingdomToStage = new Dictionary<string, string>();
+                    var mapImages = new Dictionary<string, string>();
+
+                    // Erstelle stagesByKingdom aus Stage2Alias und Alias2Kingdom
+                    foreach (var stageEntry in Shared.Stages.Stage2Alias)
+                    {
+                        var stage = stageEntry.Key;
+                        var alias = stageEntry.Value;
+
+                        // Verwende ContainsKey und Indexer für OrderedDictionary
+                        if (Shared.Stages.Alias2Kingdom.Contains(alias))
+                        {
+                            var kingdom = Shared.Stages.Alias2Kingdom[alias]?.ToString();
+                            if (!string.IsNullOrEmpty(kingdom))
+                            {
+                                if (!stagesByKingdom.ContainsKey(kingdom))
+                                {
+                                    stagesByKingdom[kingdom] = new List<string>();
+                                }
+                                stagesByKingdom[kingdom].Add(stage);
+
+                                // Erstelle stageToKingdom Mapping
+                                stageToKingdom[stage] = kingdom;
+
+                                // Erstelle kingdomToStage Mapping für Home Stages
+                                if (stage.Contains("HomeStage"))
+                                {
+                                    kingdomToStage[kingdom] = stage;
+                                }
+                            }
+                        }
+                    }
+
+                    // Erstelle mapImages basierend auf kingdomToStage
+                    foreach (var entry in kingdomToStage)
+                    {
+                        var kingdom = entry.Key;
+                        var homeStage = entry.Value;
+                        var kingdomName = kingdom.Replace(" ", "");
+                        mapImages[homeStage] = $"{kingdomName}.png";
+                    }
+
+                    // Erstelle JSON-Response
+                    var response = new
+                    {
+                        stagesByKingdom,
+                        stageToKingdom,
+                        kingdomToStage,
+                        mapImages
+                    };
+
+                    string jsonResponse = System.Text.Json.JsonSerializer.Serialize(response);
+                    context.Response.ContentType = "application/json";
+                    byte[] buffer = Encoding.UTF8.GetBytes(jsonResponse);
+                    context.Response.ContentLength64 = buffer.Length;
+                    context.Response.OutputStream.Write(buffer, 0, buffer.Length);
+                    context.Response.OutputStream.Close();
+                    continue;
+                }
+                catch (Exception ex)
+                {
+                    context.Response.StatusCode = 500;
+                    byte[] buffer = Encoding.UTF8.GetBytes($"Error loading stages: {ex.Message}");
+                    context.Response.ContentLength64 = buffer.Length;
+                    context.Response.OutputStream.Write(buffer, 0, buffer.Length);
+                    context.Response.OutputStream.Close();
+                    continue;
+                }
+            }
             
             // Statische Dateien ausliefern
             if (File.Exists(filePath))

@@ -51,6 +51,7 @@
 
 #include "packets/Extras.h"
 #include "packets/Extras.hpp"
+#include "packets/Health_Coins.hpp"
 #include "al/util/ControllerUtil.h"
 
 #include "helpers.hpp"
@@ -70,6 +71,8 @@ static int gameInfSendTimer = 0;
 bool gInfiniteCapBounce = false;
 bool gNoclip = false;
 
+int gHealth = 3;
+int gCoins = 0;
 
 static int capBounceFrameCounter = 0;
 static int alle_frames = 3; // sagt das nur alle x frames der cap bounce funktion ausgeführt wird
@@ -89,6 +92,8 @@ void updatePlayerInfo(GameDataHolderAccessor holder, PlayerActorBase* playerBase
 
         pInfSendTimer = 0;
     }
+
+
 /*
     // Noclip direkt implementieren ohne Hook
     if (gNoclip && playerBase && !isYukimaru) {

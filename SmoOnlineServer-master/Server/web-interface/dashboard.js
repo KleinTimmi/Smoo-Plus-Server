@@ -98,269 +98,76 @@ const bodies = [
   "Mario",
 ];
 
-const stagesByKingdom = {
-  Odyssey: ["HomeShipInsideStage"],
-  "Cap Kingdom": [
-    "CapWorldHomeStage",
-    "CapWorldTowerStage",
-    "PoisonWaveExStage",
-    "PushBlockExStage",
-    "FrogSearchExStage",
-    "RollingExStage",
-  ],
-  "Cascade Kingdom": [
-    "WaterfallWorldHomeStage",
-    "TrexPoppunExStage",
-    "WanwanClashExStage",
-    "Lift2DExStage",
-    "CapAppearExStage",
-    "WindBlowExStage",
-  ],
-  "Sand Kingdom": [
-    "SandWorldHomeStage",
-    "SandWorldShopStage",
-    "SandWorldSlotStage",
-    "SandWorldCostumeStage",
-    "SandWorldSecretStage",
-    "SandWorldVibrationStage",
-    "SandWorldPyramid000Stage",
-    "SandWorldPyramid001Stage",
-    "SandWorldUnderground000Stage",
-    "SandWorldUnderground001Stage",
-    "SandWorldPressExStage",
-    "SandWorldMeganeExStage",
-    "SandWorldKillerExStage",
-    "SandWorldSphinxExStage",
-    "SandWorldRotateExStage",
-    "MeganeLiftExStage",
-    "RocketFlowerExStage",
-    "WaterTubeExStage",
-  ],
-  "Lake Kingdom": [
-    "LakeWorldHomeStage",
-    "LakeWorldShopStage",
-    "GotogotonExStage",
-    "FastenerExStage",
-    "TrampolineWallCatchExStage",
-    "FrogPoisonExStage",
-  ],
-  "Wodded Kingdom": [
-    "ForestWorldHomeStage",
-    "ForestWorldTowerStage",
-    "ForestWorldBossStage",
-    "ForestWorldWoodsStage",
-    "ForestWorldWoodsCostumeStage",
-    "ForestWorldWoodsTreasureStage",
-    "ForestWorldBonusStage",
-    "ForestWorldWaterExStage",
-    "FogMountainExStage",
-    "RailCollisionExStage",
-    "ShootingElevatorExStage",
-    "ForestWorldCloudBonusExStage",
-    "PackunPoisonExStage",
-    "AnimalChaseExStage",
-    "KillerRoadExStage",
-  ],
-  "Cloud Kingdom": [
-    "CloudWorldHomeStage",
-    "FukuwaraiKuriboStage",
-    "Cube2DExStage",
-  ],
-  "Lost Kingdom": [
-    "ClashWorldHomeStage",
-    "ClashWorldShopStage",
-    "ImomuPoisonExStage",
-    "JangoExStage",
-  ],
-  "City Kingdom": [
-    "CityWorldHomeStage",
-    "CityWorldShop01Stage",
-    "CityWorldSandSlotStage",
-    "CityWorldMainTowerStage",
-    "CityWorldFactoryStage",
-    "RadioControlExStage",
-    "Note2D3DRoomExStage",
-    "Theater2DExStage",
-    "CityPeopleRoadStage",
-    "ElectricWireExStage",
-    "ShootingCityExStage",
-    "CapRotatePackunExStage",
-    "PoleGrabCeilExStage",
-    "PoleKillerExStage",
-    "TrexBikeExStage",
-    "DonsukeExStage",
-    "SwingSteelExStage",
-    "BikeSteelExStage",
-  ],
-  "Snow Kingdom": [
-    "SnowWorldHomeStage",
-    "SnowWorldShopStage",
-    "SnowWorldCostumeStage",
-    "IceWalkerExStage",
-    "SnowWorldTownStage",
-    "SnowWorldLobby000Stage",
-    "SnowWorldLobby001Stage",
-    "SnowWorldRace000Stage",
-    "SnowWorldRace001Stage",
-    "SnowWorldRaceTutorialStage",
-    "SnowWorldLobbyExStage",
-    "SnowWorldRaceExStage",
-    "SnowWorldRaceHardExStage",
-    "IceWaterDashExStage",
-    "IceWaterBlockExStage",
-    "ByugoPuzzleExStage",
-    "SnowWorldCloudBonusExStage",
-    "KillerRailCollisionExStage",
-  ],
-  "Seaside Kingdom": [
-    "SeaWorldHomeStage",
-    "SeaWorldCostumeStage",
-    "SeaWorldSecretStage",
-    "SeaWorldVibrationStage",
-    "SeaWorldUtsuboCaveStage",
-    "SeaWorldSneakingManStage",
-    "CloudExStage",
-    "WaterValleyExStage",
-    "SenobiTowerExStage",
-    "ReflectBombExStage",
-    "TogezoRotateExStage",
-  ],
-  "Luncheon Kingdom": [
-    "LavaWorldHomeStage",
-    "LavaWorldCostumeStage",
-    "LavaWorldTreasureStage",
-    "LavaWorldUpDownExStage",
-    "LavaWorldBubbleLaneExStage",
-    "ForkExStage",
-    "LavaWorldExcavationExStage",
-    "LavaWorldClockExStage",
-    "GabuzouClockExStage",
-    "CapAppearLavaLiftExStage",
-    "LavaWorldFenceLiftExStage",
-  ],
-  "Ruin Kingdom": [
-    "BossRaidWorldHomeStage",
-    "DotTowerExStage",
-    "BullRunExStage",
-  ],
-  "Bowser Kingdom": [
-    "SkyWorldHomeStage",
-    "SkyWorldShopStage",
-    "SkyWorldCostumeStage",
-    "SkyWorldTreasureStage",
-    "TsukkunRotateExStage",
-    "JizoSwitchExStage",
-    "SkyWorldCloudBonusExStage",
-    "KaronWingTowerStage",
-    "TsukkunClimbExStage",
-  ],
-  "Moon Kingdom": [
-    "MoonWorldHomeStage",
-    "MoonWorldCaptureParadeStage",
-    "MoonWorldWeddingRoomStage",
-    "MoonWorldWeddingRoom2Stage",
-    "MoonWorldKoopa1Stage",
-    "MoonWorldKoopa2Stage",
-    "Galaxy2DExStage",
-    "MoonAthleticExStage",
-  ],
-  "Dark Side": [
-    "Special1WorldHomeStage",
-    "Special1WorldTowerStackerStage",
-    "Special1WorldTowerBombTailStage",
-    "Special1WorldTowerFireBlowerStage",
-    "Special1WorldTowerCapThrowerStage",
-    "KillerRoadNoCapExStage",
-    "PackunPoisonNoCapExStage",
-    "BikeSteelNoCapExStage",
-    "ShootingCityYoshiExStage",
-    "SenobiTowerYoshiExStage",
-    "LavaWorldUpDownYoshiExStage",
-  ],
-  "Darker Side": [
-    "Special2WorldHomeStage",
-    "Special2WorldLavaStage",
-    "Special2WorldCloudStage",
-    "Special2WorldKoopaStage",
-  ],
-  "Peach Kingdom": [
-    "PeachWorldHomeStage",
-    "PeachWorldCastleStage",
-    "PeachWorldShopStage",
-    "PeachWorldCostumeStage",
-    "FukuwaraiMarioStage",
-    "PeachWorldPictureBossKnuckleStage",
-    "PeachWorldPictureBossForestStage",
-    "PeachWorldPictureMofumofuStage",
-    "PeachWorldPictureGiantWanderBossStage",
-    "PeachWorldPictureBossMagmaStage",
-    "PeachWorldPictureBossRaidStage",
-    "RevengeBossKnuckleStage",
-    "RevengeForestBossStage",
-    "RevengeMofumofuStage",
-    "RevengeGiantWanderBossStage",
-    "RevengeBossMagmaStage",
-    "RevengeBossRaidStage",
-    "YoshiCloudExStage",
-    "DotHardExStage",
-  ],
-};
+// Dynamische Stage-Daten aus Stages.cs laden
+let stagesByKingdom = {};
+let stageToKingdom = {};
+let kingdomToStage = {};
+let mapImages = {};
 
-const stageToKingdom = {
-  CapWorldHomeStage: "Cap Kingdom",
-  SandWorldHomeStage: "Sand Kingdom",
-  WaterfallWorldHomeStage: "Cascade Kingdom",
-  LakeWorldHomeStage: "Lake Kingdom",
-  ForestWorldHomeStage: "Wodded Kingdom",
-  CloudWorldHomeStage: "Cloud Kingdom",
-  CityWorldHomeStage: "City Kingdom",
-  SnowWorldHomeStage: "Snow Kingdom",
-  SeaWorldHomeStage: "Seaside Kingdom",
-  LavaWorldHomeStage: "Luncheon Kingdom",
-  BossRaidWorldHomeStage: "Ruin Kingdom",
-  KoopaWorldHomeStage: "Bowser Kingdom",
-  MoonWorldHomeStage: "Moon Kingdom",
-  DarkWorldHomeStage: "Dark Side",
-  DarkerWorldHomeStage: "Darker Side",
-};
-
-const kingdomToStage = {
-  Odyssey: "HomeShipInsideStage",
-  "Cap Kingdom": "CapWorldHomeStage",
-  "Cascade Kingdom": "WaterfallWorldHomeStage",
-  "Sand Kingdom": "SandWorldHomeStage",
-  "Lake Kingdom": "LakeWorldHomeStage",
-  "Wodded Kingdom": "ForestWorldHomeStage",
-  "Cloud Kingdom": "CloudWorldHomeStage",
-  "City Kingdom": "CityWorldHomeStage",
-  "Snow Kingdom": "SnowWorldHomeStage",
-  "Seaside Kingdom": "SeaWorldHomeStage",
-  "Luncheon Kingdom": "LavaWorldHomeStage",
-  "Ruin Kingdom": "BossRaidWorldHomeStage",
-  "Bowser Kingdom": "KoopaWorldHomeStage",
-  "Moon Kingdom": "MoonWorldHomeStage",
-  "Dark Side": "DarkWorldHomeStage",
-  "Darker Side": "DarkerWorldHomeStage",
-};
-
-const mapImages = {
-  HomeShipInsideStage: "Odyssey.png",
-  CapWorldHomeStage: "CapKingdom.png",
-  WaterfallWorldHomeStage: "CascadeKingdom.png",
-  SandWorldHomeStage: "SandKingdom.png",
-  LakeWorldHomeStage: "LakeKingdom.png",
-  ForestWorldHomeStage: "WoodedKingdom.png",
-  CloudWorldHomeStage: "CloudKingdom.png",
-  CityWorldHomeStage: "MetroKingdom.png",
-  SnowWorldHomeStage: "SnowKingdom.png",
-  SeaWorldHomeStage: "SeasideKingdom.png",
-  LavaWorldHomeStage: "LuncheonKingdom.png",
-  BossRaidWorldHomeStage: "RuinedKingdom.png",
-  KoopaWorldHomeStage: "BowserKingdom.png",
-  MoonWorldHomeStage: "MoonKingdom.png",
-  DarkWorldHomeStage: "DarkSide.png",
-  DarkerWorldHomeStage: "DarkerSide.png",
-};
+// Funktion zum Laden der Stage-Daten vom Server
+async function loadStageData() {
+  try {
+    // Verwende den neuen HTTP-API-Endpunkt
+    const response = await fetch('/api/stages');
+    
+    if (!response.ok) {
+      throw new Error('Fehler beim Laden der Stage-Daten');
+    }
+    
+    const data = await response.json();
+    
+    // Daten zuweisen
+    stagesByKingdom = data.stagesByKingdom || {};
+    stageToKingdom = data.stageToKingdom || {};
+    kingdomToStage = data.kingdomToStage || {};
+    mapImages = data.mapImages || {};
+    
+    console.log('✅ Stage-Daten erfolgreich geladen:', Object.keys(stagesByKingdom).length, 'Kingdoms');
+    
+    // Dropdowns neu befüllen
+    fillKingdomDropdowns();
+    
+  } catch (error) {
+    console.error('❌ Fehler beim Laden der Stage-Daten:', error);
+    // Fallback zu Standard-Daten aus Stages.cs
+    stagesByKingdom = {
+      "Odyssey": ["HomeShipInsideStage"],
+      "Cap Kingdom": ["CapWorldHomeStage", "CapWorldTowerStage", "PoisonWaveExStage", "PushBlockExStage", "FrogSearchExStage", "RollingExStage"],
+      "Cascade Kingdom": ["WaterfallWorldHomeStage", "TrexPoppunExStage", "WanwanClashExStage", "Lift2DExStage", "CapAppearExStage", "WindBlowExStage"],
+      "Sand Kingdom": ["SandWorldHomeStage", "SandWorldShopStage", "SandWorldSlotStage", "SandWorldCostumeStage", "SandWorldSecretStage", "SandWorldVibrationStage", "SandWorldPyramid000Stage", "SandWorldPyramid001Stage", "SandWorldUnderground000Stage", "SandWorldUnderground001Stage", "SandWorldPressExStage", "SandWorldMeganeExStage", "SandWorldKillerExStage", "SandWorldSphinxExStage", "SandWorldRotateExStage", "MeganeLiftExStage", "RocketFlowerExStage", "WaterTubeExStage"],
+      "Lake Kingdom": ["LakeWorldHomeStage", "LakeWorldShopStage", "GotogotonExStage", "FastenerExStage", "TrampolineWallCatchExStage", "FrogPoisonExStage"],
+      "Wooded Kingdom": ["ForestWorldHomeStage", "ForestWorldTowerStage", "ForestWorldBossStage", "ForestWorldWoodsStage", "ForestWorldWoodsCostumeStage", "ForestWorldWoodsTreasureStage", "ForestWorldBonusStage", "ForestWorldWaterExStage", "FogMountainExStage", "RailCollisionExStage", "ShootingElevatorExStage", "ForestWorldCloudBonusExStage", "PackunPoisonExStage", "AnimalChaseExStage", "KillerRoadExStage"],
+      "Cloud Kingdom": ["CloudWorldHomeStage", "FukuwaraiKuriboStage", "Cube2DExStage"],
+      "Lost Kingdom": ["ClashWorldHomeStage", "ClashWorldShopStage", "ImomuPoisonExStage", "JangoExStage"],
+      "Metro Kingdom": ["CityWorldHomeStage", "CityWorldShop01Stage", "CityWorldSandSlotStage", "CityWorldMainTowerStage", "CityWorldFactoryStage", "RadioControlExStage", "Note2D3DRoomExStage", "Theater2DExStage", "CityPeopleRoadStage", "ElectricWireExStage", "ShootingCityExStage", "CapRotatePackunExStage", "PoleGrabCeilExStage", "PoleKillerExStage", "TrexBikeExStage", "DonsukeExStage", "SwingSteelExStage", "BikeSteelExStage"],
+      "Snow Kingdom": ["SnowWorldHomeStage", "SnowWorldShopStage", "SnowWorldCostumeStage", "IceWalkerExStage", "SnowWorldTownStage", "SnowWorldLobby000Stage", "SnowWorldLobby001Stage", "SnowWorldRace000Stage", "SnowWorldRace001Stage", "SnowWorldRaceTutorialStage", "SnowWorldLobbyExStage", "SnowWorldRaceExStage", "SnowWorldRaceHardExStage", "IceWaterDashExStage", "IceWaterBlockExStage", "ByugoPuzzleExStage", "SnowWorldCloudBonusExStage", "KillerRailCollisionExStage"],
+      "Seaside Kingdom": ["SeaWorldHomeStage", "SeaWorldCostumeStage", "SeaWorldSecretStage", "SeaWorldVibrationStage", "SeaWorldUtsuboCaveStage", "SeaWorldSneakingManStage", "CloudExStage", "WaterValleyExStage", "SenobiTowerExStage", "ReflectBombExStage", "TogezoRotateExStage"],
+      "Luncheon Kingdom": ["LavaWorldHomeStage", "LavaWorldCostumeStage", "LavaWorldTreasureStage", "LavaWorldUpDownExStage", "LavaWorldBubbleLaneExStage", "ForkExStage", "LavaWorldExcavationExStage", "LavaWorldClockExStage", "GabuzouClockExStage", "CapAppearLavaLiftExStage", "LavaWorldFenceLiftExStage"],
+      "Ruined Kingdom": ["BossRaidWorldHomeStage", "DotTowerExStage", "BullRunExStage"],
+      "Bowser's Kingdom": ["SkyWorldHomeStage", "SkyWorldShopStage", "SkyWorldCostumeStage", "SkyWorldTreasureStage", "TsukkunRotateExStage", "JizoSwitchExStage", "SkyWorldCloudBonusExStage", "KaronWingTowerStage", "TsukkunClimbExStage"],
+      "Moon Kingdom": ["MoonWorldHomeStage", "MoonWorldCaptureParadeStage", "MoonWorldWeddingRoomStage", "MoonWorldWeddingRoom2Stage", "MoonWorldKoopa1Stage", "MoonWorldKoopa2Stage", "Galaxy2DExStage", "MoonAthleticExStage"],
+      "Dark Side": ["Special1WorldHomeStage", "Special1WorldTowerStackerStage", "Special1WorldTowerBombTailStage", "Special1WorldTowerFireBlowerStage", "Special1WorldTowerCapThrowerStage", "KillerRoadNoCapExStage", "PackunPoisonNoCapExStage", "BikeSteelNoCapExStage", "ShootingCityYoshiExStage", "SenobiTowerYoshiExStage", "LavaWorldUpDownYoshiExStage"],
+      "Darker Side": ["Special2WorldHomeStage", "Special2WorldLavaStage", "Special2WorldCloudStage", "Special2WorldKoopaStage"],
+      "Mushroom Kingdom": ["PeachWorldHomeStage", "PeachWorldCastleStage", "PeachWorldShopStage", "PeachWorldCostumeStage", "FukuwaraiMarioStage", "PeachWorldPictureBossKnuckleStage", "PeachWorldPictureBossForestStage", "PeachWorldPictureMofumofuStage", "PeachWorldPictureGiantWanderBossStage", "PeachWorldPictureBossMagmaStage", "PeachWorldPictureBossRaidStage", "RevengeBossKnuckleStage", "RevengeForestBossStage", "RevengeMofumofuStage", "RevengeGiantWanderBossStage", "RevengeBossMagmaStage", "RevengeBossRaidStage", "YoshiCloudExStage", "DotHardExStage"]
+    };
+    
+    // Erstelle stageToKingdom und kingdomToStage Mappings
+    stageToKingdom = {};
+    kingdomToStage = {};
+    mapImages = {};
+    
+    for (const [kingdom, stages] of Object.entries(stagesByKingdom)) {
+      stages.forEach(stage => {
+        stageToKingdom[stage] = kingdom;
+        if (stage.includes('HomeStage')) {
+          kingdomToStage[kingdom] = stage;
+          const kingdomName = kingdom.replace(/\s+/g, '');
+          mapImages[stage] = `${kingdomName}.png`;
+        }
+      });
+    }
+  }
+}
 
 //dropdown menu logic
 function fillKingdomDropdowns() {
@@ -379,10 +186,10 @@ function fillKingdomDropdowns() {
   });
 }
 
-// Beim Laden der Seite Kingdom-Dropdowns befüllen und initialisieren
-document.addEventListener("DOMContentLoaded", function () {
-  fillKingdomDropdowns();
-
+// Beim Laden der Seite Stage-Daten laden und Kingdom-Dropdowns befüllen
+document.addEventListener("DOMContentLoaded", async function () {
+  await loadStageData();
+  
   // Ban Stage Dropdown initialisieren
   const kingdomSelect = document.getElementById("kingdomSelect");
   if (kingdomSelect) {

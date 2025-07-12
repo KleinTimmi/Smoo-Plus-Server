@@ -15,6 +15,7 @@ public class ApiRequest {
         ["Status"]      = async (Context ctx) => await ApiRequestStatus.Send(ctx),
         ["Command"]     = async (Context ctx) => await ApiRequestCommand.Send(ctx),
         ["Permissions"] = async (Context ctx) => await ApiRequestPermissions.Send(ctx),
+        ["Stages"]      = async (Context ctx) => await ApiRequestStages.Send(ctx),
     };
 
 
