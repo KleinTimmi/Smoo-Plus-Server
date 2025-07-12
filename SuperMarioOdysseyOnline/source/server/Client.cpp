@@ -23,6 +23,11 @@
 
 #include "server/gamemode/GameModeManager.hpp"
 #include "server/hns/HideAndSeekMode.hpp"
+#include "helpers/GetHelper.h"
+
+// Externe Deklarationen für globale Variablen aus main.cpp
+extern int gHealth;
+extern int gCoins;
 
 
 
@@ -917,6 +922,40 @@ void Client::handleExtrasPacket(Packet* curPacket) {
     } else {
         Logger::log("Failed to cast packet to ExtrasPacket\n");
     }
+}
+
+void Client::sendHealthCoinsPacket(const PlayerActorHakoniwa* player) {
+    if (!sInstance) {
+        Logger::log("Static Instance is Null!\n");
+        return;
+    }
+
+    sead::ScopedCurrentHeapSetter setter(sInstance->mHeap);
+
+    Health_Coins* packet = new Health_Coins();
+    packet->mUserID = sInstance->mUserID;
+    
+    // Get health from PlayerHitPointData
+    if (sInstance->mHolder.mData && sInstance->mHolder.mData->mGameDataFile) {
+        PlayerHitPointData* hitData = sInstance->mHolder.mData->mGameDataFile->getPlayerHitPointData();
+        if (hitData) {
+            packet->health = hitData->mCurrentHit;
+        } else {
+            packet->health = 3; // Default health
+        }
+    } else {
+        packet->health = 3; // Default health
+    }
+    
+    // Get coins from HakoniwaSequence
+    HakoniwaSequence* sequence = tryGetHakoniwaSequence();
+    if (sequence) {
+        packet->coins = sequence->mFinalCoins;
+    } else {
+        packet->coins = 0; // Default coins
+    }
+
+    sInstance->mSocket->queuePacket(packet);
 }
 
 void Client::handleHealthCoinsPacket(Packet* curPacket) {

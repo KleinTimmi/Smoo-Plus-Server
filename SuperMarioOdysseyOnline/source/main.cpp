@@ -53,6 +53,7 @@
 #include "packets/Extras.hpp"
 #include "packets/Health_Coins.hpp"
 #include "al/util/ControllerUtil.h"
+#include "game/Player/PlayerHitPointData.h"
 
 #include "helpers.hpp"
 #include "helpers/GetHelper.h"
@@ -94,13 +95,21 @@ void updatePlayerInfo(GameDataHolderAccessor holder, PlayerActorBase* playerBase
     }
 
     PlayerActorHakoniwa* hakoniwa = static_cast<PlayerActorHakoniwa*>(playerBase);
-    if (hakoniwa && hakoniwa->mCurCoins != gCoins) {
-        gCoins = hakoniwa->mFinalCoins;
+    
+    // Check coins from HakoniwaSequence
+    HakoniwaSequence* sequence = tryGetHakoniwaSequence();
+    if (sequence && sequence->mFinalCoins != gCoins) {
+        gCoins = sequence->mFinalCoins;
         Client::sendHealthCoinsPacket(hakoniwa);
     }
-    if (hakoniwa && hakoniwa->mCurHealth != gHealth) {
-        gHealth = hakoniwa->mFinalLives;
-        Client::sendHealthCoinsPacket(hakoniwa);
+    
+    // Check health from PlayerHitPointData
+    if (holder.mData && holder.mData->mGameDataFile) {
+        PlayerHitPointData* hitData = holder.mData->mGameDataFile->getPlayerHitPointData();
+        if (hitData && hitData->mCurrentHit != gHealth) {
+            gHealth = hitData->mCurrentHit;
+            Client::sendHealthCoinsPacket(hakoniwa);
+        }
     }
 
 /*

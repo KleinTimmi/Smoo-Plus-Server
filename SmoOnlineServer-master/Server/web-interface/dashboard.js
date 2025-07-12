@@ -1,4 +1,6 @@
 // --- Cap- und Body-Bildnamen (aus images/cap und images/body) ---
+let lastSeenPlayers = {};
+
 const caps = [
   "MarioZombie",
   "MarioTuxedo",
@@ -98,76 +100,269 @@ const bodies = [
   "Mario",
 ];
 
-// Dynamische Stage-Daten aus Stages.cs laden
-let stagesByKingdom = {};
-let stageToKingdom = {};
-let kingdomToStage = {};
-let mapImages = {};
+const stagesByKingdom = {
+  Odyssey: ["HomeShipInsideStage"],
+  "Cap Kingdom": [
+    "CapWorldHomeStage",
+    "CapWorldTowerStage",
+    "PoisonWaveExStage",
+    "PushBlockExStage",
+    "FrogSearchExStage",
+    "RollingExStage",
+  ],
+  "Cascade Kingdom": [
+    "WaterfallWorldHomeStage",
+    "TrexPoppunExStage",
+    "WanwanClashExStage",
+    "Lift2DExStage",
+    "CapAppearExStage",
+    "WindBlowExStage",
+  ],
+  "Sand Kingdom": [
+    "SandWorldHomeStage",
+    "SandWorldShopStage",
+    "SandWorldSlotStage",
+    "SandWorldCostumeStage",
+    "SandWorldSecretStage",
+    "SandWorldVibrationStage",
+    "SandWorldPyramid000Stage",
+    "SandWorldPyramid001Stage",
+    "SandWorldUnderground000Stage",
+    "SandWorldUnderground001Stage",
+    "SandWorldPressExStage",
+    "SandWorldMeganeExStage",
+    "SandWorldKillerExStage",
+    "SandWorldSphinxExStage",
+    "SandWorldRotateExStage",
+    "MeganeLiftExStage",
+    "RocketFlowerExStage",
+    "WaterTubeExStage",
+  ],
+  "Lake Kingdom": [
+    "LakeWorldHomeStage",
+    "LakeWorldShopStage",
+    "GotogotonExStage",
+    "FastenerExStage",
+    "TrampolineWallCatchExStage",
+    "FrogPoisonExStage",
+  ],
+  "Wodded Kingdom": [
+    "ForestWorldHomeStage",
+    "ForestWorldTowerStage",
+    "ForestWorldBossStage",
+    "ForestWorldWoodsStage",
+    "ForestWorldWoodsCostumeStage",
+    "ForestWorldWoodsTreasureStage",
+    "ForestWorldBonusStage",
+    "ForestWorldWaterExStage",
+    "FogMountainExStage",
+    "RailCollisionExStage",
+    "ShootingElevatorExStage",
+    "ForestWorldCloudBonusExStage",
+    "PackunPoisonExStage",
+    "AnimalChaseExStage",
+    "KillerRoadExStage",
+  ],
+  "Cloud Kingdom": [
+    "CloudWorldHomeStage",
+    "FukuwaraiKuriboStage",
+    "Cube2DExStage",
+  ],
+  "Lost Kingdom": [
+    "ClashWorldHomeStage",
+    "ClashWorldShopStage",
+    "ImomuPoisonExStage",
+    "JangoExStage",
+  ],
+  "City Kingdom": [
+    "CityWorldHomeStage",
+    "CityWorldShop01Stage",
+    "CityWorldSandSlotStage",
+    "CityWorldMainTowerStage",
+    "CityWorldFactoryStage",
+    "RadioControlExStage",
+    "Note2D3DRoomExStage",
+    "Theater2DExStage",
+    "CityPeopleRoadStage",
+    "ElectricWireExStage",
+    "ShootingCityExStage",
+    "CapRotatePackunExStage",
+    "PoleGrabCeilExStage",
+    "PoleKillerExStage",
+    "TrexBikeExStage",
+    "DonsukeExStage",
+    "SwingSteelExStage",
+    "BikeSteelExStage",
+  ],
+  "Snow Kingdom": [
+    "SnowWorldHomeStage",
+    "SnowWorldShopStage",
+    "SnowWorldCostumeStage",
+    "IceWalkerExStage",
+    "SnowWorldTownStage",
+    "SnowWorldLobby000Stage",
+    "SnowWorldLobby001Stage",
+    "SnowWorldRace000Stage",
+    "SnowWorldRace001Stage",
+    "SnowWorldRaceTutorialStage",
+    "SnowWorldLobbyExStage",
+    "SnowWorldRaceExStage",
+    "SnowWorldRaceHardExStage",
+    "IceWaterDashExStage",
+    "IceWaterBlockExStage",
+    "ByugoPuzzleExStage",
+    "SnowWorldCloudBonusExStage",
+    "KillerRailCollisionExStage",
+  ],
+  "Seaside Kingdom": [
+    "SeaWorldHomeStage",
+    "SeaWorldCostumeStage",
+    "SeaWorldSecretStage",
+    "SeaWorldVibrationStage",
+    "SeaWorldUtsuboCaveStage",
+    "SeaWorldSneakingManStage",
+    "CloudExStage",
+    "WaterValleyExStage",
+    "SenobiTowerExStage",
+    "ReflectBombExStage",
+    "TogezoRotateExStage",
+  ],
+  "Luncheon Kingdom": [
+    "LavaWorldHomeStage",
+    "LavaWorldCostumeStage",
+    "LavaWorldTreasureStage",
+    "LavaWorldUpDownExStage",
+    "LavaWorldBubbleLaneExStage",
+    "ForkExStage",
+    "LavaWorldExcavationExStage",
+    "LavaWorldClockExStage",
+    "GabuzouClockExStage",
+    "CapAppearLavaLiftExStage",
+    "LavaWorldFenceLiftExStage",
+  ],
+  "Ruin Kingdom": [
+    "BossRaidWorldHomeStage",
+    "DotTowerExStage",
+    "BullRunExStage",
+  ],
+  "Bowser Kingdom": [
+    "SkyWorldHomeStage",
+    "SkyWorldShopStage",
+    "SkyWorldCostumeStage",
+    "SkyWorldTreasureStage",
+    "TsukkunRotateExStage",
+    "JizoSwitchExStage",
+    "SkyWorldCloudBonusExStage",
+    "KaronWingTowerStage",
+    "TsukkunClimbExStage",
+  ],
+  "Moon Kingdom": [
+    "MoonWorldHomeStage",
+    "MoonWorldCaptureParadeStage",
+    "MoonWorldWeddingRoomStage",
+    "MoonWorldWeddingRoom2Stage",
+    "MoonWorldKoopa1Stage",
+    "MoonWorldKoopa2Stage",
+    "Galaxy2DExStage",
+    "MoonAthleticExStage",
+  ],
+  "Dark Side": [
+    "Special1WorldHomeStage",
+    "Special1WorldTowerStackerStage",
+    "Special1WorldTowerBombTailStage",
+    "Special1WorldTowerFireBlowerStage",
+    "Special1WorldTowerCapThrowerStage",
+    "KillerRoadNoCapExStage",
+    "PackunPoisonNoCapExStage",
+    "BikeSteelNoCapExStage",
+    "ShootingCityYoshiExStage",
+    "SenobiTowerYoshiExStage",
+    "LavaWorldUpDownYoshiExStage",
+  ],
+  "Darker Side": [
+    "Special2WorldHomeStage",
+    "Special2WorldLavaStage",
+    "Special2WorldCloudStage",
+    "Special2WorldKoopaStage",
+  ],
+  "Peach Kingdom": [
+    "PeachWorldHomeStage",
+    "PeachWorldCastleStage",
+    "PeachWorldShopStage",
+    "PeachWorldCostumeStage",
+    "FukuwaraiMarioStage",
+    "PeachWorldPictureBossKnuckleStage",
+    "PeachWorldPictureBossForestStage",
+    "PeachWorldPictureMofumofuStage",
+    "PeachWorldPictureGiantWanderBossStage",
+    "PeachWorldPictureBossMagmaStage",
+    "PeachWorldPictureBossRaidStage",
+    "RevengeBossKnuckleStage",
+    "RevengeForestBossStage",
+    "RevengeMofumofuStage",
+    "RevengeGiantWanderBossStage",
+    "RevengeBossMagmaStage",
+    "RevengeBossRaidStage",
+    "YoshiCloudExStage",
+    "DotHardExStage",
+  ],
+};
 
-// Funktion zum Laden der Stage-Daten vom Server
-async function loadStageData() {
-  try {
-    // Verwende den neuen HTTP-API-Endpunkt
-    const response = await fetch('/api/stages');
-    
-    if (!response.ok) {
-      throw new Error('Fehler beim Laden der Stage-Daten');
-    }
-    
-    const data = await response.json();
-    
-    // Daten zuweisen
-    stagesByKingdom = data.stagesByKingdom || {};
-    stageToKingdom = data.stageToKingdom || {};
-    kingdomToStage = data.kingdomToStage || {};
-    mapImages = data.mapImages || {};
-    
-    console.log('✅ Stage-Daten erfolgreich geladen:', Object.keys(stagesByKingdom).length, 'Kingdoms');
-    
-    // Dropdowns neu befüllen
-    fillKingdomDropdowns();
-    
-  } catch (error) {
-    console.error('❌ Fehler beim Laden der Stage-Daten:', error);
-    // Fallback zu Standard-Daten aus Stages.cs
-    stagesByKingdom = {
-      "Odyssey": ["HomeShipInsideStage"],
-      "Cap Kingdom": ["CapWorldHomeStage", "CapWorldTowerStage", "PoisonWaveExStage", "PushBlockExStage", "FrogSearchExStage", "RollingExStage"],
-      "Cascade Kingdom": ["WaterfallWorldHomeStage", "TrexPoppunExStage", "WanwanClashExStage", "Lift2DExStage", "CapAppearExStage", "WindBlowExStage"],
-      "Sand Kingdom": ["SandWorldHomeStage", "SandWorldShopStage", "SandWorldSlotStage", "SandWorldCostumeStage", "SandWorldSecretStage", "SandWorldVibrationStage", "SandWorldPyramid000Stage", "SandWorldPyramid001Stage", "SandWorldUnderground000Stage", "SandWorldUnderground001Stage", "SandWorldPressExStage", "SandWorldMeganeExStage", "SandWorldKillerExStage", "SandWorldSphinxExStage", "SandWorldRotateExStage", "MeganeLiftExStage", "RocketFlowerExStage", "WaterTubeExStage"],
-      "Lake Kingdom": ["LakeWorldHomeStage", "LakeWorldShopStage", "GotogotonExStage", "FastenerExStage", "TrampolineWallCatchExStage", "FrogPoisonExStage"],
-      "Wooded Kingdom": ["ForestWorldHomeStage", "ForestWorldTowerStage", "ForestWorldBossStage", "ForestWorldWoodsStage", "ForestWorldWoodsCostumeStage", "ForestWorldWoodsTreasureStage", "ForestWorldBonusStage", "ForestWorldWaterExStage", "FogMountainExStage", "RailCollisionExStage", "ShootingElevatorExStage", "ForestWorldCloudBonusExStage", "PackunPoisonExStage", "AnimalChaseExStage", "KillerRoadExStage"],
-      "Cloud Kingdom": ["CloudWorldHomeStage", "FukuwaraiKuriboStage", "Cube2DExStage"],
-      "Lost Kingdom": ["ClashWorldHomeStage", "ClashWorldShopStage", "ImomuPoisonExStage", "JangoExStage"],
-      "Metro Kingdom": ["CityWorldHomeStage", "CityWorldShop01Stage", "CityWorldSandSlotStage", "CityWorldMainTowerStage", "CityWorldFactoryStage", "RadioControlExStage", "Note2D3DRoomExStage", "Theater2DExStage", "CityPeopleRoadStage", "ElectricWireExStage", "ShootingCityExStage", "CapRotatePackunExStage", "PoleGrabCeilExStage", "PoleKillerExStage", "TrexBikeExStage", "DonsukeExStage", "SwingSteelExStage", "BikeSteelExStage"],
-      "Snow Kingdom": ["SnowWorldHomeStage", "SnowWorldShopStage", "SnowWorldCostumeStage", "IceWalkerExStage", "SnowWorldTownStage", "SnowWorldLobby000Stage", "SnowWorldLobby001Stage", "SnowWorldRace000Stage", "SnowWorldRace001Stage", "SnowWorldRaceTutorialStage", "SnowWorldLobbyExStage", "SnowWorldRaceExStage", "SnowWorldRaceHardExStage", "IceWaterDashExStage", "IceWaterBlockExStage", "ByugoPuzzleExStage", "SnowWorldCloudBonusExStage", "KillerRailCollisionExStage"],
-      "Seaside Kingdom": ["SeaWorldHomeStage", "SeaWorldCostumeStage", "SeaWorldSecretStage", "SeaWorldVibrationStage", "SeaWorldUtsuboCaveStage", "SeaWorldSneakingManStage", "CloudExStage", "WaterValleyExStage", "SenobiTowerExStage", "ReflectBombExStage", "TogezoRotateExStage"],
-      "Luncheon Kingdom": ["LavaWorldHomeStage", "LavaWorldCostumeStage", "LavaWorldTreasureStage", "LavaWorldUpDownExStage", "LavaWorldBubbleLaneExStage", "ForkExStage", "LavaWorldExcavationExStage", "LavaWorldClockExStage", "GabuzouClockExStage", "CapAppearLavaLiftExStage", "LavaWorldFenceLiftExStage"],
-      "Ruined Kingdom": ["BossRaidWorldHomeStage", "DotTowerExStage", "BullRunExStage"],
-      "Bowser's Kingdom": ["SkyWorldHomeStage", "SkyWorldShopStage", "SkyWorldCostumeStage", "SkyWorldTreasureStage", "TsukkunRotateExStage", "JizoSwitchExStage", "SkyWorldCloudBonusExStage", "KaronWingTowerStage", "TsukkunClimbExStage"],
-      "Moon Kingdom": ["MoonWorldHomeStage", "MoonWorldCaptureParadeStage", "MoonWorldWeddingRoomStage", "MoonWorldWeddingRoom2Stage", "MoonWorldKoopa1Stage", "MoonWorldKoopa2Stage", "Galaxy2DExStage", "MoonAthleticExStage"],
-      "Dark Side": ["Special1WorldHomeStage", "Special1WorldTowerStackerStage", "Special1WorldTowerBombTailStage", "Special1WorldTowerFireBlowerStage", "Special1WorldTowerCapThrowerStage", "KillerRoadNoCapExStage", "PackunPoisonNoCapExStage", "BikeSteelNoCapExStage", "ShootingCityYoshiExStage", "SenobiTowerYoshiExStage", "LavaWorldUpDownYoshiExStage"],
-      "Darker Side": ["Special2WorldHomeStage", "Special2WorldLavaStage", "Special2WorldCloudStage", "Special2WorldKoopaStage"],
-      "Mushroom Kingdom": ["PeachWorldHomeStage", "PeachWorldCastleStage", "PeachWorldShopStage", "PeachWorldCostumeStage", "FukuwaraiMarioStage", "PeachWorldPictureBossKnuckleStage", "PeachWorldPictureBossForestStage", "PeachWorldPictureMofumofuStage", "PeachWorldPictureGiantWanderBossStage", "PeachWorldPictureBossMagmaStage", "PeachWorldPictureBossRaidStage", "RevengeBossKnuckleStage", "RevengeForestBossStage", "RevengeMofumofuStage", "RevengeGiantWanderBossStage", "RevengeBossMagmaStage", "RevengeBossRaidStage", "YoshiCloudExStage", "DotHardExStage"]
-    };
-    
-    // Erstelle stageToKingdom und kingdomToStage Mappings
-    stageToKingdom = {};
-    kingdomToStage = {};
-    mapImages = {};
-    
-    for (const [kingdom, stages] of Object.entries(stagesByKingdom)) {
-      stages.forEach(stage => {
-        stageToKingdom[stage] = kingdom;
-        if (stage.includes('HomeStage')) {
-          kingdomToStage[kingdom] = stage;
-          const kingdomName = kingdom.replace(/\s+/g, '');
-          mapImages[stage] = `${kingdomName}.png`;
-        }
-      });
-    }
-  }
-}
+const stageToKingdom = {
+  CapWorldHomeStage: "Cap Kingdom",
+  SandWorldHomeStage: "Sand Kingdom",
+  WaterfallWorldHomeStage: "Cascade Kingdom",
+  LakeWorldHomeStage: "Lake Kingdom",
+  ForestWorldHomeStage: "Wodded Kingdom",
+  CloudWorldHomeStage: "Cloud Kingdom",
+  CityWorldHomeStage: "City Kingdom",
+  SnowWorldHomeStage: "Snow Kingdom",
+  SeaWorldHomeStage: "Seaside Kingdom",
+  LavaWorldHomeStage: "Luncheon Kingdom",
+  BossRaidWorldHomeStage: "Ruin Kingdom",
+  KoopaWorldHomeStage: "Bowser Kingdom",
+  MoonWorldHomeStage: "Moon Kingdom",
+  DarkWorldHomeStage: "Dark Side",
+  DarkerWorldHomeStage: "Darker Side",
+};
+
+const kingdomToStage = {
+  Odyssey: "HomeShipInsideStage",
+  "Cap Kingdom": "CapWorldHomeStage",
+  "Cascade Kingdom": "WaterfallWorldHomeStage",
+  "Sand Kingdom": "SandWorldHomeStage",
+  "Lake Kingdom": "LakeWorldHomeStage",
+  "Wodded Kingdom": "ForestWorldHomeStage",
+  "Cloud Kingdom": "CloudWorldHomeStage",
+  "City Kingdom": "CityWorldHomeStage",
+  "Snow Kingdom": "SnowWorldHomeStage",
+  "Seaside Kingdom": "SeaWorldHomeStage",
+  "Luncheon Kingdom": "LavaWorldHomeStage",
+  "Ruin Kingdom": "BossRaidWorldHomeStage",
+  "Bowser Kingdom": "KoopaWorldHomeStage",
+  "Moon Kingdom": "MoonWorldHomeStage",
+  "Dark Side": "DarkWorldHomeStage",
+  "Darker Side": "DarkerWorldHomeStage",
+};
+
+const mapImages = {
+  HomeShipInsideStage: "Odyssey.png",
+  CapWorldHomeStage: "CapKingdom.png",
+  WaterfallWorldHomeStage: "CascadeKingdom.png",
+  SandWorldHomeStage: "SandKingdom.png",
+  LakeWorldHomeStage: "LakeKingdom.png",
+  ForestWorldHomeStage: "WoodedKingdom.png",
+  CloudWorldHomeStage: "CloudKingdom.png",
+  CityWorldHomeStage: "MetroKingdom.png",
+  SnowWorldHomeStage: "SnowKingdom.png",
+  SeaWorldHomeStage: "SeasideKingdom.png",
+  LavaWorldHomeStage: "LuncheonKingdom.png",
+  BossRaidWorldHomeStage: "RuinedKingdom.png",
+  KoopaWorldHomeStage: "BowserKingdom.png",
+  MoonWorldHomeStage: "MoonKingdom.png",
+  DarkWorldHomeStage: "DarkSide.png",
+  DarkerWorldHomeStage: "DarkerSide.png",
+};
 
 //dropdown menu logic
 function fillKingdomDropdowns() {
@@ -186,10 +381,10 @@ function fillKingdomDropdowns() {
   });
 }
 
-// Beim Laden der Seite Stage-Daten laden und Kingdom-Dropdowns befüllen
-document.addEventListener("DOMContentLoaded", async function () {
-  await loadStageData();
-  
+// Beim Laden der Seite Kingdom-Dropdowns befüllen und initialisieren
+document.addEventListener("DOMContentLoaded", function () {
+  fillKingdomDropdowns();
+
   // Ban Stage Dropdown initialisieren
   const kingdomSelect = document.getElementById("kingdomSelect");
   if (kingdomSelect) {
@@ -263,7 +458,28 @@ async function fetchPlayers() {
   const response = await fetch("/api/players");
   if (!response.ok) return [];
   const data = await response.json();
-  return data.Players || [];
+  const realPlayers = data.Players || [];
+
+  // Test-Player hinzufügen
+  const testPlayer = {
+    Name: "TestPlayer",
+    Cap: "Mario",
+    Body: "Mario",
+    Capture: "Mario",
+    GameMode: "Multiplayer",
+    Stage: "CapWorldHomeStage",
+    IPv4: "192.168.1.100",
+    Banned: false,
+    Lives: 3,
+    Coins: 150,
+    Speed: 1.0,
+    JumpHeight: 1.0,
+    PosX: 1000,
+    PosY: 500,
+  };
+
+  // Test-Player zur Liste hinzufügen
+  return [testPlayer, ...realPlayers];
 }
 
 function getCapImg(capName) {
@@ -280,6 +496,61 @@ function getCaptureImg(captureName) {
   if (!captureName) return "-";
   return `<img src="images/capture/${captureName}.png" alt="${captureName}" class="outfit-img">`;
 }
+
+// Player Table Columns Definition (muss nach den Bildfunktionen stehen)
+const playerTableColumns = [
+  { key: "name", label: "Name", class: "col-name", render: (p) => p.Name },
+  {
+    key: "cap",
+    label: "Cap",
+    class: "col-cap",
+    render: (p) => getCapImg(p.Cap),
+  },
+  {
+    key: "body",
+    label: "Body",
+    class: "col-body",
+    render: (p) => getBodyImg(p.Body),
+  },
+  {
+    key: "capture",
+    label: "Capture",
+    class: "col-capture",
+    render: (p) => getCaptureImg(p.Capture),
+  },
+  {
+    key: "gamemode",
+    label: "Game Mode",
+    class: "col-gamemode",
+    render: (p) => p.GameMode || "-",
+  },
+  {
+    key: "stage",
+    label: "Stage",
+    class: "col-stage",
+    render: (p) => p.Stage || "-",
+  },
+  { key: "ip", label: "IP", class: "col-ip", render: (p) => p.IPv4 || "-" },
+  {
+    key: "actions",
+    label: "Aktionen",
+    class: "col-actions",
+    render: (p, idx) => `
+    <button class="btn btn-sm btn-outline-danger" onclick="toggleBan(${idx})">${
+      p.Banned ? "Unban" : "Ban"
+    }</button>
+    <button class="btn btn-sm btn-outline-warning ms-1" onclick="crashPlayer('${
+      p.Name
+    }')">Crash</button>
+    <button class="btn btn-sm btn-outline-primary ms-1" onclick="openTeleportModal('${
+      p.Name
+    }')">Teleport</button>
+    <button class="btn btn-sm btn-outline-success ms-1" onclick="openParamEditor('${
+      p.Name
+    }')">Param Editor</button>
+  `,
+  },
+];
 
 async function renderPlayerTable() {
   const tbody = document.getElementById("playerTable");
@@ -855,58 +1126,7 @@ if (!window.teleportModalHandlerAdded) {
   window.teleportModalHandlerAdded = true;
 }
 
-// Modal für Parameter-Editor einfügen, falls nicht vorhanden
-if (!document.getElementById("paramEditorModal")) {
-  const paramModalHtml = `
-    <div class="modal fade" id="paramEditorModal" tabindex="-1" aria-labelledby="paramEditorModalLabel" aria-hidden="true">
-      <div class="modal-dialog">
-        <div class="modal-content">
-          <div class="modal-header">
-            <h5 class="modal-title" id="paramEditorModalLabel">Parameter bearbeiten</h5>
-            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-          </div>
-          <div class="modal-body">
-            <div style="display:flex;justify-content:space-between;align-items:flex-start;">
-              <div id="paramCoinSVG"></div>
-              <div id="paramLifeSVG"></div>
-            </div>
-            <form id="paramEditorForm">
-              <div class="d-flex flex-row justify-content-center align-items-end gap-3">
-                <div>
-                  <label for="paramCap" class="form-label">Cap</label>
-                  <select id="paramCap" class="form-select" style="width:120px;"></select>
-                </div>
-                <div>
-                  <label for="paramBody" class="form-label">Body</label>
-                  <select id="paramBody" class="form-select" style="width:120px;"></select>
-                </div>
-              </div>
-              <div id="outfitPreview" style="margin-top:8px;display:flex;justify-content:center;gap:16px;"></div>
-              <input type="hidden" id="paramLives" value="3" />
-              <input type="hidden" id="paramCoins" value="0" />
-              <div class="d-flex justify-content-between mt-4">
-                <div style="width:48%">
-                  <label for="paramSpeed" class="form-label">Speed</label>
-                  <input type="number" step="0.01" class="form-control" id="paramSpeed" min="0.1" />
-                </div>
-                <div style="width:48%">
-                  <label for="paramJumpHeight" class="form-label">Sprunghöhe</label>
-                  <input type="number" step="0.01" class="form-control" id="paramJumpHeight" min="0.1" />
-                </div>
-              </div>
-              <input type="hidden" id="paramPlayerName" />
-            </form>
-          </div>
-          <div class="modal-footer">
-            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Abbrechen</button>
-            <button type="button" class="btn btn-primary" id="paramEditorSendBtn">Speichern</button>
-          </div>
-        </div>
-      </div>
-    </div>
-  `;
-  document.body.insertAdjacentHTML("beforeend", paramModalHtml);
-}
+// Modal für Parameter-Editor ist bereits im HTML vorhanden, daher nicht dynamisch erstellen
 
 // Lebens- und Münzanzeige für das Param-Modal (Segment-Kreis, Herz, Zahl, Münze, interaktiv)
 function renderLifeAndCoinSVG(lives, coins) {
@@ -1053,44 +1273,116 @@ function setupScrubbers() {
 }
 // Funktion zum Öffnen des Parameter-Editors
 window.openParamEditor = async function (playerName) {
-  // Modal-HTML ggf. einfügen, falls nicht vorhanden
-  if (!document.getElementById("paramEditorModal")) {
-    // (Modal-HTML wie oben einfügen, ggf. aus Template-String)
-    // ... (hier ggf. den Modal-HTML-Block einfügen, wie in der letzten Version)
-    // Für diese Demo: alert("Fehler: Modal-HTML fehlt!"); return;
+  // Modal-HTML muss im DOM sein
+  const modalEl = document.getElementById("paramEditorModal");
+  if (!modalEl) {
     alert(
       "Fehler: Das Parameter-Modal konnte nicht gefunden werden. Bitte Seite neu laden."
     );
     return;
   }
+
   document.getElementById("paramPlayerName").value = playerName;
+
   // Spielerwerte laden
   const players = await fetchPlayers();
   const player = players.find((p) => p.Name === playerName);
+
   if (player) {
-    document.getElementById("paramSpeed").value = player.Speed;
-    document.getElementById("paramJumpHeight").value = player.JumpHeight;
-    currentLives = player.Lives;
-    currentCoins = player.Coins;
-    if (
-      !document.getElementById("paramCoinSVG") ||
-      !document.getElementById("paramLifeSVG")
-    ) {
-      alert(
-        "Fehler: Ein zentrales Anzeige-Element fehlt im Modal. Bitte Seite neu laden."
-      );
-      return;
+    // Coins, Leben, Speed, Jump High setzen
+    document.getElementById("paramCoins").value = player.Coins || 0;
+    document.getElementById("paramLives").value = player.Lives || 3;
+    document.getElementById("paramSpeed").value = player.Speed || 1.0;
+    document.getElementById("paramJumpHeight").value = player.JumpHeight || 1.0;
+
+    // Koordinaten setzen (falls vorhanden)
+    const coordsElement = document.getElementById("paramCoords");
+    if (coordsElement) {
+      coordsElement.value =
+        player.PosX !== undefined && player.PosY !== undefined
+          ? `${player.PosX}, ${player.PosY}`
+          : "";
     }
-    document.getElementById("paramCoinSVG").innerHTML =
-      renderCoinSVG(currentCoins);
-    document.getElementById("paramLifeSVG").innerHTML =
-      renderLifeSVG(currentLives);
-    setupScrubbers();
-    await fillCapAndBodyDropdowns(player.Cap, player.Body);
+
+    // Cap/Body Dropdowns befüllen
+    await fillCapAndBodyDropdowns(
+      player.Cap || "Mario",
+      player.Body || "Mario"
+    );
+
+    // Ausgewählte Werte setzen
+    document.getElementById("paramCap").value = player.Cap || "Mario";
+    document.getElementById("paramBody").value = player.Body || "Mario";
+
+    // Vorschau-Bilder aktualisieren
+    const capPreviewImg = document.getElementById("capPreviewImg");
+    const bodyPreviewImg = document.getElementById("bodyPreviewImg");
+
+    if (capPreviewImg) {
+      capPreviewImg.src = `images/cap/${player.Cap || "Mario"}.png`;
+    }
+    if (bodyPreviewImg) {
+      bodyPreviewImg.src = `images/body/${player.Body || "Mario"}.png`;
+    }
+
+    // Dropdown-Änderung aktualisiert Vorschau
+    document.getElementById("paramCap").onchange = function () {
+      if (capPreviewImg) {
+        capPreviewImg.src = `images/cap/${this.value}.png`;
+      }
+    };
+    document.getElementById("paramBody").onchange = function () {
+      if (bodyPreviewImg) {
+        bodyPreviewImg.src = `images/body/${this.value}.png`;
+      }
+    };
   }
-  const modal = new bootstrap.Modal(
-    document.getElementById("paramEditorModal")
-  );
+
+  // Button-Events für Schnellaktionen
+  const coinsGiveBtn = document.getElementById("coinsGiveBtn");
+  if (coinsGiveBtn) {
+    coinsGiveBtn.onclick = function () {
+      document.getElementById("paramCoins").value = 9999;
+    };
+  }
+
+  const coinsResetBtn = document.getElementById("coinsResetBtn");
+  if (coinsResetBtn) {
+    coinsResetBtn.onclick = function () {
+      document.getElementById("paramCoins").value = 0;
+    };
+  }
+
+  const koenigHerzBtn = document.getElementById("koenigHerzBtn");
+  if (koenigHerzBtn) {
+    koenigHerzBtn.onclick = function () {
+      document.getElementById("paramLives").value = 6;
+    };
+  }
+
+  const playerDieBtn = document.getElementById("playerDieBtn");
+  if (playerDieBtn) {
+    playerDieBtn.onclick = function () {
+      document.getElementById("paramLives").value = 0;
+    };
+  }
+
+  const speedResetBtn = document.getElementById("speedResetBtn");
+  if (speedResetBtn) {
+    speedResetBtn.onclick = function () {
+      document.getElementById("paramSpeed").value = 1.0;
+    };
+  }
+
+  const jumpResetBtn = document.getElementById("jumpResetBtn");
+  if (jumpResetBtn) {
+    jumpResetBtn.onclick = function () {
+      document.getElementById("paramJumpHeight").value = 1.0;
+    };
+  }
+
+  // Modal anzeigen
+  const modal = new bootstrap.Modal(modalEl);
   modal.show();
 };
 // Event-Listener für das Leben- und Münzen-Feld, um SVG zu aktualisieren
@@ -1113,29 +1405,90 @@ if (!window.paramLifeSVGHandlerAdded) {
 if (!window.paramEditorHandlerAdded) {
   document.getElementById("paramEditorSendBtn").onclick = async function () {
     const player = document.getElementById("paramPlayerName").value;
-    const outfit = document.getElementById("paramOutfit").value;
+    const lives = document.getElementById("paramLives").value;
+    const coins = document.getElementById("paramCoins").value;
+    const cap = document.getElementById("paramCap").value;
+    const body = document.getElementById("paramBody").value;
     const speed = document.getElementById("paramSpeed").value;
     const jumpHeight = document.getElementById("paramJumpHeight").value;
+
+    // Leben setzen
+    document
+      .getElementById("paramLives")
+      .addEventListener("change", function () {
+        const player = document.getElementById("paramPlayerName").value;
+        const lives = this.value;
+        fetch("/commands/exec", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ command: `health ${player} ${lives}` }),
+        });
+      });
+
+    //Life Up Heart
+    document.getElementById("lifeUpHeartBtn").onclick = function () {
+      fetch("/commands/exec", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ command: `health ${player} 6` }),
+      });
+    };
+
+    //Kill player
+    document.getElementById("playerKillBtn").onclick = function () {
+      fetch("/commands/exec", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ command: `health ${player} 0` }),
+      });
+    };
+
+    // Münzen setzen
+    document
+      .getElementById("paramCoins")
+      .addEventListener("change", function () {
+        const player = document.getElementById("paramPlayerName").value;
+        const coins = this.value;
+        fetch("/commands/exec", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ command: `coins ${player} ${coins}` }),
+        });
+      });
+
+    //Give 9999 coins
+    document.getElementById("coinsGiveBtn").onclick = function () {
+      fetch("/commands/exec", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ command: `coins ${player} 9999` }),
+      });
+    };
+
+    //Reset coins to 0
+    document.getElementById("coinsResetBtn").onclick = function () {
+      fetch("/commands/exec", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ command: `coins ${player} 0` }),
+      });
+    };
+
+    // Outfit setzen (Cap und Body)
     await fetch("/commands/exec", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ command: `setlives ${player} ${currentLives}` }),
+      body: JSON.stringify({ command: `setoutfit ${player} ${cap} ${body}` }),
     });
-    await fetch("/commands/exec", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ command: `setcoins ${player} ${currentCoins}` }),
-    });
-    await fetch("/commands/exec", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ command: `setoutfit ${player} ${outfit}` }),
-    });
+
+    // Speed setzen
     await fetch("/commands/exec", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ command: `setspeed ${player} ${speed}` }),
     });
+
+    // Sprunghöhe setzen
     await fetch("/commands/exec", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -1143,9 +1496,13 @@ if (!window.paramEditorHandlerAdded) {
         command: `setjumpheight ${player} ${jumpHeight}`,
       }),
     });
+
+    // Modal schließen
     bootstrap.Modal.getInstance(
       document.getElementById("paramEditorModal")
     ).hide();
+
+    // Spielertabelle aktualisieren
     renderPlayerTable();
   };
   window.paramEditorHandlerAdded = true;
@@ -1268,8 +1625,6 @@ setInterval(function () {
     renderMap();
   }
 }, 2000);
-
-let lastSeenPlayers = {};
 
 // Lebensanzeige-Overlay oben rechts
 function renderLifeOverlay(lives) {
@@ -1459,6 +1814,7 @@ async function fillCapAndBodyDropdowns(selectedCap, selectedBody) {
   // Vorschau
   const preview = document.getElementById("outfitPreview");
   function updatePreview() {
+    if (!preview) return;
     preview.innerHTML = `
       <img src="images/cap/${capSelect.value}.png" style="height:48px;">
       <img src="images/body/${bodySelect.value}.png" style="height:48px;">
@@ -1510,8 +1866,12 @@ function initializeDraggableFeatures() {
   const gridSize = 50; // Größe des Rasters in Pixeln
   let isShiftPressed = false;
 
+  // Vorherige Event-Listener entfernen (falls vorhanden)
+  document.removeEventListener("keydown", window.shiftKeyDownHandler);
+  document.removeEventListener("keyup", window.shiftKeyUpHandler);
+
   // Shift-Key Event-Listener
-  document.addEventListener("keydown", function (e) {
+  window.shiftKeyDownHandler = function (e) {
     if (e.key === "Shift") {
       isShiftPressed = true;
       // Visuelle Rückmeldung aktivieren
@@ -1520,9 +1880,9 @@ function initializeDraggableFeatures() {
         box.classList.add("grid-active");
       });
     }
-  });
+  };
 
-  document.addEventListener("keyup", function (e) {
+  window.shiftKeyUpHandler = function (e) {
     if (e.key === "Shift") {
       isShiftPressed = false;
       // Visuelle Rückmeldung deaktivieren
@@ -1531,7 +1891,10 @@ function initializeDraggableFeatures() {
         box.classList.remove("grid-active");
       });
     }
-  });
+  };
+
+  document.addEventListener("keydown", window.shiftKeyDownHandler);
+  document.addEventListener("keyup", window.shiftKeyUpHandler);
 
   featureBoxes.forEach((box) => {
     // Gespeicherte Position laden
@@ -1641,13 +2004,15 @@ function initializeDraggableFeatures() {
       document.removeEventListener("mouseup", stopDrag);
     }
 
-    // Event-Listener für Drag-Handle
+    // Vorherige Event-Listener entfernen (falls vorhanden)
     if (dragHandle) {
+      dragHandle.removeEventListener("mousedown", startDrag);
       dragHandle.addEventListener("mousedown", startDrag);
     }
 
     // Auch die gesamte Box als Drag-Bereich (optional)
-    box.addEventListener("mousedown", function (e) {
+    box.removeEventListener("mousedown", box.dragHandler);
+    box.dragHandler = function (e) {
       // Nur starten wenn nicht auf einem Button oder Select geklickt wurde
       if (
         e.target.tagName !== "BUTTON" &&
@@ -1656,22 +2021,22 @@ function initializeDraggableFeatures() {
       ) {
         startDrag(e);
       }
-    });
+    };
+    box.addEventListener("mousedown", box.dragHandler);
   });
 }
 
 // Feature-Boxen initialisieren wenn Features-Sektion geladen wird
-document.getElementById("navFeatures").onclick = function (e) {
-  e.preventDefault();
-  showSection("features");
-  // Kurz warten bis DOM aktualisiert ist
-  setTimeout(initializeDraggableFeatures, 100);
-};
+let featuresInitialized = false;
 
 // Auch beim ersten Laden initialisieren falls Features-Sektion sichtbar ist
 document.addEventListener("DOMContentLoaded", function () {
-  if (document.getElementById("featuresSection").style.display !== "none") {
+  if (
+    document.getElementById("featuresSection").style.display !== "none" &&
+    !featuresInitialized
+  ) {
     initializeDraggableFeatures();
+    featuresInitialized = true;
   }
 });
 
@@ -1841,9 +2206,28 @@ async function fillAllPlayerDropdowns() {
 
 // Beim Laden der Seite und beim Öffnen des Features-Bereichs Dropdowns befüllen
 document.addEventListener("DOMContentLoaded", fillAllPlayerDropdowns);
-document
-  .getElementById("navFeatures")
-  .addEventListener("click", fillAllPlayerDropdowns);
+
+// Features-Navigation Event-Listener kombinieren
+const navFeaturesElement = document.getElementById("navFeatures");
+if (navFeaturesElement) {
+  // Vorherige Event-Listener entfernen
+  navFeaturesElement.removeEventListener("click", fillAllPlayerDropdowns);
+
+  // Neuer kombinierter Event-Listener
+  navFeaturesElement.addEventListener("click", function (e) {
+    e.preventDefault();
+    showSection("features");
+    fillAllPlayerDropdowns();
+
+    // Kurz warten bis DOM aktualisiert ist
+    setTimeout(() => {
+      if (!featuresInitialized) {
+        initializeDraggableFeatures();
+        featuresInitialized = true;
+      }
+    }, 100);
+  });
+}
 
 // Nach dem Rendern prüfen, ob alle Spalten ausgeblendet sind
 function checkAllColumnsHidden() {
@@ -1874,56 +2258,51 @@ function checkAllColumnsHidden() {
 }
 checkAllColumnsHidden();
 
-const playerTableColumns = [
-  { key: "name", label: "Name", class: "col-name", render: (p) => p.Name },
-  {
-    key: "cap",
-    label: "Cap",
-    class: "col-cap",
-    render: (p) => getCapImg(p.Cap),
-  },
-  {
-    key: "body",
-    label: "Body",
-    class: "col-body",
-    render: (p) => getBodyImg(p.Body),
-  },
-  {
-    key: "capture",
-    label: "Capture",
-    class: "col-capture",
-    render: (p) => getCaptureImg(p.Capture),
-  },
-  {
-    key: "gamemode",
-    label: "Game Mode",
-    class: "col-gamemode",
-    render: (p) => p.GameMode || "-",
-  },
-  {
-    key: "stage",
-    label: "Stage",
-    class: "col-stage",
-    render: (p) => p.Stage || "-",
-  },
-  { key: "ip", label: "IP", class: "col-ip", render: (p) => p.IPv4 || "-" },
-  {
-    key: "actions",
-    label: "Aktionen",
-    class: "col-actions",
-    render: (p, idx) => `
-    <button class="btn btn-sm btn-outline-danger" onclick="toggleBan(${idx})">${
-      p.Banned ? "Unban" : "Ban"
-    }</button>
-    <button class="btn btn-sm btn-outline-warning ms-1" onclick="crashPlayer('${
-      p.Name
-    }')">Crash</button>
-    <button class="btn btn-sm btn-outline-primary ms-1" onclick="openTeleportModal('${
-      p.Name
-    }')">Teleport</button>
-    <button class="btn btn-sm btn-outline-success ms-1" onclick="openParamEditor('${
-      p.Name
-    }')">Param Editor</button>
-  `,
-  },
-];
+// Scrubber-Funktion für Zahleneingabefelder im Param-Editor
+function enableScrubber(
+  inputId,
+  step = 1,
+  min = null,
+  max = null,
+  decimals = 0
+) {
+  const input = document.getElementById(inputId);
+  if (!input) return;
+  input.style.cursor = "ew-resize";
+
+  // Vorherige Listener entfernen (damit es nicht mehrfach gebunden wird)
+  input.onmousedown = null;
+
+  input.onmousedown = function (e) {
+    let startX = e.clientX;
+    let startVal = parseFloat(input.value) || 0;
+    document.body.style.cursor = "ew-resize";
+
+    function move(ev) {
+      let diff = Math.round((ev.clientX - startX) / 5);
+      let newVal = startVal + diff * step;
+      if (min !== null) newVal = Math.max(min, newVal);
+      if (max !== null) newVal = Math.min(max, newVal);
+      if (decimals > 0) newVal = parseFloat(newVal.toFixed(decimals));
+      input.value = newVal;
+      input.dispatchEvent(new Event("change"));
+    }
+    function up() {
+      document.removeEventListener("mousemove", move);
+      document.removeEventListener("mouseup", up);
+      document.body.style.cursor = "";
+    }
+    document.addEventListener("mousemove", move);
+    document.addEventListener("mouseup", up);
+  };
+}
+
+// Aktiviere Scrubber für relevante Felder beim Öffnen des Param-Editors
+const oldOpenParamEditor = window.openParamEditor;
+window.openParamEditor = async function (playerName) {
+  await oldOpenParamEditor(playerName);
+  enableScrubber("paramCoins", 1, 0, 9999, 0);
+  enableScrubber("paramLives", 1, 0, 6, 0);
+  enableScrubber("paramSpeed", 0.01, 0.1, null, 2);
+  enableScrubber("paramJumpHeight", 0.01, 0.1, null, 2);
+};

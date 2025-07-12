@@ -77,6 +77,7 @@ class Client {
         static void sendShineCollectPacket(int shineId);
         static void sendGameModeInfPacket();
         static void sendCaptureInfPacket(const PlayerActorHakoniwa* player);
+        static void sendHealthCoinsPacket(const PlayerActorHakoniwa* player);
         void resendInitPackets();
 
         int getCollectedShinesCount() { return curCollectedShines.size(); }

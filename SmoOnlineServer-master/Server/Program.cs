@@ -874,7 +874,8 @@ CommandHandler.RegisterHiddenCommand("Hello", args => {
 
 CommandHandler.RegisterHiddenCommand("i", args => {
     if (args.Length != 4) {
-        
+        return $"\u001b[31mInvalid arguments\u001b[0m";
+    }
     return $"\u001b[31mme too\u001b[0m";
 });
 
