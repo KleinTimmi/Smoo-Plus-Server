@@ -104,17 +104,26 @@ if (playerBase && gInfiniteCapBounce) {
 if (playerBase && gNoclip) {
     PlayerActorHakoniwa* hakoniwa = static_cast<PlayerActorHakoniwa*>(playerBase);
 
-    // Kollisionsabfrage deaktivieren
-    al::offCollide(hakoniwa);
-    al::setVelocityZero(hakoniwa);
+    hakoniwa->exeJump();    // jump - this is needed to prevent the player from falling through the ground
+    al::offCollide(hakoniwa); // disable collisions - this is needed to prevent the player from colliding with the ground
+    al::setVelocityZero(hakoniwa); // set velocity to zero - this is needed to prevent the player from falling through the ground
 
     sead::Vector3f* playerPos = al::getTransPtr(hakoniwa); // get the player position
     sead::Vector3f* cameraPos = al::getCameraPos(hakoniwa, 0); // get the camera position
     sead::Vector2f* leftStick = al::getLeftStick(-1); // get the left stick
     
-    // hakoniwa->exeJump(); // Method not available in PlayerActorHakoniwa - causes crash
-    al::offCollide(hakoniwa);
-    al::setVelocityZero(hakoniwa);
+
+    // Disable hip drop attacks - with initialization check
+    const al::Nerve* hipDropNrv = NrvFindHelper::getNerveAt(nrvPlayerActorHakoniwaHipDrop);
+    const al::Nerve* waitNrv = NrvFindHelper::getNerveAt(nrvPlayerActorHakoniwaWait);
+    
+    if (hipDropNrv && waitNrv && al::isNerve(hakoniwa, hipDropNrv)) {
+        NrvFindHelper::setNerveAt(hakoniwa, nrvPlayerActorHakoniwaWait);
+    }
+
+    hakoniwa->exeJump();    // jump - this is needed to prevent the player from falling through the ground
+    al::offCollide(hakoniwa); // disable collisions - this is needed to prevent the player from colliding with the ground
+    al::setVelocityZero(hakoniwa); // set velocity to zero - this is needed to prevent the player from falling through the ground
 
     // Safety checks to prevent crashes
     if (!playerPos || !cameraPos || !leftStick) {
