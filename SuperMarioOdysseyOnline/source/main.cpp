@@ -16,6 +16,7 @@
 #include "al/util/GraphicsUtil.h"
 #include "al/util/LiveActorUtil.h"
 #include "al/util/NerveUtil.h"
+#include "al/actor/ActorActionKeeper.h"
 
 
 #include "debugMenu.hpp"
@@ -54,14 +55,25 @@
 
 #include "helpers.hpp"
 #include "helpers/GetHelper.h"
+#include "helpers/hook.hpp"
+
 #include "helpers/NrvFind/NrvFindHelper.h"
 #include "helpers/NrvFind/player/NrvPlayerActorHakoniwa.h"
+
+#include <exl/hook/trampoline.hpp>
+
+
 
 static int pInfSendTimer = 0;
 static int gameInfSendTimer = 0;
 
 bool gInfiniteCapBounce = false;
 bool gNoclip = false;
+
+
+static int capBounceFrameCounter = 0;
+static int alle_frames = 3; // sagt das nur alle x frames der cap bounce funktion ausgeführt wird
+
 
 
 
@@ -78,11 +90,61 @@ void updatePlayerInfo(GameDataHolderAccessor holder, PlayerActorBase* playerBase
         pInfSendTimer = 0;
     }
 
-//Cap Bounce Logik
-static int capBounceFrameCounter = 0;
-static int alle_frames = 3; // sagt das nur alle x frames der cap bounce funktion ausgeführt wird
+    // Noclip direkt implementieren ohne Hook
+    if (gNoclip && playerBase && !isYukimaru) {
+        PlayerActorHakoniwa* hakoniwa = static_cast<PlayerActorHakoniwa*>(playerBase);
+        if (hakoniwa) {
+            static bool wasNoclipOn = false;
+            bool isNoclip = gNoclip;
 
-if (playerBase && gInfiniteCapBounce) {
+            if (!isNoclip && wasNoclipOn)
+                al::onCollide(hakoniwa);
+            wasNoclipOn = isNoclip;
+
+            if (isNoclip) {
+                static float speed = 20.0f;
+                static float speedMax = 250.0f;
+                static float vspeed = 10.0f;
+                static float speedGain = 0.0f;
+
+                sead::Vector3f *playerPos = al::getTransPtr(hakoniwa);
+                sead::Vector3f *cameraPos = al::getCameraPos(hakoniwa, 0);
+                sead::Vector2f *leftStick = al::getLeftStick(-1);
+
+                const al::Nerve* hipDropNrv = NrvFindHelper::getNerveAt(nrvPlayerActorHakoniwaHipDrop);
+                if(al::isNerve(hakoniwa, hipDropNrv))
+                    NrvFindHelper::setNerveAt(hakoniwa, nrvPlayerActorHakoniwaWait);
+                    
+                hakoniwa->exeJump();
+                al::offCollide(hakoniwa);
+                al::setVelocityZero(hakoniwa);
+
+                // Mario slightly goes down even when velocity is 0. This is a hacky fix for that.
+                playerPos->y += 1.5f;
+
+                float d = sqrt(al::powerIn(playerPos->x - cameraPos->x, 2) + (al::powerIn(playerPos->z - cameraPos->z, 2)));
+                float vx = ((speed + speedGain) / d) * (playerPos->x - cameraPos->x);
+                float vz = ((speed + speedGain) / d) * (playerPos->z - cameraPos->z);
+
+                playerPos->x -= leftStick->x * vz;
+                playerPos->z += leftStick->x * vx;
+
+                playerPos->x += leftStick->y * vx;
+                playerPos->z += leftStick->y * vz;
+
+                if (al::isPadHoldX(-1) || al::isPadHoldY(-1)) speedGain += 0.5f;
+                if (al::isPadHoldA(-1) || al::isPadHoldB(-1)) speedGain -= 0.5f;
+                if (speedGain <= 0.0f) speedGain = 0.0f;
+                if (speedGain >= speedMax) speedGain = speedMax;
+
+                if (al::isPadHoldZL(-1)) playerPos->y -= (vspeed + speedGain / 3);
+                if (al::isPadHoldZR(-1)) playerPos->y += (vspeed + speedGain / 3);
+            }
+        }
+    }
+
+
+    if (playerBase && gInfiniteCapBounce) {
     capBounceFrameCounter++;
     if (capBounceFrameCounter >= alle_frames) { // alle 3 Frames
         PlayerActorHakoniwa* hakoniwa = static_cast<PlayerActorHakoniwa*>(playerBase);
@@ -93,95 +155,9 @@ if (playerBase && gInfiniteCapBounce) {
         capBounceFrameCounter = 0; // zurücksetzen
     }
 }
-
-
-    static float speed = 20.0f;
-    static float speedMax = 250.0f;
-    static float vspeed = 10.0f;
-    static float speedGain = 0.0f;
-
-//Noclip Logik
-if (playerBase && gNoclip) {
-    PlayerActorHakoniwa* hakoniwa = static_cast<PlayerActorHakoniwa*>(playerBase);
-
-    hakoniwa->exeJump();    // jump - this is needed to prevent the player from falling through the ground
-    al::offCollide(hakoniwa); // disable collisions - this is needed to prevent the player from colliding with the ground
-    al::setVelocityZero(hakoniwa); // set velocity to zero - this is needed to prevent the player from falling through the ground
-
-    sead::Vector3f* playerPos = al::getTransPtr(hakoniwa); // get the player position
-    sead::Vector3f* cameraPos = al::getCameraPos(hakoniwa, 0); // get the camera position
-    sead::Vector2f* leftStick = al::getLeftStick(-1); // get the left stick
-    
-
-    // Disable hip drop attacks - with initialization check
-    const al::Nerve* hipDropNrv = NrvFindHelper::getNerveAt(nrvPlayerActorHakoniwaHipDrop);
-    const al::Nerve* waitNrv = NrvFindHelper::getNerveAt(nrvPlayerActorHakoniwaWait);
-    
-    if (hipDropNrv && waitNrv && al::isNerve(hakoniwa, hipDropNrv)) {
-        NrvFindHelper::setNerveAt(hakoniwa, nrvPlayerActorHakoniwaWait);
-    }
-
-    hakoniwa->exeJump();    // jump - this is needed to prevent the player from falling through the ground
-    al::offCollide(hakoniwa); // disable collisions - this is needed to prevent the player from colliding with the ground
-    al::setVelocityZero(hakoniwa); // set velocity to zero - this is needed to prevent the player from falling through the ground
-
-    // Safety checks to prevent crashes
-    if (!playerPos || !cameraPos || !leftStick) {
-        return; // Exit if any pointer is null
-    }
-
-    // Mario leicht anheben, um das Absinken zu verhindern
-    playerPos->y += 1.5f;
-
-    // LunaKit-style complex movement calculations
-
-    // Calculate distance from camera
-    float d = sqrt(al::powerIn(playerPos->x - cameraPos->x, 2) + al::powerIn(playerPos->z - cameraPos->z, 2));
-    
-    // Calculate velocity components based on camera position
-    float vx = ((speed + speedGain) / d) * (playerPos->x - cameraPos->x);
-    float vz = ((speed + speedGain) / d) * (playerPos->z - cameraPos->z);
-
-    // Apply movement based on stick input and camera-relative velocity
-    playerPos->x -= leftStick->x * vz;
-    playerPos->z += leftStick->x * vx;
-    playerPos->x += leftStick->y * vx;
-    playerPos->z += leftStick->y * vz;
-
-    // Speed gain controls
-    if (al::isPadHoldX(-1) || al::isPadHoldY(-1)) speedGain += 0.5f;
-    if (al::isPadHoldA(-1) || al::isPadHoldB(-1)) speedGain -= 0.5f;
-    if (speedGain <= 0.0f) speedGain = 0.0f;
-    if (speedGain >= speedMax) speedGain = speedMax;
-
-    // Vertical movement
-    if (al::isPadHoldZL(-1)) playerPos->y -= (vspeed + speedGain / 3);
-    if (al::isPadHoldZR(-1)) playerPos->y += (vspeed + speedGain / 3);
-
-    // Spieler auf Mindesthöhe halten
-    if (playerPos->y < 5.0f) {
-        playerPos->y = 5.0f;
-    }
-
-} else if (playerBase && !gNoclip) {
-    PlayerActorHakoniwa* hakoniwa = static_cast<PlayerActorHakoniwa*>(playerBase);
-    al::onCollide(hakoniwa);
 }
 
 
-    if (gameInfSendTimer >= 60) {
-        if (isYukimaru) {
-            Client::sendGameInfPacket(holder);
-        } else {
-            Client::sendGameInfPacket((PlayerActorHakoniwa*)playerBase, holder);
-        }
-
-        gameInfSendTimer = 0;
-    }
-
-    pInfSendTimer++;
-    gameInfSendTimer++;
-}
 
 // ------------- Hooks -------------
 
@@ -572,6 +548,9 @@ bool hakoniwaSequenceHook(HakoniwaSequence* sequence) {
         }
         if (al::isPadTriggerUp(-1)) { // L + Up => Disable background music
             isDisableMusic = !isDisableMusic;
+        }
+        if (al::isPadTriggerRight(-1)) { // L + Right => Toggle noclip
+            gNoclip = !gNoclip;
         }
     }
 

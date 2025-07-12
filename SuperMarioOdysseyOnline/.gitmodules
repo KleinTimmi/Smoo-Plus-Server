@@ -1,0 +1,9 @@
+[submodule "libs/smo"]
+	path = libs/smo
+	url = https://github.com/MonsterDruide1/OdysseyHeaders.git
+[submodule "libs/ArduinoJson"]
+	path = libs/ArduinoJson
+	url = https://github.com/bblanchon/ArduinoJson.git
+[submodule "libs/nnsdk/submodule"]
+	path = libs/nnsdk/submodule
+	url = https://github.com/open-ead/nnheaders.git

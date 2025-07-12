@@ -51,7 +51,7 @@ SOURCES		:=  \
 			source
 SOURCES     +=  source/al/execute
 DATA		:=	data
-INCLUDES	:=	include include/sead
+INCLUDES	:=	include include/sead libs/exlaunch
 
 #---------------------------------------------------------------------------------
 # options for code generation
