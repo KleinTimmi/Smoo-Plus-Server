@@ -527,6 +527,18 @@ CommandHandler.RegisterCommand("noclip", args => {
     return $"Gave player/s: {string.Join(", ", players.Select(p => p.Name))} Noclip: {enable}"; 
 });
 
+CommandHandler.RegisterCommand("message",|| "msg") args => {
+    const string optionUsage = "Usage: message <Player/*> <message>";
+    if (args.Length != 2)
+       // return optionUsage;
+    return "not implemented";
+
+    string playerArg = args[0];
+    string message = args[1];
+    //return $"Message sent to {playerArg}: {message}";
+    return "not implemented";
+}
+
 CommandHandler.RegisterCommand("scenario", args => {
     const string optionUsage = "Valid options: merge [true/false]";
     if (args.Length < 1)

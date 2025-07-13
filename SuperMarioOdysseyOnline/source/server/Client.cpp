@@ -923,7 +923,7 @@ void Client::handleExtrasPacket(Packet* curPacket) {
         Logger::log("Failed to cast packet to ExtrasPacket\n");
     }
 }
-
+/*
 void Client::sendHealthCoinsPacket(const PlayerActorHakoniwa* player) {
     if (!sInstance) {
         Logger::log("Static Instance is Null!\n");
@@ -973,7 +973,7 @@ void Client::handleHealthCoinsPacket(Packet* curPacket) {
         Logger::log("Failed to cast packet to Health_Coins\n");
     }
 }
-
+*/
 
 
 /**

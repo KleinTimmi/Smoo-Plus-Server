@@ -408,6 +408,7 @@ public class Server {
             await trySendPack<TagPacket>(other, other.GetTagPacket());
             await trySendMeta<GamePacket>(other, "lastGamePacket");
             await trySendMeta<PlayerPacket>(other, "lastPlayerPacket");
+            await trySendMeta<Health_CoinsPacket>(other, "lastHealthCoinsPacket");
         });
     }
 

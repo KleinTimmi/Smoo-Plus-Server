@@ -17,7 +17,7 @@ BUILDVERSTR ?= $(GIT_REV)
 IP ?= 192.168.178.37 # ftp server ip (usually is switch's local IP)
 DEBUGLOG ?= 1 # defaults to disable debug logger 
 SERVERIP ?= 192.168.178.37 # put debug logger server IP here
-ISEMU ?= 1 # set to 1 to compile for emulators
+ISEMU ?= 0 # set to 1 to compile for emulators
 
 
 PROJNAME ?= StarlightBase

@@ -51,7 +51,10 @@
 
 #include "packets/Extras.h"
 #include "packets/Extras.hpp"
-#include "packets/Health_Coins.hpp"
+
+#include "ExtrasCode.hpp"
+
+//#include "packets/Health_Coins.hpp"
 #include "al/util/ControllerUtil.h"
 #include "game/Player/PlayerHitPointData.h"
 
@@ -72,8 +75,8 @@ static int gameInfSendTimer = 0;
 bool gInfiniteCapBounce = false;
 bool gNoclip = false;
 
-int gHealth = 3;
-int gCoins = 0;
+//int gHealth = 3;
+//int gCoins = 0;
 
 static int capBounceFrameCounter = 0;
 static int alle_frames = 3; // sagt das nur alle x frames der cap bounce funktion ausgeführt wird
@@ -94,90 +97,10 @@ void updatePlayerInfo(GameDataHolderAccessor holder, PlayerActorBase* playerBase
         pInfSendTimer = 0;
     }
 
-    PlayerActorHakoniwa* hakoniwa = static_cast<PlayerActorHakoniwa*>(playerBase);
-    
-    // Check coins from HakoniwaSequence
-    HakoniwaSequence* sequence = tryGetHakoniwaSequence();
-    if (sequence && sequence->mFinalCoins != gCoins) {
-        gCoins = sequence->mFinalCoins;
-        Client::sendHealthCoinsPacket(hakoniwa);
-    }
-    
-    // Check health from PlayerHitPointData
-    if (holder.mData && holder.mData->mGameDataFile) {
-        PlayerHitPointData* hitData = holder.mData->mGameDataFile->getPlayerHitPointData();
-        if (hitData && hitData->mCurrentHit != gHealth) {
-            gHealth = hitData->mCurrentHit;
-            Client::sendHealthCoinsPacket(hakoniwa);
-        }
-    }
 
-/*
-    // Noclip direkt implementieren ohne Hook
-    if (gNoclip && playerBase && !isYukimaru) {
-        PlayerActorHakoniwa* hakoniwa = static_cast<PlayerActorHakoniwa*>(playerBase);
-        if (hakoniwa) {
-            static bool wasNoclipOn = false;
-            bool isNoclip = gNoclip;
+    handleNoclip(static_cast<PlayerActorHakoniwa*>(playerBase), gNoclip, isYukimaru);
 
-            if (!isNoclip && wasNoclipOn)
-                al::onCollide(hakoniwa);
-            wasNoclipOn = isNoclip;
-
-            if (isNoclip) {
-                static float speed = 20.0f;
-                static float speedMax = 250.0f;
-                static float vspeed = 10.0f;
-                static float speedGain = 0.0f;
-
-                sead::Vector3f *playerPos = al::getTransPtr(hakoniwa);
-                sead::Vector3f *cameraPos = al::getCameraPos(hakoniwa, 0);
-                sead::Vector2f *leftStick = al::getLeftStick(-1);
-
-                const al::Nerve* hipDropNrv = NrvFindHelper::getNerveAt(nrvPlayerActorHakoniwaHipDrop);
-                if(al::isNerve(hakoniwa, hipDropNrv))
-                    NrvFindHelper::setNerveAt(hakoniwa, nrvPlayerActorHakoniwaWait);
-                    
-                hakoniwa->exeJump();
-                al::offCollide(hakoniwa);
-                al::setVelocityZero(hakoniwa);
-
-                // Mario slightly goes down even when velocity is 0. This is a hacky fix for that.
-                playerPos->y += 1.5f;
-
-                float d = sqrt(al::powerIn(playerPos->x - cameraPos->x, 2) + (al::powerIn(playerPos->z - cameraPos->z, 2)));
-                float vx = ((speed + speedGain) / d) * (playerPos->x - cameraPos->x);
-                float vz = ((speed + speedGain) / d) * (playerPos->z - cameraPos->z);
-
-                playerPos->x -= leftStick->x * vz;
-                playerPos->z += leftStick->x * vx;
-
-                playerPos->x += leftStick->y * vx;
-                playerPos->z += leftStick->y * vz;
-
-                if (al::isPadHoldX(-1) || al::isPadHoldY(-1)) speedGain += 0.5f;
-                if (al::isPadHoldA(-1) || al::isPadHoldB(-1)) speedGain -= 0.5f;
-                if (speedGain <= 0.0f) speedGain = 0.0f;
-                if (speedGain >= speedMax) speedGain = speedMax;
-
-                if (al::isPadHoldZL(-1)) playerPos->y -= (vspeed + speedGain / 3);
-                if (al::isPadHoldZR(-1)) playerPos->y += (vspeed + speedGain / 3);
-            }
-        }
-    }
-*/
-
-    if (playerBase && gInfiniteCapBounce) {
-    capBounceFrameCounter++;
-    if (capBounceFrameCounter >= alle_frames) { // alle 3 Frames
-        PlayerActorHakoniwa* hakoniwa = static_cast<PlayerActorHakoniwa*>(playerBase);
-        if (hakoniwa && hakoniwa->mHackCap && hakoniwa->mHackCap->mCapActionHistory && hakoniwa->mPlayerWallActionHistory) {    //
-            hakoniwa->mHackCap->mCapActionHistory->clearCapJump();
-            hakoniwa->mPlayerWallActionHistory->reset();
-        }
-        capBounceFrameCounter = 0; // zurücksetzen
-    }
-}
+    handleInfiniteCapBounce(static_cast<PlayerActorHakoniwa*>(playerBase), gInfiniteCapBounce);
 }
 
 
