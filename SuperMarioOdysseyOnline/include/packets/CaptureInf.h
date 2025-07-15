@@ -8,6 +8,6 @@ struct PACKED CaptureInf : Packet {
         mPacketSize = sizeof(CaptureInf) - sizeof(Packet);
     };
 
-    char hackName[0x20] = {};
+    char hackName[0x20] = {}; //32
 
 };
