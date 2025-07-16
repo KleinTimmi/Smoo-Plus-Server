@@ -4,7 +4,7 @@
 #include <cmath>
 #include "packets/Extras.hpp"
 
-//------------------------------nützliche includes---------------------------------
+//------------------------------usefull includes---------------------------------
 #include "game/GameData/GameDataHolderAccessor.h"            //für health und coins
 #include "game/GameData/GameDataFunction.h"
 #include "game/HakoniwaSequence/HakoniwaSequence.h"
@@ -40,7 +40,7 @@ void handleNoclip(PlayerActorHakoniwa* hakoniwa, bool gNoclip, bool isYukimaru) 
 
            
            
-           
+           //instead set the player to demopupetable
            /* --------------------Nerven nerven---------------------------------
             const al::Nerve* hipDropNrv = NrvFindHelper::getNerveAt(nrvPlayerActorHakoniwaHipDrop);
             if(al::isNerve(hakoniwa, hipDropNrv))
