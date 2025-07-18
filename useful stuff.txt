@@ -9,7 +9,7 @@ Set costume
 https://github.com/KleinTimmi/SmooExtra/blob/master/SuperMarioOdysseyOnline%2Finclude%2Fgame%2FGameData%2FGameDataFile.h#L190-L191
 
 
-Sechser Herz 
+Life max up item
 
 https://github.com/KleinTimmi/SmooExtra/blob/master/SuperMarioOdysseyOnline%2Finclude%2Fgame%2FGameData%2FGameDataFunction.h#L130
 
