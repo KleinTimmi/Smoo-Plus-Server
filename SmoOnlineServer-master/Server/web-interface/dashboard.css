@@ -27,44 +27,7 @@ button.flex-fill {
   color: #ffffff;
   background: #303031;
   position: relative;
-  cursor: move;
-  user-select: none;
   transition: box-shadow 0.2s ease;
-}
-
-.feature-box.dragging {
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
-  z-index: 1000;
-  opacity: 0.9;
-}
-
-.feature-box .drag-handle {
-  position: absolute;
-  top: 8px;
-  right: 8px;
-  width: 20px;
-  height: 20px;
-  background: rgba(255, 255, 255, 0.1);
-  border-radius: 4px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: move;
-  font-size: 12px;
-  color: rgba(255, 255, 255, 0.6);
-  transition: background 0.2s ease;
-}
-
-.feature-box .drag-handle:hover {
-  background: rgba(255, 255, 255, 0.2);
-  color: rgba(255, 255, 255, 0.8);
-}
-
-.feature-box .card-body {
-  padding: 1rem;
-  color: #ffffff;
-  background: #303031;
-  padding-top: 2rem; /* Platz für Drag-Handle */
 }
 
 /* Features Container für absolute Positionierung */
@@ -78,20 +41,6 @@ button.flex-fill {
   padding-bottom: 20px; /* Etwas Abstand am unteren Rand */
 }
 
-/* Feature-Boxen können über Container-Grenzen hinausgehen */
-.feature-box {
-  max-width: 300px;
-  margin: 0 auto 1.5rem auto;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.07);
-  color: #ffffff;
-  background: #303031;
-  position: absolute;
-  cursor: move;
-  user-select: none;
-  transition: box-shadow 0.2s ease;
-  z-index: 10; /* Über anderen Elementen */
-}
-
 /* Light Mode Anpassungen für Feature-Boxen */
 body.theme-light .feature-box {
   background: #fff !important;
@@ -100,15 +49,6 @@ body.theme-light .feature-box {
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
 }
 
-body.theme-light .feature-box .drag-handle {
-  background: rgba(0, 0, 0, 0.1);
-  color: rgba(0, 0, 0, 0.6);
-}
-
-body.theme-light .feature-box .drag-handle:hover {
-  background: rgba(0, 0, 0, 0.2);
-  color: rgba(0, 0, 0, 0.8);
-}
 .sidebar .nav-link,
 .sidebar .navbar-brand {
   color: #fff;
@@ -586,14 +526,11 @@ body.theme-light #playerlistSection .dashboard-title {
   pointer-events: none;
 }
 
-.img-dropdown {
-  position: relative;
-}
-.img-dropdown-menu {
-  /* siehe JS für Details */
-}
-.img-dropdown-current {
-  /* siehe JS für Details */
+#outfitSetBtn {
+  margin-left: 200px;
+  margin-right: 200px;
+  margin-top: 10px;
+  width: 100px;
 }
 
 #szsDropZone {
@@ -735,89 +672,4 @@ body.theme-light #featuresSection.grid-mode {
     ),
     linear-gradient(90deg, rgba(13, 110, 253, 0.2) 1px, transparent 1px);
   background-size: 50px 50px;
-}
-
-/* Feature-Boxen gleich groß */
-.feature-box {
-  width: 320px;
-  height: 180px;
-  min-width: 320px;
-  min-height: 180px;
-  max-width: 320px;
-  max-height: 180px;
-  display: flex;
-  flex-direction: column;
-  justify-content: flex-start;
-}
-
-.feature-box .card-body {
-  display: flex;
-  flex-direction: column;
-  height: 100%;
-  justify-content: flex-start;
-  padding-top: 8px;
-  padding-bottom: 8px;
-}
-
-.feature-box .feature-title {
-  margin-bottom: 8px;
-  font-weight: 600;
-  font-size: 1.1rem;
-}
-
-.feature-box .feature-select-row {
-  display: flex;
-  flex-direction: column;
-  align-items: stretch;
-  margin-bottom: 0;
-  flex: 1 1 0;
-  justify-content: flex-start;
-}
-
-.feature-box select.form-select {
-  margin-bottom: 16px;
-  min-width: 90px;
-  max-width: 100%;
-  flex: 0 0 auto;
-}
-
-.feature-box .feature-btn-row {
-  display: flex;
-  flex-direction: row;
-  gap: 10px;
-  margin-bottom: 0;
-  width: 100%;
-}
-
-.feature-box .btn {
-  min-width: 0;
-  flex: 1 1 0;
-  margin-bottom: 0 !important;
-}
-
-/* Drag-Handle oben rechts bleibt */
-.feature-box .drag-handle {
-  position: absolute;
-  top: 8px;
-  right: 8px;
-  z-index: 2;
-}
-
-/* Select-Box in Feature-Boxen immer volle Breite */
-.feature-box .feature-select-row select.form-select {
-  width: 100%;
-  min-width: 0;
-  max-width: 100%;
-  box-sizing: border-box;
-  margin-bottom: 16px;
-  flex: 0 0 auto;
-}
-
-/* Buttons darunter immer gleichmäßig */
-.feature-box .feature-btn-row {
-  display: flex;
-  flex-direction: row;
-  gap: 10px;
-  margin-bottom: 0;
-  width: 100%;
 }

@@ -364,6 +364,134 @@ const mapImages = {
   DarkerWorldHomeStage: "DarkerSide.png",
 };
 
+// --- Hilfsfunktionen ganz oben einfügen ---
+function getSavedTheme() {
+  return localStorage.getItem("theme") || "system";
+}
+
+function updateColumnVisibility(columnName, visible) {
+  const className = `col-${columnName}`;
+  const elements = document.querySelectorAll(`.${className}`);
+
+  elements.forEach((element) => {
+    if (visible) {
+      element.classList.remove("hidden");
+    } else {
+      element.classList.add("hidden");
+    }
+  });
+}
+
+function initializeColumnVisibility() {
+  // Gespeicherte Einstellungen laden
+  const savedSettings = localStorage.getItem("playerlistColumns");
+  const defaultSettings = {
+    name: true,
+    cap: true,
+    body: true,
+    capture: true,
+    gamemode: true,
+    stage: true,
+    ip: true,
+    actions: true,
+  };
+
+  const settings = savedSettings ? JSON.parse(savedSettings) : defaultSettings;
+
+  // Checkboxen entsprechend setzen
+  Object.keys(settings).forEach((key) => {
+    const checkbox = document.getElementById(
+      `col${key.charAt(0).toUpperCase() + key.slice(1)}`
+    );
+    if (checkbox) {
+      checkbox.checked = settings[key];
+      updateColumnVisibility(key, settings[key]);
+    }
+  });
+
+  // Event-Listener für Checkboxen
+  const checkboxes = [
+    "colName",
+    "colCap",
+    "colBody",
+    "colCapture",
+    "colGameMode",
+    "colStage",
+    "colIP",
+    "colActions",
+  ];
+
+  checkboxes.forEach((id) => {
+    const checkbox = document.getElementById(id);
+    if (checkbox) {
+      checkbox.addEventListener("change", function () {
+        const columnName = id.replace("col", "").toLowerCase();
+        updateColumnVisibility(columnName, this.checked);
+        saveColumnSettings();
+      });
+    }
+  });
+
+  // "Show all" Button
+  document
+    .getElementById("showAllColumns")
+    .addEventListener("click", function () {
+      checkboxes.forEach((id) => {
+        const checkbox = document.getElementById(id);
+        if (checkbox) {
+          checkbox.checked = true;
+          const columnName = id.replace("col", "").toLowerCase();
+          updateColumnVisibility(columnName, true);
+        }
+      });
+      saveColumnSettings();
+    });
+
+  // "Hide all" Button
+  document
+    .getElementById("hideAllColumns")
+    .addEventListener("click", function () {
+      checkboxes.forEach((id) => {
+        const checkbox = document.getElementById(id);
+        if (checkbox) {
+          checkbox.checked = false;
+          const columnName = id.replace("col", "").toLowerCase();
+          updateColumnVisibility(columnName, false);
+        }
+      });
+      saveColumnSettings();
+    });
+
+  // Toggle-Button für Ausklapp-Menü
+  const toggleButton = document.getElementById("toggleColumnSettings");
+  const toggleIcon = document.getElementById("toggleIcon");
+  const content = document.getElementById("columnSettingsContent");
+
+  // Gespeicherten Zustand laden
+  const isExpanded =
+    localStorage.getItem("playerlistSettingsExpanded") === "true";
+  if (isExpanded) {
+    content.style.display = "block";
+    toggleIcon.classList.add("rotated");
+  }
+
+  toggleButton.addEventListener("click", function () {
+    const isVisible = content.style.display !== "none";
+
+    if (isVisible) {
+      // Collapse
+      content.style.display = "none";
+      toggleIcon.classList.remove("rotated");
+      localStorage.setItem("playerlistSettingsExpanded", "false");
+    } else {
+      // Expand
+      content.style.display = "block";
+      toggleIcon.classList.add("rotated");
+      localStorage.setItem("playerlistSettingsExpanded", "true");
+    }
+  });
+}
+
 //dropdown menu logic
 function fillKingdomDropdowns() {
   const kingdomNames = Object.keys(stagesByKingdom);
@@ -381,21 +509,108 @@ function fillKingdomDropdowns() {
   });
 }
 
-// Beim Laden der Seite Kingdom-Dropdowns befüllen und initialisieren
+// When the page is loaded, fill the Kingdom-Dropdowns and initialize
 document.addEventListener("DOMContentLoaded", function () {
+  // Kingdom-Dropdowns initialisieren
   fillKingdomDropdowns();
 
   // Ban Stage Dropdown initialisieren
   const kingdomSelect = document.getElementById("kingdomSelect");
   if (kingdomSelect) {
+    kingdomSelect.addEventListener("change", function () {
+      const kingdom = this.value;
+      const stageSelect = document.getElementById("stageSelect");
+      stageSelect.innerHTML = "";
+      (stagesByKingdom[kingdom] || []).forEach((stage) => {
+        const opt = document.createElement("option");
+        opt.value = stage;
+        opt.textContent = stage;
+        stageSelect.appendChild(opt);
+      });
+    });
     kingdomSelect.dispatchEvent(new Event("change"));
   }
 
   // Send Player Dropdown initialisieren
   const sendKingdom = document.getElementById("sendKingdom");
   if (sendKingdom) {
+    sendKingdom.addEventListener("change", function () {
+      const kingdom = this.value;
+      const stageSelect = document.getElementById("sendStage");
+      stageSelect.innerHTML = "";
+      (stagesByKingdom[kingdom] || []).forEach((stage) => {
+        const opt = document.createElement("option");
+        opt.value = stage;
+        opt.textContent = stage;
+        stageSelect.appendChild(opt);
+      });
+    });
     sendKingdom.dispatchEvent(new Event("change"));
   }
+
+  // Settings-FAB-Button initialize
+  const settingsFab = document.getElementById("settingsFab");
+  if (settingsFab) {
+    settingsFab.onclick = function () {
+      const modal = new bootstrap.Modal(document.getElementById("themeModal"));
+      // Current Theme in Modal select
+      const theme = getSavedTheme();
+      document.getElementById("themeDark").checked = theme === "dark";
+      document.getElementById("themeLight").checked = theme === "light";
+      document.getElementById("themeSystem").checked = theme === "system";
+      modal.show();
+    };
+  }
+
+  // --- Theme-Logik ---
+  function setTheme(theme) {
+    document.body.classList.remove("theme-dark", "theme-light");
+    if (theme === "dark") {
+      document.body.classList.add("theme-dark");
+    } else if (theme === "light") {
+      document.body.classList.add("theme-light");
+    } else {
+      // System: je nach prefers-color-scheme
+      if (window.matchMedia("(prefers-color-scheme: dark)").matches) {
+        document.body.classList.add("theme-dark");
+      } else {
+        document.body.classList.add("theme-light");
+      }
+    }
+  }
+  function saveTheme(theme) {
+    localStorage.setItem("theme", theme);
+  }
+  function getSavedTheme() {
+    return localStorage.getItem("theme") || "system";
+  }
+  setTheme(getSavedTheme());
+  ["themeDark", "themeLight", "themeSystem"].forEach((id) => {
+    const el = document.getElementById(id);
+    if (el) {
+      el.onchange = function () {
+        if (el.checked) {
+          saveTheme(el.value);
+          setTheme(el.value);
+        }
+      };
+    }
+  });
+  window
+    .matchMedia("(prefers-color-scheme: dark)")
+    .addEventListener("change", function () {
+      if (getSavedTheme() === "system") setTheme("system");
+    });
+
+  const mapKingdomSelect = document.getElementById("mapKingdomSelect");
+  if (mapKingdomSelect) {
+    mapKingdomSelect.addEventListener("change", function () {
+      renderMap();
+    });
+  }
+
+  // Map initial anzeigen
+  renderMap();
 });
 
 document.getElementById("consoleSendBtn").onclick = function (e) {
@@ -425,7 +640,7 @@ function updateConsoleOutput() {
     .then((r) => r.text())
     .then((text) => {
       document.getElementById("log").textContent = text;
-      // Automatisch nach unten scrollen:
+      // Automatically scroll down:
       const logDiv = document.getElementById("log");
       logDiv.scrollTop = logDiv.scrollHeight;
     });
@@ -439,7 +654,7 @@ function fetchIp() {
     });
 }
 
-// Bereich-Umschaltung
+// Section switch
 document.getElementById("navConsole").addEventListener("click", function (e) {
   e.preventDefault();
   document.getElementById("consoleSection").style.display = "block";
@@ -447,7 +662,7 @@ document.getElementById("navConsole").addEventListener("click", function (e) {
   updateConsoleOutput();
 });
 
-// Output regelmäßig aktualisieren, aber nur wenn Console sichtbar ist
+// Output regularly update, but only if Console is visible
 setInterval(function () {
   if (document.getElementById("consoleSection").style.display === "block") {
     updateConsoleOutput();
@@ -460,12 +675,12 @@ async function fetchPlayers() {
   const data = await response.json();
   const realPlayers = data.Players || [];
 
-  // Test-Player hinzufügen
+  // Add test-player
   const testPlayer = {
     Name: "TestPlayer",
     Cap: "Mario",
     Body: "Mario",
-    Capture: "Mario",
+    Capture: "Kuribo",
     GameMode: "Multiplayer",
     Stage: "CapWorldHomeStage",
     IPv4: "192.168.1.100",
@@ -478,7 +693,7 @@ async function fetchPlayers() {
     PosY: 500,
   };
 
-  // Test-Player zur Liste hinzufügen
+  // Add test-player to the list
   return [testPlayer, ...realPlayers];
 }
 
@@ -591,7 +806,7 @@ async function renderPlayerTable() {
   });
 
   if (visibleColumns.length === 0) {
-    tbody.innerHTML = `<tr><td colspan="1" class="text-center text-muted">Keine Spalten ausgewählt</td></tr>`;
+    tbody.innerHTML = `<tr><td colspan="1" class="text-center text-muted">No columns selected</td></tr>`;
   } else {
     tbody.innerHTML = html;
   }
@@ -683,7 +898,7 @@ async function loadServerInfo() {
         `;
       });
   } catch (e) {
-    box.innerHTML = "Serverdaten konnten nicht geladen werden.";
+    box.innerHTML = "Server data could not be loaded.";
   }
 }
 
@@ -1277,7 +1492,7 @@ window.openParamEditor = async function (playerName) {
   const modalEl = document.getElementById("paramEditorModal");
   if (!modalEl) {
     alert(
-      "Fehler: Das Parameter-Modal konnte nicht gefunden werden. Bitte Seite neu laden."
+      "Error: The parameter modal could not be found. Please reload the page."
     );
     return;
   }
@@ -1338,337 +1553,287 @@ window.openParamEditor = async function (playerName) {
     };
   }
 
-  // Button-Events für Schnellaktionen
-  const coinsGiveBtn = document.getElementById("coinsGiveBtn");
-  if (coinsGiveBtn) {
-    coinsGiveBtn.onclick = function () {
-      document.getElementById("paramCoins").value = 9999;
-    };
-  }
+  //Coin Set Button
+  document.getElementById("coinsSetBtn").onclick = function () {
+    const player = document.getElementById("paramPlayerName").value;
+    const coins = document.getElementById("paramCoins").value;
+    fetch("/commands/exec", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ command: `coins ${player} ${coins}` }),
+    });
+  };
 
-  const coinsResetBtn = document.getElementById("coinsResetBtn");
-  if (coinsResetBtn) {
-    coinsResetBtn.onclick = function () {
-      document.getElementById("paramCoins").value = 0;
-    };
-  }
+  //Give 9999 coins
+  document.getElementById("coinsGiveBtn").onclick = function () {
+    fetch("/commands/exec", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ command: `coins ${player} 9999` }),
+    });
+  };
 
-  const koenigHerzBtn = document.getElementById("koenigHerzBtn");
-  if (koenigHerzBtn) {
-    koenigHerzBtn.onclick = function () {
-      document.getElementById("paramLives").value = 6;
-    };
-  }
+  //Reset coins to 0
+  document.getElementById("coinsResetBtn").onclick = function () {
+    fetch("/commands/exec", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ command: `coins ${player} 0` }),
+    });
+  };
 
-  const playerDieBtn = document.getElementById("playerDieBtn");
-  if (playerDieBtn) {
-    playerDieBtn.onclick = function () {
-      document.getElementById("paramLives").value = 0;
-    };
-  }
-
-  const speedResetBtn = document.getElementById("speedResetBtn");
-  if (speedResetBtn) {
-    speedResetBtn.onclick = function () {
-      document.getElementById("paramSpeed").value = 1.0;
-    };
-  }
-
-  const jumpResetBtn = document.getElementById("jumpResetBtn");
-  if (jumpResetBtn) {
-    jumpResetBtn.onclick = function () {
-      document.getElementById("paramJumpHeight").value = 1.0;
-    };
-  }
-
-  // Modal anzeigen
-  const modal = new bootstrap.Modal(modalEl);
-  modal.show();
-};
-// Event-Listener für das Leben- und Münzen-Feld, um SVG zu aktualisieren
-if (!window.paramLifeSVGHandlerAdded) {
-  document.addEventListener("input", function (e) {
-    if (
-      e.target &&
-      (e.target.id === "paramLives" || e.target.id === "paramCoins")
-    ) {
-      const lives = parseInt(document.getElementById("paramLives").value) || 0;
-      const coins = parseInt(document.getElementById("paramCoins").value) || 0;
-      document.getElementById("paramLifeSVG").innerHTML = renderLifeSVG(lives);
-      document.getElementById("paramCoinSVG").innerHTML = renderCoinSVG(coins);
-      setupScrubbers();
-    }
-  });
-  window.paramLifeSVGHandlerAdded = true;
-}
-// Senden-Button im Parameter-Editor
-if (!window.paramEditorHandlerAdded) {
-  document.getElementById("paramEditorSendBtn").onclick = async function () {
+  //Lives Set Button
+  document.getElementById("livesSetBtn").onclick = function () {
     const player = document.getElementById("paramPlayerName").value;
     const lives = document.getElementById("paramLives").value;
-    const coins = document.getElementById("paramCoins").value;
-    const cap = document.getElementById("paramCap").value;
-    const body = document.getElementById("paramBody").value;
-    const speed = document.getElementById("paramSpeed").value;
-    const jumpHeight = document.getElementById("paramJumpHeight").value;
+    fetch("/commands/exec", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ command: `health ${player} ${lives}` }),
+    });
+  };
 
-    // Leben setzen
-    document
-      .getElementById("paramLives")
-      .addEventListener("change", function () {
-        const player = document.getElementById("paramPlayerName").value;
-        const lives = this.value;
-        fetch("/commands/exec", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ command: `health ${player} ${lives}` }),
-        });
-      });
-
-    //Life Up Heart
-    document.getElementById("lifeUpHeartBtn").onclick = function () {
+  // Life Up Heart Button
+  const lifeUpHeartBtn = document.getElementById("lifeUpHeartBtn");
+  if (lifeUpHeartBtn) {
+    lifeUpHeartBtn.onclick = function () {
+      const player = document.getElementById("paramPlayerName").value;
       fetch("/commands/exec", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ command: `health ${player} 6` }),
       });
     };
+  }
 
-    //Kill player
-    document.getElementById("playerKillBtn").onclick = function () {
+  // Player Kill Button
+  const playerKillBtn = document.getElementById("playerKillBtn");
+  if (playerKillBtn) {
+    playerKillBtn.onclick = function () {
+      const player = document.getElementById("paramPlayerName").value;
       fetch("/commands/exec", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ command: `health ${player} 0` }),
       });
     };
+  }
 
-    // Münzen setzen
-    document
-      .getElementById("paramCoins")
-      .addEventListener("change", function () {
-        const player = document.getElementById("paramPlayerName").value;
-        const coins = this.value;
-        fetch("/commands/exec", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ command: `coins ${player} ${coins}` }),
-        });
-      });
-
-    //Give 9999 coins
-    document.getElementById("coinsGiveBtn").onclick = function () {
-      fetch("/commands/exec", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ command: `coins ${player} 9999` }),
-      });
-    };
-
-    //Reset coins to 0
-    document.getElementById("coinsResetBtn").onclick = function () {
-      fetch("/commands/exec", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ command: `coins ${player} 0` }),
-      });
-    };
-
-    // Outfit setzen (Cap und Body)
-    await fetch("/commands/exec", {
+  //Outfit Set Button
+  document.getElementById("outfitSetBtn").onclick = function () {
+    const player = document.getElementById("paramPlayerName").value;
+    const cap = document.getElementById("paramCap").value;
+    const body = document.getElementById("paramBody").value;
+    fetch("/commands/exec", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ command: `setoutfit ${player} ${cap} ${body}` }),
     });
+  };
 
-    // Speed setzen
-    await fetch("/commands/exec", {
+  //Speed Set Button
+  document.getElementById("speedSetBtn").onclick = function () {
+    const player = document.getElementById("paramPlayerName").value;
+    const speed = document.getElementById("paramSpeed").value;
+    fetch("/commands/exec", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ command: `setspeed ${player} ${speed}` }),
+      body: JSON.stringify({ command: `speed ${player} ${speed}` }),
     });
+  };
 
-    // Sprunghöhe setzen
-    await fetch("/commands/exec", {
+  //Jump Height Set Button
+  document.getElementById("jumpSetBtn").onclick = function () {
+    const player = document.getElementById("paramPlayerName").value;
+    const jump = document.getElementById("paramJumpHeight").value;
+    fetch("/commands/exec", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        command: `setjumpheight ${player} ${jumpHeight}`,
-      }),
+      body: JSON.stringify({ command: `jumpheight ${player} ${jump}` }),
     });
-
-    // Modal schließen
-    bootstrap.Modal.getInstance(
-      document.getElementById("paramEditorModal")
-    ).hide();
-
-    // Spielertabelle aktualisieren
-    renderPlayerTable();
   };
-  window.paramEditorHandlerAdded = true;
-}
 
-// Theme-Settings-Button und Modal
-const settingsFab = document.getElementById("settingsFab");
-if (settingsFab) {
-  settingsFab.onclick = function () {
-    const modal = new bootstrap.Modal(document.getElementById("themeModal"));
-    // Aktuelles Theme im Modal auswählen
-    const theme = getSavedTheme();
-    document.getElementById("themeDark").checked = theme === "dark";
-    document.getElementById("themeLight").checked = theme === "light";
-    document.getElementById("themeSystem").checked = theme === "system";
-    modal.show();
+  //Speed Reset Button
+  document.getElementById("speedResetBtn").onclick = function () {
+    const player = document.getElementById("paramPlayerName").value;
+    fetch("/commands/exec", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ command: `speed ${player} 1.0` }),
+    });
   };
-}
 
-// Theme-Wechsel-Logik
-function setTheme(theme) {
-  document.body.classList.remove("theme-dark", "theme-light");
-  if (theme === "dark") {
-    document.body.classList.add("theme-dark");
-  } else if (theme === "light") {
-    document.body.classList.add("theme-light");
-  } else {
-    // System: je nach prefers-color-scheme
-    if (window.matchMedia("(prefers-color-scheme: dark)").matches) {
-      document.body.classList.add("theme-dark");
-    } else {
-      document.body.classList.add("theme-light");
-    }
-  }
-}
-function getSavedTheme() {
-  return localStorage.getItem("theme") || "system";
-}
-function saveTheme(theme) {
-  localStorage.setItem("theme", theme);
-}
-// Theme-Radio-Buttons
-["themeDark", "themeLight", "themeSystem"].forEach((id) => {
-  const el = document.getElementById(id);
-  if (el) {
-    el.onchange = function () {
-      if (el.checked) {
-        saveTheme(el.value);
-        setTheme(el.value);
+  //Jump Reset Button
+  document.getElementById("jumpResetBtn").onclick = function () {
+    const player = document.getElementById("paramPlayerName").value;
+    fetch("/commands/exec", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ command: `jumpheight ${player} 1.0` }),
+    });
+  };
+
+  // Modal anzeigen
+  const modal = new bootstrap.Modal(modalEl);
+  modal.show();
+
+  // Event-Listener für das Leben- und Münzen-Feld, um SVG zu aktualisieren
+  if (!window.paramLifeSVGHandlerAdded) {
+    document.addEventListener("input", function (e) {
+      if (
+        e.target &&
+        (e.target.id === "paramLives" || e.target.id === "paramCoins")
+      ) {
+        const lives =
+          parseInt(document.getElementById("paramLives").value) || 0;
+        const coins =
+          parseInt(document.getElementById("paramCoins").value) || 0;
+        document.getElementById("paramLifeSVG").innerHTML =
+          renderLifeSVG(lives);
+        document.getElementById("paramCoinSVG").innerHTML =
+          renderCoinSVG(coins);
+        setupScrubbers();
       }
+    });
+    window.paramLifeSVGHandlerAdded = true;
+  }
+  // Senden-Button im Parameter-Editor
+  if (!window.paramEditorHandlerAdded) {
+    document.getElementById("paramEditorSendBtn").onclick = async function () {
+      const player = document.getElementById("paramPlayerName").value;
+      const lives = document.getElementById("paramLives").value;
+      const coins = document.getElementById("paramCoins").value;
+      const cap = document.getElementById("paramCap").value;
+      const body = document.getElementById("paramBody").value;
+      const speed = document.getElementById("paramSpeed").value;
+      const jumpHeight = document.getElementById("paramJumpHeight").value;
+
+      // Modal schließen
+      bootstrap.Modal.getInstance(
+        document.getElementById("paramEditorModal")
+      ).hide();
+
+      // Spielertabelle aktualisieren
+      renderPlayerTable();
+    };
+    window.paramEditorHandlerAdded = true;
+  }
+
+  // Theme-Settings-Button und Modal
+  const settingsFab = document.getElementById("settingsFab");
+  if (settingsFab) {
+    settingsFab.onclick = function () {
+      const modal = new bootstrap.Modal(document.getElementById("themeModal"));
+      // Aktuelles Theme im Modal auswählen
+      const theme = getSavedTheme();
+      document.getElementById("themeDark").checked = theme === "dark";
+      document.getElementById("themeLight").checked = theme === "light";
+      document.getElementById("themeSystem").checked = theme === "system";
+      modal.show();
     };
   }
-});
-// Theme beim Laden setzen
-setTheme(getSavedTheme());
-// System-Theme-Änderung beachten
-window
-  .matchMedia("(prefers-color-scheme: dark)")
-  .addEventListener("change", function () {
-    if (getSavedTheme() === "system") setTheme("system");
-  });
 
-let selectedKingdom = document.getElementById("mapKingdomSelect").value;
-document
-  .getElementById("mapKingdomSelect")
-  .addEventListener("change", function () {
-    selectedKingdom = this.value;
-    renderMap();
-  });
-
-async function renderMap() {
-  const players = await fetchPlayers();
-  console.log("selectedKingdom:", selectedKingdom);
-  let stageName = kingdomToStage[selectedKingdom];
-  console.log("stageName:", stageName);
-  let mapFile = mapImages[stageName] || "CapWorld.png";
-  console.log("mapFile:", mapFile);
-  document.getElementById("mapImage").src = "images/map/" + mapFile;
-
-  // Titel setzen
-  document.getElementById("mapTitle").textContent = "Map – " + selectedKingdom;
-
-  // Marker-Overlay leeren
-  const markerDiv = document.getElementById("playerMarkers");
-  markerDiv.innerHTML = "";
-
-  // Nur Spieler im aktuellen Kingdom anzeigen
-  players
-    .filter((p) => stageToKingdom[p.Stage] === selectedKingdom)
-    .forEach((p) => {
-      if (p.PosX !== undefined && p.PosY !== undefined) {
-        const bounds = mapBounds[stageName];
-        if (bounds && p.PosX !== undefined && p.PosY !== undefined) {
-          // X von Spielkoordinate auf Prozent im Bild
-          let x = (p.PosX - bounds.minX) / (bounds.maxX - bounds.minX);
-          let y = 1 - (p.PosY - bounds.minY) / (bounds.maxY - bounds.minY); // ggf. Y invertieren!
-          let marker = document.createElement("div");
-          marker.style.position = "absolute";
-          marker.style.left = x * 100 + "%";
-          marker.style.top = y * 100 + "%";
-          marker.style.transform = "translate(-50%, -50%)";
-          marker.style.width = "32px";
-          marker.style.height = "32px";
-          marker.innerHTML = `<img src="images/cap/${p.Cap}.png" title="${p.Name}" style="width:100%;border-radius:50%;">`;
-          markerDiv.appendChild(marker);
-        }
-      }
-    });
-
-  if (!stageName) {
-    console.error("Kein stageName für Kingdom:", selectedKingdom);
-  }
-  if (!mapImages[stageName]) {
-    console.error("Kein Bild für stageName:", stageName);
-  }
-}
-
-setInterval(function () {
-  if (document.getElementById("mapSection").style.display === "block") {
-    renderMap();
-  }
-}, 2000);
-
-// Lebensanzeige-Overlay oben rechts
-function renderLifeOverlay(lives) {
-  const filterId = "glowLifeOverlay"; // oder: "glowLifeOverlay" + Math.random().toString(36).substr(2, 5);
-  const maxLives = 6;
-  const segs = 6;
-  const r = 44;
-  const ringWidth = 14;
-  const totalLength = 2 * Math.PI * r;
-  const segLength = totalLength / segs;
-  const gap = segLength * 0.1;
-  const dash = segLength - gap;
-
-  // Farbwechsel
-  let ringColor = "#00e600";
-  let glowColor = "#00ff00";
-  if (lives === 2) {
-    ringColor = "#ffe066";
-    glowColor = "#ffe066";
-  }
-  if (lives === 1) {
-    ringColor = "#ff3c28";
-    glowColor = "#ff3c28";
-  }
-
-  // Dasharray für die Segmente
-  let dashArrayFilled = [];
-  for (let i = 0; i < segs; i++) {
-    if (i < lives) {
-      dashArrayFilled.push(dash, gap);
+  // Theme-Wechsel-Logik
+  function setTheme(theme) {
+    document.body.classList.remove("theme-dark", "theme-light");
+    if (theme === "dark") {
+      document.body.classList.add("theme-dark");
+    } else if (theme === "light") {
+      document.body.classList.add("theme-light");
     } else {
-      dashArrayFilled.push(0, dash + gap);
+      // System: je nach prefers-color-scheme
+      if (window.matchMedia("(prefers-color-scheme: dark)").matches) {
+        document.body.classList.add("theme-dark");
+      } else {
+        document.body.classList.add("theme-light");
+      }
     }
   }
 
-  // Herz und Zahl
-  const heart = `<path d="M50 72 Q28 52 40 34 Q50 20 60 34 Q72 52 50 72 Z" fill="white" stroke="black" stroke-width="3"/>`;
-  const lifeText = `
+  function saveTheme(theme) {
+    localStorage.setItem("theme", theme);
+  }
+
+  // Theme beim Laden setzen
+  setTheme(getSavedTheme());
+
+  // Theme-Radio-Buttons Event-Listener
+  ["themeDark", "themeLight", "themeSystem"].forEach((id) => {
+    const el = document.getElementById(id);
+    if (el) {
+      el.onchange = function () {
+        if (el.checked) {
+          saveTheme(el.value);
+          setTheme(el.value);
+        }
+      };
+    }
+  });
+
+  // System-Theme-Änderung beachten
+  window
+    .matchMedia("(prefers-color-scheme: dark)")
+    .addEventListener("change", function () {
+      if (getSavedTheme() === "system") setTheme("system");
+    });
+
+  let selectedKingdom = document.getElementById("mapKingdomSelect").value;
+  document
+    .getElementById("mapKingdomSelect")
+    .addEventListener("change", function () {
+      selectedKingdom = this.value;
+      renderMap();
+    });
+
+  setInterval(function () {
+    if (document.getElementById("mapSection").style.display === "block") {
+      renderMap();
+    }
+  }, 2000);
+
+  // Lebensanzeige-Overlay oben rechts
+  function renderLifeOverlay(lives) {
+    const filterId = "glowLifeOverlay"; // oder: "glowLifeOverlay" + Math.random().toString(36).substr(2, 5);
+    const maxLives = 6;
+    const segs = 6;
+    const r = 44;
+    const ringWidth = 14;
+    const totalLength = 2 * Math.PI * r;
+    const segLength = totalLength / segs;
+    const gap = segLength * 0.1;
+    const dash = segLength - gap;
+
+    // Farbwechsel
+    let ringColor = "#00e600";
+    let glowColor = "#00ff00";
+    if (lives === 2) {
+      ringColor = "#ffe066";
+      glowColor = "#ffe066";
+    }
+    if (lives === 1) {
+      ringColor = "#ff3c28";
+      glowColor = "#ff3c28";
+    }
+
+    // Dasharray für die Segmente
+    let dashArrayFilled = [];
+    for (let i = 0; i < segs; i++) {
+      if (i < lives) {
+        dashArrayFilled.push(dash, gap);
+      } else {
+        dashArrayFilled.push(0, dash + gap);
+      }
+    }
+
+    // Herz und Zahl
+    const heart = `<path d="M50 72 Q28 52 40 34 Q50 20 60 34 Q72 52 50 72 Z" fill="white" stroke="black" stroke-width="3"/>`;
+    const lifeText = `
     <text x="50" y="60" text-anchor="middle" font-size="34" font-family="Arial" font-weight="bold" fill="white" opacity="0.7" stroke="white" stroke-width="3">${lives}</text>
     <text x="50" y="60" text-anchor="middle" font-size="34" font-family="Arial" font-weight="bold" fill="black">${lives}</text>
   `;
 
-  // SVG mit Glow-Filter
-  return `
+    // SVG mit Glow-Filter
+    return `
     <div style="width:100px;height:100px;">
       <svg width="100" height="100" viewBox="0 0 100 100">
         <defs>
@@ -1692,617 +1857,477 @@ function renderLifeOverlay(lives) {
       </svg>
     </div>
   `;
-}
-async function updateLifeOverlay() {
-  const overlay = document.getElementById("lifeOverlay");
-  if (!overlay) return;
-  const players = await fetchPlayers();
-  if (!players.length) {
-    overlay.innerHTML = "";
-    return;
   }
-  const lives = players[0].Lives || 0;
-  overlay.innerHTML = renderLifeOverlay(lives);
-  console.log("updateLifeOverlay wird aufgerufen!", lives);
-}
-setInterval(updateLifeOverlay, 1000);
-
-// --- Hilfsfunktion: Bild-Dropdown für Cap/Body ---
-function makeImageDropdown(selectId, images, selectedValue, folder) {
-  const select = document.getElementById(selectId);
-  if (!select) return;
-  select.style.display = "none"; // Verstecke das echte Dropdown
-
-  // Container für das Custom-Dropdown
-  let custom = document.getElementById(selectId + "_imgdropdown");
-  if (!custom) {
-    custom = document.createElement("div");
-    custom.id = selectId + "_imgdropdown";
-    custom.className = "img-dropdown";
-    custom.style.position = "relative";
-    select.parentNode.insertBefore(custom, select.nextSibling);
-  }
-  custom.innerHTML = "";
-
-  // Aktuell gewähltes Bild anzeigen
-  let current = images.find((img) => img === selectedValue) || images[0];
-  const currentDiv = document.createElement("div");
-  currentDiv.className = "img-dropdown-current";
-  currentDiv.style.cursor = "pointer";
-  currentDiv.style.display = "flex";
-  currentDiv.style.alignItems = "center";
-  currentDiv.style.gap = "8px";
-  currentDiv.style.border = "1px solid #444";
-  currentDiv.style.borderRadius = "6px";
-  currentDiv.style.background = "#23232a";
-  currentDiv.style.padding = "2px 8px";
-  currentDiv.innerHTML = `<img src="images/${folder}/${current}.png" style="height:32px;"> <span style="color:#fff;">${current}</span>`;
-  custom.appendChild(currentDiv);
-
-  // Das "Dropdown"-Menü (unsichtbar bis Klick)
-  const menu = document.createElement("div");
-  menu.className = "img-dropdown-menu";
-  menu.style.position = "absolute";
-  menu.style.left = "0";
-  menu.style.top = "140%";
-  menu.style.background = "#23232a";
-  menu.style.border = "1px solid #444";
-  menu.style.borderRadius = "6px";
-  menu.style.boxShadow = "0 2px 8px #0008";
-  menu.style.zIndex = "1000";
-  menu.style.display = "none";
-  menu.style.minWidth = "120px";
-  menu.style.maxHeight = "600px";
-  menu.style.overflowY = "auto";
-  images.forEach((img) => {
-    const item = document.createElement("div");
-    item.style.display = "flex";
-    item.style.alignItems = "center";
-    item.style.gap = "8px";
-    item.style.padding = "4px 8px";
-    item.style.cursor = "pointer";
-    item.innerHTML = `<img src="images/${folder}/${img}.png" style="height:28px;"> <span style="color:#fff;">${img}</span>`;
-    if (img === current) item.style.background = "#393a5a";
-    item.onclick = function () {
-      select.value = img;
-      select.dispatchEvent(new Event("change"));
-      menu.style.display = "none";
-      makeImageDropdown(selectId, images, img, folder); // neu rendern
-    };
-    menu.appendChild(item);
-  });
-  custom.appendChild(menu);
-
-  // Klick auf das aktuelle Bild öffnet das Menü
-  currentDiv.onclick = function (e) {
-    menu.style.display = menu.style.display === "block" ? "none" : "block";
-    e.stopPropagation();
-  };
-  // Klick außerhalb schließt das Menü
-  document.addEventListener("click", function closeMenu(e) {
-    if (!custom.contains(e.target)) {
-      menu.style.display = "none";
-      document.removeEventListener("click", closeMenu);
+  async function updateLifeOverlay() {
+    const overlay = document.getElementById("lifeOverlay");
+    if (!overlay) return;
+    const players = await fetchPlayers();
+    if (!players.length) {
+      overlay.innerHTML = "";
+      return;
     }
-  });
-}
+    const lives = players[0].Lives || 0;
+    overlay.innerHTML = renderLifeOverlay(lives);
+    console.log("updateLifeOverlay wird aufgerufen!", lives);
+  }
+  setInterval(updateLifeOverlay, 1000);
 
-// --- Outfit-Dropdown für Parameter-Editor (mit Bildern) ---
-async function fillCapAndBodyDropdowns(selectedCap, selectedBody) {
-  const capSelect = document.getElementById("paramCap");
-  const bodySelect = document.getElementById("paramBody");
-  if (!capSelect || !bodySelect) return;
-  capSelect.innerHTML = "";
-  bodySelect.innerHTML = "";
-  caps.forEach((cap) => {
-    const opt = document.createElement("option");
-    opt.value = cap;
-    opt.textContent = cap;
-    if (cap === selectedCap) opt.selected = true;
-    capSelect.appendChild(opt);
-  });
-  bodies.forEach((body) => {
-    const opt = document.createElement("option");
-    opt.value = body;
-    opt.textContent = body;
-    if (body === selectedBody) opt.selected = true;
-    bodySelect.appendChild(opt);
-  });
-  // Custom Image-Dropdowns erzeugen
-  makeImageDropdown("paramCap", caps, selectedCap, "cap");
-  makeImageDropdown("paramBody", bodies, selectedBody, "body");
-  // Vorschau
-  const preview = document.getElementById("outfitPreview");
-  function updatePreview() {
-    if (!preview) return;
-    preview.innerHTML = `
+  // --- Hilfsfunktion: Bild-Dropdown für Cap/Body ---
+  function makeImageDropdown(selectId, images, selectedValue, folder) {
+    const select = document.getElementById(selectId);
+    if (!select) return;
+    select.style.display = "none"; // Verstecke das echte Dropdown
+
+    // Container für das Custom-Dropdown
+    let custom = document.getElementById(selectId + "_imgdropdown");
+    if (!custom) {
+      custom = document.createElement("div");
+      custom.id = selectId + "_imgdropdown";
+      custom.className = "img-dropdown";
+      custom.style.position = "relative";
+      select.parentNode.insertBefore(custom, select.nextSibling);
+    }
+    custom.innerHTML = "";
+
+    // Aktuell gewähltes Bild anzeigen
+    let current = images.find((img) => img === selectedValue) || images[0];
+    const currentDiv = document.createElement("div");
+    currentDiv.className = "img-dropdown-current";
+    currentDiv.style.cursor = "pointer";
+    currentDiv.style.display = "flex";
+    currentDiv.style.alignItems = "center";
+    currentDiv.style.gap = "8px";
+    currentDiv.style.border = "1px solid #444";
+    currentDiv.style.borderRadius = "6px";
+    currentDiv.style.background = "#23232a";
+    currentDiv.style.padding = "2px 8px";
+    currentDiv.innerHTML = `<img src="images/${folder}/${current}.png" style="height:32px;"> <span style="color:#fff;">${current}</span>`;
+    custom.appendChild(currentDiv);
+
+    // Das "Dropdown"-Menü (unsichtbar bis Klick)
+    const menu = document.createElement("div");
+    menu.className = "img-dropdown-menu";
+    menu.style.position = "absolute";
+    menu.style.left = "0";
+    menu.style.top = "140%";
+    menu.style.background = "#23232a";
+    menu.style.border = "1px solid #444";
+    menu.style.borderRadius = "6px";
+    menu.style.boxShadow = "0 2px 8px #0008";
+    menu.style.zIndex = "1000";
+    menu.style.display = "none";
+    menu.style.minWidth = "120px";
+    menu.style.maxHeight = "500px";
+    menu.style.overflowY = "auto";
+    images.forEach((img) => {
+      const item = document.createElement("div");
+      item.style.display = "flex";
+      item.style.alignItems = "center";
+      item.style.gap = "8px";
+      item.style.padding = "4px 8px";
+      item.style.cursor = "pointer";
+      item.innerHTML = `<img src="images/${folder}/${img}.png" style="height:28px;"> <span style="color:#fff;">${img}</span>`;
+      if (img === current) item.style.background = "#393a5a";
+      item.onclick = function () {
+        select.value = img;
+        select.dispatchEvent(new Event("change"));
+        menu.style.display = "none";
+        makeImageDropdown(selectId, images, img, folder); // neu rendern
+      };
+      menu.appendChild(item);
+    });
+    custom.appendChild(menu);
+
+    // Klick auf das aktuelle Bild öffnet das Menü
+    currentDiv.onclick = function (e) {
+      menu.style.display = menu.style.display === "block" ? "none" : "block";
+      e.stopPropagation();
+    };
+    // Klick außerhalb schließt das Menü
+    document.addEventListener("click", function closeMenu(e) {
+      if (!custom.contains(e.target)) {
+        menu.style.display = "none";
+        document.removeEventListener("click", closeMenu);
+      }
+    });
+  }
+
+  // --- Outfit-Dropdown für Parameter-Editor (mit Bildern) ---
+  async function fillCapAndBodyDropdowns(selectedCap, selectedBody) {
+    const capSelect = document.getElementById("paramCap");
+    const bodySelect = document.getElementById("paramBody");
+    if (!capSelect || !bodySelect) return;
+    capSelect.innerHTML = "";
+    bodySelect.innerHTML = "";
+    caps.forEach((cap) => {
+      const opt = document.createElement("option");
+      opt.value = cap;
+      opt.textContent = cap;
+      if (cap === selectedCap) opt.selected = true;
+      capSelect.appendChild(opt);
+    });
+    bodies.forEach((body) => {
+      const opt = document.createElement("option");
+      opt.value = body;
+      opt.textContent = body;
+      if (body === selectedBody) opt.selected = true;
+      bodySelect.appendChild(opt);
+    });
+    // Custom Image-Dropdowns erzeugen
+    makeImageDropdown("paramCap", caps, selectedCap, "cap");
+    makeImageDropdown("paramBody", bodies, selectedBody, "body");
+    // Vorschau
+    const preview = document.getElementById("outfitPreview");
+    function updatePreview() {
+      if (!preview) return;
+      preview.innerHTML = `
       <img src="images/cap/${capSelect.value}.png" style="height:48px;">
       <img src="images/body/${bodySelect.value}.png" style="height:48px;">
     `;
+    }
+    capSelect.onchange = updatePreview;
+    bodySelect.onchange = updatePreview;
+    updatePreview();
   }
-  capSelect.onchange = updatePreview;
-  bodySelect.onchange = updatePreview;
-  updatePreview();
-}
 
-const dropZone = document.getElementById("szsDropZone");
-const fileInput = document.getElementById("szsFileInput");
+  const dropZone = document.getElementById("szsDropZone");
+  const fileInput = document.getElementById("szsFileInput");
 
-// Klick auf Dropzone öffnet Dateiauswahl
-dropZone.addEventListener("click", () => fileInput.click());
+  // Klick auf Dropzone öffnet Dateiauswahl
+  dropZone.addEventListener("click", () => fileInput.click());
 
-// Drag & Drop Events
-dropZone.addEventListener("dragover", (e) => {
-  e.preventDefault();
-  dropZone.classList.add("dragover");
-});
-dropZone.addEventListener("dragleave", (e) => {
-  e.preventDefault();
-  dropZone.classList.remove("dragover");
-});
-dropZone.addEventListener("drop", (e) => {
-  e.preventDefault();
-  dropZone.classList.remove("dragover");
-  if (e.dataTransfer.files.length) {
-    fileInput.files = e.dataTransfer.files;
-    dropZone.textContent = e.dataTransfer.files[0].name;
-  }
-});
-
-// Wenn Datei per Dialog gewählt wird, zeige Name an
-fileInput.addEventListener("change", () => {
-  if (fileInput.files.length) {
-    dropZone.textContent = fileInput.files[0].name;
-  } else {
-    dropZone.textContent = "Datei hierher ziehen oder klicken";
-  }
-});
-
-// --- Drag & Drop für Feature-Boxen ---
-function initializeDraggableFeatures() {
-  const featureBoxes = document.querySelectorAll(".feature-box");
-
-  // Grid-Einstellungen
-  const gridSize = 50; // Größe des Rasters in Pixeln
-  let isShiftPressed = false;
-
-  // Vorherige Event-Listener entfernen (falls vorhanden)
-  document.removeEventListener("keydown", window.shiftKeyDownHandler);
-  document.removeEventListener("keyup", window.shiftKeyUpHandler);
-
-  // Shift-Key Event-Listener
-  window.shiftKeyDownHandler = function (e) {
-    if (e.key === "Shift") {
-      isShiftPressed = true;
-      // Visuelle Rückmeldung aktivieren
-      document.getElementById("featuresSection").classList.add("grid-mode");
-      featureBoxes.forEach((box) => {
-        box.classList.add("grid-active");
-      });
+  // Drag & Drop Events
+  dropZone.addEventListener("dragover", (e) => {
+    e.preventDefault();
+    dropZone.classList.add("dragover");
+  });
+  dropZone.addEventListener("dragleave", (e) => {
+    e.preventDefault();
+    dropZone.classList.remove("dragover");
+  });
+  dropZone.addEventListener("drop", (e) => {
+    e.preventDefault();
+    dropZone.classList.remove("dragover");
+    if (e.dataTransfer.files.length) {
+      fileInput.files = e.dataTransfer.files;
+      dropZone.textContent = e.dataTransfer.files[0].name;
     }
-  };
+  });
 
-  window.shiftKeyUpHandler = function (e) {
-    if (e.key === "Shift") {
-      isShiftPressed = false;
-      // Visuelle Rückmeldung deaktivieren
-      document.getElementById("featuresSection").classList.remove("grid-mode");
-      featureBoxes.forEach((box) => {
-        box.classList.remove("grid-active");
-      });
+  // Wenn Datei per Dialog gewählt wird, zeige Name an
+  fileInput.addEventListener("change", () => {
+    if (fileInput.files.length) {
+      dropZone.textContent = fileInput.files[0].name;
+    } else {
+      dropZone.textContent = "Drag file here or click";
     }
-  };
+  });
 
-  document.addEventListener("keydown", window.shiftKeyDownHandler);
-  document.addEventListener("keyup", window.shiftKeyUpHandler);
-
-  featureBoxes.forEach((box) => {
-    // Gespeicherte Position laden
-    const savedPosition = localStorage.getItem(`featureBox_${box.id}`);
-    if (savedPosition) {
-      const pos = JSON.parse(savedPosition);
-      box.style.left = pos.x + "px";
-      box.style.top = pos.y + "px";
-    }
-
-    let isDragging = false;
-    let startX, startY, startLeft, startTop;
-
-    const dragHandle = box.querySelector(".drag-handle");
-
-    function startDrag(e) {
-      e.preventDefault();
-      isDragging = true;
-      box.classList.add("dragging");
-
-      const rect = box.getBoundingClientRect();
-      startX = e.clientX;
-      startY = e.clientY;
-      startLeft = rect.left;
-      startTop = rect.top;
-
-      document.addEventListener("mousemove", drag);
-      document.addEventListener("mouseup", stopDrag);
-    }
-
-    function snapToGrid(value, gridSize) {
-      return Math.round(value / gridSize) * gridSize;
-    }
-
-    function drag(e) {
-      if (!isDragging) return;
-
-      const deltaX = e.clientX - startX;
-      const deltaY = e.clientY - startY;
-
-      const container = document.getElementById("featuresSection");
-      const containerRect = container.getBoundingClientRect();
-      const boxRect = box.getBoundingClientRect();
-
-      // Neue Position berechnen
-      let newLeft = startLeft + deltaX - containerRect.left;
-      let newTop = startTop + deltaY - containerRect.top;
-
-      // Snap-to-Grid wenn Shift gedrückt ist
-      if (isShiftPressed) {
-        newLeft = snapToGrid(newLeft, gridSize);
-        newTop = snapToGrid(newTop, gridSize);
-      }
-
-      // Grenzen einhalten - jetzt bis zum unteren Rand der Seite
-      const maxLeft = containerRect.width - boxRect.width;
-      const maxTop = window.innerHeight - boxRect.height - 50; // 50px Abstand vom unteren Rand
-
-      newLeft = Math.max(0, Math.min(newLeft, maxLeft));
-      newTop = Math.max(0, Math.min(newTop, maxTop));
-
-      // Kollisionserkennung mit anderen Boxen
-      const otherBoxes = Array.from(featureBoxes).filter((b) => b !== box);
-      let hasCollision = false;
-
-      otherBoxes.forEach((otherBox) => {
-        const otherRect = otherBox.getBoundingClientRect();
-        const otherLeft = otherRect.left - containerRect.left;
-        const otherTop = otherRect.top - containerRect.top;
-
-        // Prüfe ob sich die Boxen überlappen
-        if (
-          newLeft < otherLeft + otherRect.width &&
-          newLeft + boxRect.width > otherLeft &&
-          newTop < otherTop + otherRect.height &&
-          newTop + boxRect.height > otherTop
-        ) {
-          hasCollision = true;
-        }
-      });
-
-      // Nur setzen wenn keine Kollision
-      if (!hasCollision) {
-        box.style.left = newLeft + "px";
-        box.style.top = newTop + "px";
-      }
-    }
-
-    function stopDrag() {
-      if (!isDragging) return;
-
-      isDragging = false;
-      box.classList.remove("dragging");
-
-      // Position speichern
-      const rect = box.getBoundingClientRect();
-      const containerRect = document
-        .getElementById("featuresSection")
-        .getBoundingClientRect();
-      const savedPos = {
-        x: rect.left - containerRect.left,
-        y: rect.top - containerRect.top,
-      };
-      localStorage.setItem(`featureBox_${box.id}`, JSON.stringify(savedPos));
-
-      document.removeEventListener("mousemove", drag);
-      document.removeEventListener("mouseup", stopDrag);
-    }
-
-    // Vorherige Event-Listener entfernen (falls vorhanden)
-    if (dragHandle) {
-      dragHandle.removeEventListener("mousedown", startDrag);
-      dragHandle.addEventListener("mousedown", startDrag);
-    }
-
-    // Auch die gesamte Box als Drag-Bereich (optional)
-    box.removeEventListener("mousedown", box.dragHandler);
-    box.dragHandler = function (e) {
-      // Nur starten wenn nicht auf einem Button oder Select geklickt wurde
-      if (
-        e.target.tagName !== "BUTTON" &&
-        e.target.tagName !== "SELECT" &&
-        !e.target.closest(".drag-handle")
-      ) {
-        startDrag(e);
-      }
+  // --- Spalten-Ein-/Ausblendung für Playerlist ---
+  function initializeColumnVisibility() {
+    // Gespeicherte Einstellungen laden
+    const savedSettings = localStorage.getItem("playerlistColumns");
+    const defaultSettings = {
+      name: true,
+      cap: true,
+      body: true,
+      capture: true,
+      gamemode: true,
+      stage: true,
+      ip: true,
+      actions: true,
     };
-    box.addEventListener("mousedown", box.dragHandler);
-  });
-}
 
-// Feature-Boxen initialisieren wenn Features-Sektion geladen wird
-let featuresInitialized = false;
+    const settings = savedSettings
+      ? JSON.parse(savedSettings)
+      : defaultSettings;
 
-// Auch beim ersten Laden initialisieren falls Features-Sektion sichtbar ist
-document.addEventListener("DOMContentLoaded", function () {
-  if (
-    document.getElementById("featuresSection").style.display !== "none" &&
-    !featuresInitialized
-  ) {
-    initializeDraggableFeatures();
-    featuresInitialized = true;
-  }
-});
+    // Checkboxen entsprechend setzen
+    Object.keys(settings).forEach((key) => {
+      const checkbox = document.getElementById(
+        `col${key.charAt(0).toUpperCase() + key.slice(1)}`
+      );
+      if (checkbox) {
+        checkbox.checked = settings[key];
+        updateColumnVisibility(key, settings[key]);
+      }
+    });
 
-// --- Spalten-Ein-/Ausblendung für Playerlist ---
-function initializeColumnVisibility() {
-  // Gespeicherte Einstellungen laden
-  const savedSettings = localStorage.getItem("playerlistColumns");
-  const defaultSettings = {
-    name: true,
-    cap: true,
-    body: true,
-    capture: true,
-    gamemode: true,
-    stage: true,
-    ip: true,
-    actions: true,
-  };
+    // Event-Listener für Checkboxen
+    const checkboxes = [
+      "colName",
+      "colCap",
+      "colBody",
+      "colCapture",
+      "colGameMode",
+      "colStage",
+      "colIP",
+      "colActions",
+    ];
 
-  const settings = savedSettings ? JSON.parse(savedSettings) : defaultSettings;
+    checkboxes.forEach((id) => {
+      const checkbox = document.getElementById(id);
+      if (checkbox) {
+        checkbox.addEventListener("change", function () {
+          const columnName = id.replace("col", "").toLowerCase();
+          updateColumnVisibility(columnName, this.checked);
+          saveColumnSettings();
+        });
+      }
+    });
 
-  // Checkboxen entsprechend setzen
-  Object.keys(settings).forEach((key) => {
-    const checkbox = document.getElementById(
-      `col${key.charAt(0).toUpperCase() + key.slice(1)}`
-    );
-    if (checkbox) {
-      checkbox.checked = settings[key];
-      updateColumnVisibility(key, settings[key]);
-    }
-  });
-
-  // Event-Listener für Checkboxen
-  const checkboxes = [
-    "colName",
-    "colCap",
-    "colBody",
-    "colCapture",
-    "colGameMode",
-    "colStage",
-    "colIP",
-    "colActions",
-  ];
-
-  checkboxes.forEach((id) => {
-    const checkbox = document.getElementById(id);
-    if (checkbox) {
-      checkbox.addEventListener("change", function () {
-        const columnName = id.replace("col", "").toLowerCase();
-        updateColumnVisibility(columnName, this.checked);
+    // "Show all" Button
+    document
+      .getElementById("showAllColumns")
+      .addEventListener("click", function () {
+        checkboxes.forEach((id) => {
+          const checkbox = document.getElementById(id);
+          if (checkbox) {
+            checkbox.checked = true;
+            const columnName = id.replace("col", "").toLowerCase();
+            updateColumnVisibility(columnName, true);
+          }
+        });
         saveColumnSettings();
       });
-    }
-  });
 
-  // "Alle anzeigen" Button
-  document
-    .getElementById("showAllColumns")
-    .addEventListener("click", function () {
-      checkboxes.forEach((id) => {
-        const checkbox = document.getElementById(id);
-        if (checkbox) {
-          checkbox.checked = true;
-          const columnName = id.replace("col", "").toLowerCase();
-          updateColumnVisibility(columnName, true);
-        }
+    // "Hide all" Button
+    document
+      .getElementById("hideAllColumns")
+      .addEventListener("click", function () {
+        checkboxes.forEach((id) => {
+          const checkbox = document.getElementById(id);
+          if (checkbox) {
+            checkbox.checked = false;
+            const columnName = id.replace("col", "").toLowerCase();
+            updateColumnVisibility(columnName, false);
+          }
+        });
+        saveColumnSettings();
       });
-      saveColumnSettings();
-    });
 
-  // "Alle verstecken" Button
-  document
-    .getElementById("hideAllColumns")
-    .addEventListener("click", function () {
-      checkboxes.forEach((id) => {
-        const checkbox = document.getElementById(id);
-        if (checkbox) {
-          checkbox.checked = false;
-          const columnName = id.replace("col", "").toLowerCase();
-          updateColumnVisibility(columnName, false);
-        }
-      });
-      saveColumnSettings();
-    });
+    // Toggle-Button für Ausklapp-Menü
+    const toggleButton = document.getElementById("toggleColumnSettings");
+    const toggleIcon = document.getElementById("toggleIcon");
+    const content = document.getElementById("columnSettingsContent");
 
-  // Toggle-Button für Ausklapp-Menü
-  const toggleButton = document.getElementById("toggleColumnSettings");
-  const toggleIcon = document.getElementById("toggleIcon");
-  const content = document.getElementById("columnSettingsContent");
-
-  // Gespeicherten Zustand laden
-  const isExpanded =
-    localStorage.getItem("playerlistSettingsExpanded") === "true";
-  if (isExpanded) {
-    content.style.display = "block";
-    toggleIcon.classList.add("rotated");
-  }
-
-  toggleButton.addEventListener("click", function () {
-    const isVisible = content.style.display !== "none";
-
-    if (isVisible) {
-      // Einklappen
-      content.style.display = "none";
-      toggleIcon.classList.remove("rotated");
-      localStorage.setItem("playerlistSettingsExpanded", "false");
-    } else {
-      // Ausklappen
+    // Gespeicherten Zustand laden
+    const isExpanded =
+      localStorage.getItem("playerlistSettingsExpanded") === "true";
+    if (isExpanded) {
       content.style.display = "block";
       toggleIcon.classList.add("rotated");
-      localStorage.setItem("playerlistSettingsExpanded", "true");
     }
-  });
-}
 
-function updateColumnVisibility(columnName, visible) {
-  const className = `col-${columnName}`;
-  const elements = document.querySelectorAll(`.${className}`);
+    toggleButton.addEventListener("click", function () {
+      const isVisible = content.style.display !== "none";
 
-  elements.forEach((element) => {
-    if (visible) {
-      element.classList.remove("hidden");
-    } else {
-      element.classList.add("hidden");
-    }
-  });
-
-  // Nach jedem Spaltenwechsel prüfen!
-  checkAllColumnsHidden();
-}
-
-function saveColumnSettings() {
-  const settings = {
-    name: document.getElementById("colName").checked,
-    cap: document.getElementById("colCap").checked,
-    body: document.getElementById("colBody").checked,
-    capture: document.getElementById("colCapture").checked,
-    gamemode: document.getElementById("colGameMode").checked,
-    stage: document.getElementById("colStage").checked,
-    ip: document.getElementById("colIP").checked,
-    actions: document.getElementById("colActions").checked,
-  };
-
-  localStorage.setItem("playerlistColumns", JSON.stringify(settings));
-}
-
-// Universelle Funktion: Alle Selects mit .player-dropdown befüllen
-async function fillAllPlayerDropdowns() {
-  const selects = document.querySelectorAll("select.player-dropdown");
-  const players = await fetchPlayers();
-  selects.forEach((select) => {
-    const currentValue = select.value;
-    select.innerHTML = '<option value="All">All</option>';
-    players.forEach((p) => {
-      if (p.Name) {
-        const opt = document.createElement("option");
-        opt.value = p.Name;
-        opt.textContent = p.Name;
-        select.appendChild(opt);
+      if (isVisible) {
+        // Collapse
+        content.style.display = "none";
+        toggleIcon.classList.remove("rotated");
+        localStorage.setItem("playerlistSettingsExpanded", "false");
+      } else {
+        // Expand
+        content.style.display = "block";
+        toggleIcon.classList.add("rotated");
+        localStorage.setItem("playerlistSettingsExpanded", "true");
       }
     });
-    // Auswahl beibehalten, falls möglich
-    if ([...select.options].some((opt) => opt.value === currentValue)) {
-      select.value = currentValue;
-    }
-  });
-}
+  }
 
-// Beim Laden der Seite und beim Öffnen des Features-Bereichs Dropdowns befüllen
-document.addEventListener("DOMContentLoaded", fillAllPlayerDropdowns);
+  function saveColumnSettings() {
+    const settings = {
+      name: document.getElementById("colName").checked,
+      cap: document.getElementById("colCap").checked,
+      body: document.getElementById("colBody").checked,
+      capture: document.getElementById("colCapture").checked,
+      gamemode: document.getElementById("colGameMode").checked,
+      stage: document.getElementById("colStage").checked,
+      ip: document.getElementById("colIP").checked,
+      actions: document.getElementById("colActions").checked,
+    };
 
-// Features-Navigation Event-Listener kombinieren
-const navFeaturesElement = document.getElementById("navFeatures");
-if (navFeaturesElement) {
-  // Vorherige Event-Listener entfernen
-  navFeaturesElement.removeEventListener("click", fillAllPlayerDropdowns);
+    localStorage.setItem("playerlistColumns", JSON.stringify(settings));
+  }
 
-  // Neuer kombinierter Event-Listener
-  navFeaturesElement.addEventListener("click", function (e) {
-    e.preventDefault();
-    showSection("features");
-    fillAllPlayerDropdowns();
-
-    // Kurz warten bis DOM aktualisiert ist
-    setTimeout(() => {
-      if (!featuresInitialized) {
-        initializeDraggableFeatures();
-        featuresInitialized = true;
+  // Universelle Funktion: Alle Selects mit .player-dropdown befüllen
+  async function fillAllPlayerDropdowns() {
+    const selects = document.querySelectorAll("select.player-dropdown");
+    const players = await fetchPlayers();
+    selects.forEach((select) => {
+      const currentValue = select.value;
+      select.innerHTML = '<option value="All">All</option>';
+      players.forEach((p) => {
+        if (p.Name) {
+          const opt = document.createElement("option");
+          opt.value = p.Name;
+          opt.textContent = p.Name;
+          select.appendChild(opt);
+        }
+      });
+      // Auswahl beibehalten, falls möglich
+      if ([...select.options].some((opt) => opt.value === currentValue)) {
+        select.value = currentValue;
       }
-    }, 100);
-  });
-}
+    });
+  }
 
-// Nach dem Rendern prüfen, ob alle Spalten ausgeblendet sind
-function checkAllColumnsHidden() {
-  const visibleColumns = [
-    "col-name",
-    "col-cap",
-    "col-body",
-    "col-capture",
-    "col-gamemode",
-    "col-stage",
-    "col-ip",
-    "col-actions",
-  ].filter(
-    (cls) => !document.querySelector(`th.${cls}`).classList.contains("hidden")
-  );
-  const table = document.querySelector("#playerTable").closest("table");
-  const thead = table.querySelector("thead");
-  if (visibleColumns.length === 0) {
-    // Kopfzeile und alle Zeilen ausblenden, nur Info anzeigen
-    thead.style.display = "none";
-    document.getElementById(
-      "playerTable"
-    ).innerHTML = `<tr><td colspan="8" class="text-center text-muted">Keine Spalten ausgewählt</td></tr>`;
-  } else {
-    // Kopfzeile wieder anzeigen
-    thead.style.display = "";
+  // Beim Laden der Seite und beim Öffnen des Features-Bereichs Dropdowns befüllen
+  document.addEventListener("DOMContentLoaded", fillAllPlayerDropdowns);
+
+  // Features-Navigation Event-Listener kombinieren
+  const navFeaturesElement = document.getElementById("navFeatures");
+  if (navFeaturesElement) {
+    // Vorherige Event-Listener entfernen
+    navFeaturesElement.removeEventListener("click", fillAllPlayerDropdowns);
+
+    // Neuer kombinierter Event-Listener
+    navFeaturesElement.addEventListener("click", function (e) {
+      e.preventDefault();
+      showSection("features");
+      fillAllPlayerDropdowns();
+
+      // Kurz warten bis DOM aktualisiert ist
+      setTimeout(() => {
+        if (!featuresInitialized) {
+          initializeDraggableFeatures();
+          featuresInitialized = true;
+        }
+      }, 100);
+    });
+  }
+
+  // Nach dem Rendern prüfen, ob alle Spalten ausgeblendet sind
+  function checkAllColumnsHidden() {
+    const visibleColumns = [
+      "col-name",
+      "col-cap",
+      "col-body",
+      "col-capture",
+      "col-gamemode",
+      "col-stage",
+      "col-ip",
+      "col-actions",
+    ].filter(
+      (cls) => !document.querySelector(`th.${cls}`).classList.contains("hidden")
+    );
+    const table = document.querySelector("#playerTable").closest("table");
+    const thead = table.querySelector("thead");
+    if (visibleColumns.length === 0) {
+      // Kopfzeile und alle Zeilen ausblenden, nur Info anzeigen
+      thead.style.display = "none";
+      document.getElementById(
+        "playerTable"
+      ).innerHTML = `<tr><td colspan="8" class="text-center text-muted">No columns selected</td></tr>`;
+    } else {
+      // Kopfzeile wieder anzeigen
+      thead.style.display = "";
+    }
+  }
+  checkAllColumnsHidden();
+
+  // Scrubber-Funktion für Zahleneingabefelder im Param-Editor
+  function enableScrubber(
+    inputId,
+    step = 1,
+    min = null,
+    max = null,
+    decimals = 0
+  ) {
+    const input = document.getElementById(inputId);
+    if (!input) return;
+    input.style.cursor = "ew-resize";
+
+    // Vorherige Listener entfernen (damit es nicht mehrfach gebunden wird)
+    input.onmousedown = null;
+
+    input.onmousedown = function (e) {
+      let startX = e.clientX;
+      let startVal = parseFloat(input.value) || 0;
+      document.body.style.cursor = "ew-resize";
+
+      function move(ev) {
+        let diff = Math.round((ev.clientX - startX) / 5);
+        let newVal = startVal + diff * step;
+        if (min !== null) newVal = Math.max(min, newVal);
+        if (max !== null) newVal = Math.min(max, newVal);
+        if (decimals > 0) newVal = parseFloat(newVal.toFixed(decimals));
+        input.value = newVal;
+        input.dispatchEvent(new Event("change"));
+      }
+      function up() {
+        document.removeEventListener("mousemove", move);
+        document.removeEventListener("mouseup", up);
+        document.body.style.cursor = "";
+      }
+      document.addEventListener("mousemove", move);
+      document.addEventListener("mouseup", up);
+    };
+  }
+
+  // Enable Scrubber for relevant fields when opening the Param-Editor
+  const oldOpenParamEditor = window.openParamEditor;
+  window.openParamEditor = async function (playerName) {
+    await oldOpenParamEditor(playerName);
+    enableScrubber("paramCoins", 1, 0, 9999, 0);
+    enableScrubber("paramLives", 1, 0, 6, 0);
+    enableScrubber("paramSpeed", 0.01, 0.1, null, 2);
+    enableScrubber("paramJumpHeight", 0.01, 0.1, null, 2);
+  };
+
+  document.getElementById("jumpSetBtn").onclick = function () {
+    const player = document.getElementById("paramPlayerName").value;
+    const jump = document.getElementById("paramJumpHeight").value;
+    fetch("/commands/exec", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ command: `jumpheight ${player} ${jump}` }),
+    });
+  };
+};
+
+// Verschiebe renderMap in den globalen Scope
+async function renderMap() {
+  const players = await fetchPlayers();
+  let selectedKingdom = document.getElementById("mapKingdomSelect").value;
+  let stageName = kingdomToStage[selectedKingdom];
+  let mapFile = mapImages[stageName] || "CapKingdom.png";
+  document.getElementById("mapImage").src = "images/map/" + mapFile;
+
+  // Titel setzen
+  document.getElementById("mapTitle").textContent = "Map – " + selectedKingdom;
+
+  // Marker-Overlay leeren
+  const markerDiv = document.getElementById("playerMarkers");
+  markerDiv.innerHTML = "";
+
+  // Nur Spieler im aktuellen Kingdom anzeigen
+  players
+    .filter((p) => stageToKingdom[p.Stage] === selectedKingdom)
+    .forEach((p) => {
+      if (p.PosX !== undefined && p.PosY !== undefined) {
+        const bounds = mapBounds[stageName];
+        if (bounds && p.PosX !== undefined && p.PosY !== undefined) {
+          let x = (p.PosX - bounds.minX) / (bounds.maxX - bounds.minX);
+          let y = 1 - (p.PosY - bounds.minY) / (bounds.maxY - bounds.minY);
+          let marker = document.createElement("div");
+          marker.style.position = "absolute";
+          marker.style.left = x * 100 + "%";
+          marker.style.top = y * 100 + "%";
+          marker.style.transform = "translate(-50%, -50%)";
+          marker.style.width = "32px";
+          marker.style.height = "32px";
+          marker.innerHTML = `<img src="images/cap/${p.Cap}.png" title="${p.Name}" style="width:100%;border-radius:50%;">`;
+          markerDiv.appendChild(marker);
+        }
+      }
+    });
+
+  if (!stageName) {
+    console.error("Kein stageName für Kingdom:", selectedKingdom);
+  }
+  if (!mapImages[stageName]) {
+    console.error("Kein Bild für stageName:", stageName);
   }
 }
-checkAllColumnsHidden();
-
-// Scrubber-Funktion für Zahleneingabefelder im Param-Editor
-function enableScrubber(
-  inputId,
-  step = 1,
-  min = null,
-  max = null,
-  decimals = 0
-) {
-  const input = document.getElementById(inputId);
-  if (!input) return;
-  input.style.cursor = "ew-resize";
-
-  // Vorherige Listener entfernen (damit es nicht mehrfach gebunden wird)
-  input.onmousedown = null;
-
-  input.onmousedown = function (e) {
-    let startX = e.clientX;
-    let startVal = parseFloat(input.value) || 0;
-    document.body.style.cursor = "ew-resize";
-
-    function move(ev) {
-      let diff = Math.round((ev.clientX - startX) / 5);
-      let newVal = startVal + diff * step;
-      if (min !== null) newVal = Math.max(min, newVal);
-      if (max !== null) newVal = Math.min(max, newVal);
-      if (decimals > 0) newVal = parseFloat(newVal.toFixed(decimals));
-      input.value = newVal;
-      input.dispatchEvent(new Event("change"));
-    }
-    function up() {
-      document.removeEventListener("mousemove", move);
-      document.removeEventListener("mouseup", up);
-      document.body.style.cursor = "";
-    }
-    document.addEventListener("mousemove", move);
-    document.addEventListener("mouseup", up);
-  };
-}
-
-// Aktiviere Scrubber für relevante Felder beim Öffnen des Param-Editors
-const oldOpenParamEditor = window.openParamEditor;
-window.openParamEditor = async function (playerName) {
-  await oldOpenParamEditor(playerName);
-  enableScrubber("paramCoins", 1, 0, 9999, 0);
-  enableScrubber("paramLives", 1, 0, 6, 0);
-  enableScrubber("paramSpeed", 0.01, 0.1, null, 2);
-  enableScrubber("paramJumpHeight", 0.01, 0.1, null, 2);
-};

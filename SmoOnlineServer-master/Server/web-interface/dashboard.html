@@ -1,8 +1,8 @@
 <!DOCTYPE html>
-<html lang="de">
+<html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <title>Neorix Odyssey Server</title>
+    <title>SmoOnline Server</title>
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <link
       href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css"
@@ -47,9 +47,7 @@
 
             <!-- SZS Upload Formular -->
             <form id="szsUploadForm" enctype="multipart/form-data" class="mb-3">
-              <div id="szsDropZone" class="mb-2">
-                Datei hierher ziehen oder klicken
-              </div>
+              <div id="szsDropZone" class="mb-2">Drag file here or click</div>
               <input
                 type="file"
                 id="szsFileInput"
@@ -300,14 +298,14 @@
                 <div
                   class="d-flex justify-content-between align-items-center mb-2"
                 >
-                  <h6 class="card-title mb-0">Spalten anzeigen/verstecken</h6>
+                  <h6 class="card-title mb-0">Show/Hide Columns</h6>
                   <button
                     class="btn btn-sm btn-outline-primary"
                     id="toggleColumnSettings"
                     type="button"
                   >
                     <i class="bi bi-chevron-down" id="toggleIcon"></i>
-                    Einstellungen
+                    Settings
                   </button>
                 </div>
                 <div id="columnSettingsContent" style="display: none">
@@ -400,7 +398,7 @@
                           checked
                         />
                         <label class="form-check-label" for="colActions"
-                          >Aktionen</label
+                          >Actions</label
                         >
                       </div>
                     </div>
@@ -410,13 +408,13 @@
                       class="btn btn-sm btn-outline-primary me-2"
                       id="showAllColumns"
                     >
-                      Alle anzeigen
+                      Show all
                     </button>
                     <button
                       class="btn btn-sm btn-outline-secondary"
                       id="hideAllColumns"
                     >
-                      Alle verstecken
+                      Hide all
                     </button>
                   </div>
                 </div>
@@ -435,11 +433,11 @@
                       <th class="col-gamemode">Game Mode</th>
                       <th class="col-stage">Stage</th>
                       <th class="col-ip">IP</th>
-                      <th class="col-actions">Aktionen</th>
+                      <th class="col-actions">Actions</th>
                     </tr>
                   </thead>
                   <tbody id="playerTable">
-                    <!-- Dynamisch per JS -->
+                    <!-- Dynamically by JS -->
                   </tbody>
                 </table>
               </div>
@@ -452,9 +450,8 @@
               id="featureBox1"
               style="position: absolute; top: 20px; left: 20px"
             >
-              <div class="drag-handle">⋮⋮</div>
               <div class="card-body p-3">
-                <div class="feature-title">Infinit Cap Bounce</div>
+                <div class="feature-title">Infinite Cap Bounce</div>
                 <div class="feature-select-row">
                   <select
                     class="form-select player-dropdown"
@@ -484,7 +481,6 @@
               id="featureBox2"
               style="position: absolute; top: 20px; left: 340px"
             >
-              <div class="drag-handle">⋮⋮</div>
               <div class="card-body p-3">
                 <div class="feature-title">Noclip</div>
                 <div class="feature-select-row">
@@ -513,14 +509,14 @@
                     type="text"
                     id="consoleInput"
                     class="form-control"
-                    placeholder="Befehl eingeben..."
+                    placeholder="Enter command..."
                   />
                   <button
                     class="btn btn-outline-primary"
                     id="consoleSendBtn"
                     type="button"
                   >
-                    Senden
+                    Send
                   </button>
                 </div>
                 <pre
@@ -565,7 +561,7 @@
               <div class="card-body" style="position: relative">
                 <img
                   id="mapImage"
-                  src="images/map/CapWorld.png"
+                  src="images/map/CapKingdom.png"
                   style="
                     width: 100%;
                     max-width: 900px;
@@ -590,7 +586,7 @@
         </main>
       </div>
     </div>
-    <div class="settings-fab" id="settingsFab" title="Einstellungen">
+    <div class="settings-fab" id="settingsFab" title="Settings">
       <i class="bi bi-gear-fill"></i>
     </div>
     <!-- Theme Modal -->
@@ -604,7 +600,7 @@
       <div class="modal-dialog modal-dialog-bottom-end">
         <div class="modal-content">
           <div class="modal-header">
-            <h5 class="modal-title" id="themeModalLabel">Theme auswählen</h5>
+            <h5 class="modal-title" id="themeModalLabel">Select Theme</h5>
             <button
               type="button"
               class="btn-close"
@@ -644,14 +640,14 @@
                 value="system"
               />
               <label class="form-check-label" for="themeSystem"
-                >System (Standard)</label
+                >System (Default)</label
               >
             </div>
           </div>
         </div>
       </div>
     </div>
-    <!-- Modal für Parameter-Editor (neues Layout) -->
+    <!-- Modal for Parameter Editor (new layout) -->
     <div
       class="modal fade"
       id="paramEditorModal"
@@ -663,7 +659,7 @@
         <div class="modal-content">
           <div class="modal-header">
             <h5 class="modal-title" id="paramEditorModalLabel">
-              Parameter bearbeiten
+              Edit Parameters
             </h5>
             <button
               type="button"
@@ -676,17 +672,26 @@
             <form id="paramEditorForm">
               <div class="container-fluid">
                 <div class="row mb-3">
-                  <!-- Coins links -->
+                  <!-- Coins left -->
                   <div class="col-6 d-flex flex-column align-items-start">
                     <label for="paramCoins" class="form-label">Coins</label>
-                    <input
-                      type="number"
-                      class="form-control mb-2"
-                      id="paramCoins"
-                      min="0"
-                      max="9999"
-                      style="width: 180px"
-                    />
+                    <div class="input-group mb-2">
+                      <input
+                        type="number"
+                        class="form-control"
+                        id="paramCoins"
+                        min="0"
+                        max="9999"
+                        style="width: 180px"
+                      />
+                      <button
+                        type="button"
+                        class="btn btn-outline-success btn-sm"
+                        id="coinsSetBtn"
+                      >
+                        Set
+                      </button>
+                    </div>
                     <div class="d-flex gap-2 mb-2">
                       <button
                         type="button"
@@ -704,17 +709,26 @@
                       </button>
                     </div>
                   </div>
-                  <!-- Leben rechts -->
+                  <!-- Lives right -->
                   <div class="col-6 d-flex flex-column align-items-end">
-                    <label for="paramLives" class="form-label">Leben</label>
-                    <input
-                      type="number"
-                      class="form-control mb-2"
-                      id="paramLives"
-                      min="0"
-                      max="6"
-                      style="width: 180px"
-                    />
+                    <label for="paramLives" class="form-label">Lives</label>
+                    <div class="input-group mb-2">
+                      <input
+                        type="number"
+                        class="form-control"
+                        id="paramLives"
+                        min="0"
+                        max="6"
+                        style="width: 180px"
+                      />
+                      <button
+                        type="button"
+                        class="btn btn-outline-success btn-sm"
+                        id="livesSetBtn"
+                      >
+                        Set
+                      </button>
+                    </div>
                     <div class="d-flex gap-2 mb-2">
                       <button
                         type="button"
@@ -767,7 +781,7 @@
                       <img
                         id="capPreviewImg"
                         src=""
-                        alt="Cap Bild"
+                        alt="Cap Image"
                         style="height: 48px"
                       />
                     </div>
@@ -775,34 +789,52 @@
                       <img
                         id="bodyPreviewImg"
                         src=""
-                        alt="Body Bild"
+                        alt="Body Image"
                         style="height: 48px"
                       />
                     </div>
                   </div>
+                  <button
+                    type="button"
+                    class="btn btn-outline-success btn-sm"
+                    id="outfitSetBtn"
+                  >
+                    Set
+                  </button>
                 </div>
-                <!-- Speed, Jump, Koordinaten -->
+                <!-- Speed, Jump, Coordinates -->
                 <div class="row mb-3">
-                  <!-- Speed links -->
+                  <!-- Speed left -->
                   <div class="col-6 d-flex flex-column align-items-start">
                     <label for="paramSpeed" class="form-label">Speed</label>
-                    <input
-                      type="number"
-                      step="0.01"
-                      class="form-control mb-2"
-                      id="paramSpeed"
-                      min="0.1"
-                      style="width: 180px"
-                    />
-                    <button
-                      type="button"
-                      class="btn btn-outline-secondary btn-sm mb-2"
-                      id="speedResetBtn"
-                    >
-                      reset
-                    </button>
+                    <div class="input-group mb-2">
+                      <input
+                        type="number"
+                        step="0.01"
+                        class="form-control"
+                        id="paramSpeed"
+                        min="0.1"
+                        style="width: 180px"
+                      />
+                      <button
+                        type="button"
+                        class="btn btn-outline-success btn-sm"
+                        id="speedSetBtn"
+                      >
+                        Set
+                      </button>
+                    </div>
+                    <div class="mb-2">
+                      <button
+                        type="button"
+                        class="btn btn-outline-secondary btn-sm"
+                        id="speedResetBtn"
+                      >
+                        reset
+                      </button>
+                    </div>
                     <label for="paramCoords" class="form-label"
-                      >Koordinaten</label
+                      >Coordinates</label
                     >
                     <div
                       class="d-flex align-items-center gap-2"
@@ -831,26 +863,37 @@
                       </button>
                     </div>
                   </div>
-                  <!-- Jump high rechts -->
+                  <!-- Jump high right -->
                   <div class="col-6 d-flex flex-column align-items-end">
                     <label for="paramJumpHeight" class="form-label"
                       >Jump high</label
                     >
-                    <input
-                      type="number"
-                      step="0.01"
-                      class="form-control mb-2"
-                      id="paramJumpHeight"
-                      min="0.1"
-                      style="width: 180px"
-                    />
-                    <button
-                      type="button"
-                      class="btn btn-outline-secondary btn-sm mb-2"
-                      id="jumpResetBtn"
-                    >
-                      reset
-                    </button>
+                    <div class="input-group mb-2">
+                      <input
+                        type="number"
+                        step="0.01"
+                        class="form-control"
+                        id="paramJumpHeight"
+                        min="0.1"
+                        style="width: 180px"
+                      />
+                      <button
+                        type="button"
+                        class="btn btn-outline-success btn-sm"
+                        id="jumpSetBtn"
+                      >
+                        Set
+                      </button>
+                    </div>
+                    <div class="mb-2">
+                      <button
+                        type="button"
+                        class="btn btn-outline-secondary btn-sm"
+                        id="jumpResetBtn"
+                      >
+                        reset
+                      </button>
+                    </div>
                   </div>
                 </div>
               </div>
