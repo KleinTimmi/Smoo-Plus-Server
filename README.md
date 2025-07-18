@@ -1,6 +1,6 @@
 Port:4205
 
-useful stuff [here] (https://github.com/KleinTimmi/SmooExtra/blob/master/useful%20stuff.txt)
+useful stuff [here](https://github.com/KleinTimmi/SmooExtra/blob/master/useful%20stuff.txt)
 
 
 
