@@ -1,4 +1,4 @@
-#include "ExtrasCode.hpp"
+#include "server/ExtrasCode.hpp"
 #include "al/util.hpp" // Passe die Includes an, je nachdem wo deine Hilfsfunktionen liegen
 #include "helpers/NrvFind/NrvFindHelper.h"
 #include <cmath>
@@ -16,7 +16,7 @@
 #include "game/Player/HackCap/PlayerCapActionHistory.h"     //für infinite cap Dives
 #include "game/Player/Actions/PlayerWallActionHistory.h"    //für infinite cap Dives/wall jumps
 #include "game/StageScene/StageScene.h"
-
+#include "game/GameData/PlayerHitPointData.h"
 
 
 void handleNoclip(PlayerActorHakoniwa* hakoniwa, bool gNoclip, bool isYukimaru) {
@@ -96,22 +96,18 @@ void handleInfiniteCapBounce(PlayerActorHakoniwa* playerBase, bool gInfiniteCapB
     }
 }
 
-/*      Augeklammert weil die nerve nicht funktioniert
-    PlayerActorHakoniwa* hakoniwa = static_cast<PlayerActorHakoniwa*>(playerBase);
+// Entferne den fehlerhaften globalen if-Block und die fehlerhafte getLifeMaxupItem-Implementierung
 
-    // Check coins from HakoniwaSequence
-    HakoniwaSequence* sequence = tryGetHakoniwaSequence();
-    if (sequence && sequence->mFinalCoins != gCoins) {
-        gCoins = sequence->mFinalCoins;
-        Client::sendHealthCoinsPacket(hakoniwa);
-    }
-    
-    // Check health from PlayerHitPointData
-    if (holder.mData && holder.mData->mGameDataFile) {
-        PlayerHitPointData* hitData = holder.mData->mGameDataFile->getPlayerHitPointData();
-        if (hitData && hitData->mCurrentHit != gHealth) {
-            gHealth = hitData->mCurrentHit;
-            Client::sendHealthCoinsPacket(hakoniwa);
+// Neue, sichere Funktion zum Setzen des Life Up Heart Flags (optional, falls benötigt)
+void giveLifeUpHeart(PlayerActorHakoniwa* hakoniwa) {
+    if (!hakoniwa) return;
+    // Hole GameDataHolderAccessor über den Actor
+    GameDataHolderAccessor accessor(hakoniwa);
+    if (accessor.mData && accessor.mData->mGameDataFile) {
+        PlayerHitPointData* hitData = accessor.mData->mGameDataFile->getPlayerHitPointData();
+        if (hitData) {
+            hitData->mIsHaveMaxUpItem = true;
+            hitData->mCurrentHit = 6;
         }
     }
-*/
+}

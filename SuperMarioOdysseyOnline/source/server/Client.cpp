@@ -18,6 +18,7 @@
 #include "packets/Extras.h"
 #include "packets/Extras.hpp"
 #include "packets/Health_Coins.hpp"
+#include "server/ExtrasCode.hpp"
 
 #include "sead/heap/seadHeapMgr.h"
 
@@ -957,7 +958,7 @@ void Client::sendHealthCoinsPacket(const PlayerActorHakoniwa* player) {
 
     sInstance->mSocket->queuePacket(packet);
 }
-
+*/
 void Client::handleHealthCoinsPacket(Packet* curPacket) {
     if (auto* healthCoins = static_cast<Health_Coins*>(curPacket)) {
         Logger::log("Processing Health_Coins packet - Health: %d, Coins: %d\n", 
@@ -969,11 +970,13 @@ void Client::handleHealthCoinsPacket(Packet* curPacket) {
         gCoins = healthCoins->coins;
         Logger::log("Received Health_Coins packet: Coins = %d\n",
                     gCoins);
+        getLifeMaxupItem();
+        Logger::log("Received Health_Coins packet: LifeMaxupItem = %d\n");
     } else {
         Logger::log("Failed to cast packet to Health_Coins\n");
     }
 }
-*/
+
 
 
 /**

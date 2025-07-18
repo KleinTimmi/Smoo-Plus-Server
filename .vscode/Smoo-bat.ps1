@@ -13,5 +13,6 @@ switch ($pcName) {
     }
 }
 
-# Smoo starten
+# Smoo starten und Schließen 
+Get-Process | Where-Object { $_.MainWindowTitle -like "*Ultimate SMO Compiler*" } | ForEach-Object { $_.CloseMainWindow() }
 Start-Process $smoBatPath
