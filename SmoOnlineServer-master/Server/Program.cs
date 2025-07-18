@@ -527,20 +527,13 @@ CommandHandler.RegisterCommand("noclip", args => {
     return $"Gave player/s: {string.Join(", ", players.Select(p => p.Name))} Noclip: {enable}"; 
 });
 
-CommandHandler.RegisterCommand("message", args => {
+//Register Command Message
+CommandHandler.RegisterCommandAliases( _ => {
     const string optionUsage = "Usage: message <Player/*> <message>";
     if (args.Length != 2)
         return optionUsage;
     return "not implemented";
-});
-
-// Alias für "msg"
-CommandHandler.RegisterCommand("msg", args => {
-    const string optionUsage = "Usage: msg <Player/*> <message>";
-    if (args.Length != 2)
-        return optionUsage;
-    return "not implemented";
-});
+}, "msg", "message" );
 
 CommandHandler.RegisterCommand("scenario", args => {
     const string optionUsage = "Valid options: merge [true/false]";
@@ -848,6 +841,33 @@ CommandHandler.RegisterCommand("coins", args => {
     }
     
     return $"Set coins to {coins} for {toActUpon.Count} player(s)";
+});
+
+CommandHandler.RegisterCommand("lifeup", args => {
+    const string optionUsage = "usage: lifeup <player/*>";
+    if (args.Length != 1)
+        return optionUsage;
+
+    var (failToFind, toActUpon, ambig) = MultiUserCommandHelper(args);
+
+    if (failToFind.Count > 0) {
+        return $"Players not found: {string.Join(", ", failToFind)}";
+    }
+
+    if (toActUpon.Count == 0) {
+        return "No players found";
+    }
+
+    foreach (Client client in toActUpon) {
+        client.Metadata["lives"] = 6;
+        int coins = 0;
+        if (client.Metadata.ContainsKey("coins"))
+            coins = Convert.ToInt32(client.Metadata["coins"]);
+        // Paket direkt schicken
+        client.Send(new Health_CoinsPacket { Health = 6, Coins = coins }).Wait();
+    }
+
+    return $"Gave Life Up Heart (6 Leben) an {toActUpon.Count} Spieler";
 });
 
 
