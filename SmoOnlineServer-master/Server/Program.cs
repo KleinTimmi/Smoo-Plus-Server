@@ -972,7 +972,7 @@ var webTask = Task.Run(async () =>
     var listener = new HttpListener();
     listener.Prefixes.Add("http://localhost:8080/");
     listener.Start();
-    consoleLogger.Info("Webinterface läuft auf http://localhost:8080/");
+    consoleLogger.Info("Webinterface running on http://localhost:8080/");
     try
     {
         System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo
@@ -983,7 +983,7 @@ var webTask = Task.Run(async () =>
     }
     catch (Exception ex)
     {
-        consoleLogger.Info("Konnte Browser nicht öffnen: " + ex.Message);
+        consoleLogger.Info("Could not open browser: " + ex.Message);
     }
 
     while (listener.IsListening)
