@@ -1172,19 +1172,20 @@ window.toggleBan = async function (idx) {
 };
 
 //Features
-// Hilfsfunktion: infcapbouncePlayer Dropdown mit Spielern befüllen
+//Dropdown mit Spielern befüllen
 async function fillInfCapBounceDropdown() {
-  const select = document.getElementById("infcapbouncePlayer");
-  if (!select) return;
-  select.innerHTML = '<option value="All">All</option>';
+  const selects = document.querySelectorAll("select.player-dropdown");
   const players = await fetchPlayers();
-  players.forEach((p) => {
-    if (p.Name) {
-      const opt = document.createElement("option");
-      opt.value = p.Name;
-      opt.textContent = p.Name;
-      select.appendChild(opt);
-    }
+  selects.forEach((select) => {
+    select.innerHTML = '<option value="All">All</option>';
+    players.forEach((p) => {
+      if (p.Name) {
+        const opt = document.createElement("option");
+        opt.value = p.Name;
+        opt.textContent = p.Name;
+        select.appendChild(opt);
+      }
+    });
   });
 }
 
