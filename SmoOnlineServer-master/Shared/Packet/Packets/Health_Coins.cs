@@ -6,18 +6,22 @@ namespace Shared.Packet.Packets;
 public struct Health_CoinsPacket : IPacket {
     public int Health;
     public int Coins;
+    public bool Kill;
 
     public short Size => 5;
     public short HealthSize => 1;
     public short CoinsSize => 4;
+    public short KillSize => 1;
 
     public void Serialize(Span<byte> data) {
         MemoryMarshal.Write(data, ref Health);
         MemoryMarshal.Write(data, ref Coins);
+        MemoryMarshal.Write(data, ref Kill);
     }
 
     public void Deserialize(ReadOnlySpan<byte> data) {
         Health = MemoryMarshal.Read<int>(data);
         Coins = MemoryMarshal.Read<int>(data);
+        Kill = MemoryMarshal.Read<bool>(data);
     }
 }

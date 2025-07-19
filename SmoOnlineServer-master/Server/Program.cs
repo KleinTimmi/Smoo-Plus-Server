@@ -527,6 +527,34 @@ CommandHandler.RegisterCommand("noclip", args => {
     return $"Gave player/s: {string.Join(", ", players.Select(p => p.Name))} Noclip: {enable}"; 
 });
 
+
+
+CommandHandler.RegisterCommand("setoutfit", args => {
+    const string optionUsage = "Usage: setoutfit <Player/*> <body> <cap>";
+    if (args.Length != 3)
+        return optionUsage;
+    
+    string playerArg = args[0];
+    string body = args[1];
+    string cap = args[2];
+    
+    Client[] players = playerArg == "*"
+        ? server.Clients.Where(c => c.Connected).ToArray()
+        : server.Clients.Where(c => c.Connected && c.Name.StartsWith(playerArg, StringComparison.OrdinalIgnoreCase)).ToArray();
+    
+    if (players.Length == 0)
+        return $"No player(s) found for '{playerArg}'";
+    
+    Parallel.ForEachAsync(players, async (c, _) => {
+        await c.Send(new CostumePacket {
+            BodyName = body,
+            CapName = cap
+        });
+    }).Wait();
+
+    return $"Set outfit for player/s: {string.Join(", ", players.Select(p => p.Name))} Body: {body} Cap: {cap}";
+});
+
 //Register Command Message
 CommandHandler.RegisterCommandAliases( _ => {
     const string optionUsage = "Usage: message <Player/*> <message>";

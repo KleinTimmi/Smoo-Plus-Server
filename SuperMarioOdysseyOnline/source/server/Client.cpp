@@ -363,8 +363,6 @@ void Client::readFunc() {
                 handleHealthCoinsPacket(curPacket);
                 break;
 
-
-
                 // Send relevant info packets when another client is connected
 
                 if (lastGameInfPacket != emptyGameInfPacket) {
@@ -849,6 +847,13 @@ void Client::updateCostumeInfo(CostumeInf* packet) {
 
     strcpy(curInfo->costumeBody, packet->bodyModel);
     strcpy(curInfo->costumeHead, packet->capModel);
+    
+    // Set outfit when costume info is received
+    PlayerActorHakoniwa* player = tryGetPlayerActorHakoniwa();
+    if (player) {
+        setOutfit(player, packet->bodyModel, packet->capModel);
+        Logger::log("Set outfit from costume packet: Body=%s, Cap=%s\n", packet->bodyModel, packet->capModel);
+    }
 }
 
 /**

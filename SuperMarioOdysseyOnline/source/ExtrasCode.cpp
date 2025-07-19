@@ -1,22 +1,25 @@
 #include "server/ExtrasCode.hpp"
 #include "al/util.hpp" // Passe die Includes an, je nachdem wo deine Hilfsfunktionen liegen
 #include "helpers/NrvFind/NrvFindHelper.h"
+#include "helpers/GetHelper.h"
 #include <cmath>
+#include <string>
 #include "packets/Extras.hpp"
 
 //------------------------------usefull includes---------------------------------
-#include "game/GameData/GameDataHolderAccessor.h"            //für health und coins
+#include "game/GameData/GameDataHolderAccessor.h"            //for health and coins
 #include "game/GameData/GameDataFunction.h"
 #include "game/HakoniwaSequence/HakoniwaSequence.h"
 #include "game/Player/PlayerActorBase.h"                    //mario base
 #include "game/Player/PlayerActorHakoniwa.h"                //Mario hakoniwa
 #include "game/Player/PlayerFunction.h"                     //mario function
 #include "game/Player/PlayerHackKeeper.h"                   //mario hack keeper
-#include "game/Player/PlayerCostumeInfo.h"                  //für coszume namen
-#include "game/Player/HackCap/PlayerCapActionHistory.h"     //für infinite cap Dives
-#include "game/Player/Actions/PlayerWallActionHistory.h"    //für infinite cap Dives/wall jumps
+#include "game/Player/PlayerCostumeInfo.h"      	        //for coszume names
+#include "game/Player/PlayerHitPointData.h"                 //for life 
+#include "game/Player/HackCap/PlayerCapActionHistory.h"     //for infinite cap Dives
+#include "game/Player/Actions/PlayerWallActionHistory.h"    //for infinite cap Dives/wall jumps
 #include "game/StageScene/StageScene.h"
-#include "game/Player/PlayerHitPointData.h"
+
 
 
 void handleNoclip(PlayerActorHakoniwa* hakoniwa, bool gNoclip, bool isYukimaru) {
@@ -90,12 +93,11 @@ void handleInfiniteCapBounce(PlayerActorHakoniwa* playerBase, bool gInfiniteCapB
     }
 }
 
-// Entferne den fehlerhaften globalen if-Block und die fehlerhafte getLifeMaxupItem-Implementierung
 
-// Neue, sichere Funktion zum Setzen des Life Up Heart Flags (optional, falls benötigt)
 void giveLifeUpHeart(PlayerActorHakoniwa* hakoniwa) {
     if (!hakoniwa) return;
-    // Hole GameDataHolderAccessor über den Actor
+    
+    // Get GameDataHolderAccessor from the actor
     GameDataHolderAccessor accessor(hakoniwa);
     if (accessor.mData && accessor.mData->mGameDataFile) {
         PlayerHitPointData* hitData = accessor.mData->mGameDataFile->getPlayerHitPointData();
@@ -105,3 +107,31 @@ void giveLifeUpHeart(PlayerActorHakoniwa* hakoniwa) {
         }
     }
 }
+
+
+void setOutfit(PlayerActorHakoniwa* hakoniwa, std::string body, std::string cap) {
+    if (!hakoniwa) return;
+
+    // Get the current scene
+    al::Scene* scene = tryGetScene();
+    if (!scene) return;
+
+    // Create actor init info
+    al::ActorInitInfo initInfo;
+    al::initActorInitInfo(&initInfo, scene, nullptr, nullptr, nullptr, nullptr, nullptr);
+
+    // Set the player model using the existing function
+    PlayerFunction::initMarioModelActor(
+        hakoniwa, 
+        initInfo, 
+        body.c_str(), 
+        cap.c_str(), 
+        nullptr, 
+        false
+    );
+
+    // Send costume info to other players
+    extern void sendCostumeInfPacket(const char* body, const char* cap);
+    sendCostumeInfPacket(body.c_str(), cap.c_str());
+}
+
