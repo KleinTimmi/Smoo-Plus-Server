@@ -46,13 +46,12 @@
 #include "server/gamemode/GameModeBase.hpp"
 #include "server/gamemode/GameModeFactory.hpp"
 #include "server/gamemode/GameModeManager.hpp"
+#include "server/ExtrasCode.hpp"
 
 #include "rs/util.hpp"
 
 #include "packets/Extras.h"
 #include "packets/Extras.hpp"
-
-#include "ExtrasCode.hpp"
 
 //#include "packets/Health_Coins.hpp"
 #include "al/util/ControllerUtil.h"

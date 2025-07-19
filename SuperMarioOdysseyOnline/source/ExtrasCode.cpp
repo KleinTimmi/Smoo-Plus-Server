@@ -16,7 +16,7 @@
 #include "game/Player/HackCap/PlayerCapActionHistory.h"     //für infinite cap Dives
 #include "game/Player/Actions/PlayerWallActionHistory.h"    //für infinite cap Dives/wall jumps
 #include "game/StageScene/StageScene.h"
-#include "game/GameData/PlayerHitPointData.h"
+#include "game/Player/PlayerHitPointData.h"
 
 
 void handleNoclip(PlayerActorHakoniwa* hakoniwa, bool gNoclip, bool isYukimaru) {
@@ -27,6 +27,7 @@ void handleNoclip(PlayerActorHakoniwa* hakoniwa, bool gNoclip, bool isYukimaru) 
         if (!isNoclip && wasNoclipOn)
             al::onCollide(hakoniwa);
         wasNoclipOn = isNoclip;
+        hakoniwa->endDemoPuppetable();
 
         if (isNoclip) {
             static float speed = 20.0f;
@@ -38,22 +39,15 @@ void handleNoclip(PlayerActorHakoniwa* hakoniwa, bool gNoclip, bool isYukimaru) 
             sead::Vector3f *cameraPos = al::getCameraPos(hakoniwa, 0);
             sead::Vector2f *leftStick = al::getLeftStick(-1);
 
-           
-           
-           //instead set the player to demopupetable
-           /* --------------------Nerven nerven---------------------------------
-            const al::Nerve* hipDropNrv = NrvFindHelper::getNerveAt(nrvPlayerActorHakoniwaHipDrop);
-            if(al::isNerve(hakoniwa, hipDropNrv))
-                NrvFindHelper::setNerveAt(hakoniwa, nrvPlayerActorHakoniwaWait);
-            -----------------------aber ausgeklammert immernoch---------------------------------*/
-
+            hakoniwa->startDemoPuppetable();
+            hakoniwa->mPlayerAnimator->startAnim("Wait");
 
 
             hakoniwa->exeJump();
             al::offCollide(hakoniwa);
             al::setVelocityZero(hakoniwa);
 
-            playerPos->y += 1.5f;
+            //playerPos->y += 1.5f; //isnt needed because of the demo puppetable
 
             float d = sqrt(al::powerIn(playerPos->x - cameraPos->x, 2) + (al::powerIn(playerPos->z - cameraPos->z, 2)));
             float vx = ((speed + speedGain) / d) * (playerPos->x - cameraPos->x);

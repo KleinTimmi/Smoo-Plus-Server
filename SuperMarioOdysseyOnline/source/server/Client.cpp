@@ -8,6 +8,10 @@
 #include "al/util/LiveActorUtil.h"
 
 #include "game/GameData/GameDataFunction.h"
+
+#include "game/Player/PlayerActorHakoniwa.h"
+#include "game/Player/PlayerHitPointData.h"
+
 #include "game/SaveData/SaveDataAccessFunction.h"
 
 #include "logger.hpp"
@@ -961,6 +965,7 @@ void Client::sendHealthCoinsPacket(const PlayerActorHakoniwa* player) {
 */
 void Client::handleHealthCoinsPacket(Packet* curPacket) {
     if (auto* healthCoins = static_cast<Health_Coins*>(curPacket)) {
+        PlayerActorHakoniwa* hakoniwa = tryGetPlayerActorHakoniwa();
         Logger::log("Processing Health_Coins packet - Health: %d, Coins: %d\n", 
                     healthCoins->health, healthCoins->coins);
         
@@ -970,8 +975,12 @@ void Client::handleHealthCoinsPacket(Packet* curPacket) {
         gCoins = healthCoins->coins;
         Logger::log("Received Health_Coins packet: Coins = %d\n",
                     gCoins);
-        getLifeMaxupItem();
-        Logger::log("Received Health_Coins packet: LifeMaxupItem = %d\n");
+        if (hakoniwa) {
+            giveLifeUpHeart(hakoniwa);
+            Logger::log("Received Health_Coins packet: LifeMaxupItem given to hakoniwa\n");
+        } else {
+            Logger::log("Received Health_Coins packet: Could not get hakoniwa for LifeMaxupItem\n");
+        }
     } else {
         Logger::log("Failed to cast packet to Health_Coins\n");
     }
