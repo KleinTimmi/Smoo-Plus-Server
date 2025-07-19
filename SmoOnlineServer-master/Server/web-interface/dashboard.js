@@ -1628,9 +1628,11 @@ window.openParamEditor = async function (playerName) {
     fetch("/commands/exec", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ command: `setoutfit ${player} ${cap} ${body}` }),
+      body: JSON.stringify({ command: `setoutfit ${player} ${body} ${cap}` }),
     });
   };
+
+  //Button delete
 
   //Speed Set Button
   document.getElementById("speedSetBtn").onclick = function () {
