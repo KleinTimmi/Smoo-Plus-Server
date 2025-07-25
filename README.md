@@ -47,5 +47,3 @@ more to that [Smoo readme](https://github.com/KleinTimmi/Smoo_aaaaaaa/blob/maste
 
 ## Collect the same moons like the parrot run
 
-
-tih is a tes
