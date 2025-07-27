@@ -968,6 +968,22 @@ document.getElementById("flipBothBtn").onclick = async function () {
   });
 };
 
+//Shine Sync
+document.getElementById("Shinetrue").onclick = async function () {
+  await fetch("/commands/exec", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ command: "shine set true" }),
+  });
+};
+document.getElementById("Shinefalse").onclick = async function () {
+  await fetch("/commands/exec", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ command: "shine set false" }),
+  });
+};
+
 // Scenario Merging
 document.getElementById("mergeEnableBtn").onclick = async function () {
   await fetch("/commands/exec", {
