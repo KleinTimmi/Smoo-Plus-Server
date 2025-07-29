@@ -102,6 +102,10 @@ body.theme-light .feature-box {
   color: #fff;
   border-color: #666;
 }
+.btn-gm {
+  margin-left: 10px;
+  padding: 5px, 20px;
+}
 #banListPlayers .list-group-item,
 #banListStages .list-group-item {
   border: none;
@@ -270,15 +274,15 @@ body.theme-light .feature-box {
   color: #fff !important;
 }
 
-/* Settings-FAB unten rechts */
+/* Settings-FAB unten links */
 .settings-fab {
   position: fixed;
-  right: 32px;
-  bottom: 32px;
+  left: 20px;
+  bottom: 20px;
   z-index: 1050;
   width: 56px;
   height: 56px;
-  background: #232946;
+  background: #393a5a;
   color: #fff;
   border-radius: 50%;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
@@ -290,7 +294,7 @@ body.theme-light .feature-box {
   transition: background 0.2s;
 }
 .settings-fab:hover {
-  background: #393a5a;
+  background: #232946;
 }
 
 /* Theme: Light Mode */

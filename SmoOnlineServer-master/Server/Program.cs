@@ -587,11 +587,11 @@ CommandHandler.RegisterCommand("scenario", args => {
 
 CommandHandler.RegisterCommand("tag", args => {
     const string optionUsage =
-        "Valid options:\n\ttime <user/*> <minutes[0-65535]> <seconds[0-59]>\n\tseeking <user/*> <true/false>\n\tstart <time> <seekers>";
+        "Valid options:\n\ttime <user/*> <freeze/hns/sardine> <minutes[0-65535]> <seconds[0-59]>\n\tseeking <user/*> <freeze/hns/sardine> <true/false>\n\tstart <freeze/hns/sardine> <time> <seekers>";
     if (args.Length < 3)
         return optionUsage;
     switch (args[0]) {
-        case "time" when args.Length == 4: {
+        case "time" when args.Length == 5: {
             if (args[1] != "*" && server.Clients.All(x => x.Name != args[1])) return $"Cannot find user {args[1]}";
             Client? client = server.Clients.FirstOrDefault(x => x.Name == args[1]);
             if (!ushort.TryParse(args[2], out ushort minutes))
@@ -615,7 +615,7 @@ CommandHandler.RegisterCommand("tag", args => {
             }
             return $"Set time for {(args[1] == "*" ? "everyone" : args[1])} to {minutes}:{seconds}";
         }
-        case "seeking" when args.Length == 3: {
+        case "seeking" when args.Length == 5: {
             if (args[1] != "*" && server.Clients.All(x => x.Name != args[1])) return $"Cannot find user {args[1]}";
             Client? client = server.Clients.FirstOrDefault(x => x.Name == args[1]);
             if (!bool.TryParse(args[2], out bool seeking)) return $"Usage: tag seeking {args[1]} <true/false>";
@@ -635,7 +635,7 @@ CommandHandler.RegisterCommand("tag", args => {
             }
             return $"Set {(args[1] == "*" ? "everyone" : args[1])} to {(seeking ? "seeker" : "hider")}";
         }
-        case "start" when args.Length > 2: {
+        case "start" when args.Length == 4: {
             if (!byte.TryParse(args[1], out byte time)) return $"Invalid countdown seconds {args[1]} (range: 0-255)";
             string[] seekerNames = args[2..];
             Client[] seekers = server.Clients.Where(c => seekerNames.Contains(c.Name)).ToArray();

@@ -737,7 +737,13 @@ const playerTableColumns = [
     key: "gamemode",
     label: "Game Mode",
     class: "col-gamemode",
-    render: (p) => p.GameMode || "-",
+    render: (p) => `
+      ${p.GameMode || "-"}
+      <button class="btn-gm btn btn-sm" onclick="openChangeGMModal('${
+        p.Name
+      }')">
+        Change GM
+      </button>`,
   },
   {
     key: "stage",
@@ -965,6 +971,22 @@ document.getElementById("flipBothBtn").onclick = async function () {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ command: "flip pov both" }),
+  });
+};
+
+//Shine Sync
+document.getElementById("Shinetrue").onclick = async function () {
+  await fetch("/commands/exec", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ command: "shine set true" }),
+  });
+};
+document.getElementById("Shinefalse").onclick = async function () {
+  await fetch("/commands/exec", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ command: "shine set false" }),
   });
 };
 
@@ -1342,6 +1364,124 @@ if (!window.teleportModalHandlerAdded) {
   window.teleportModalHandlerAdded = true;
 }
 
+// Funktion zum Öffnen des Change GM Modals
+window.openChangeGMModal = function (playerName) {
+  document.getElementById(
+    "changeGMModalLabel"
+  ).textContent = `Change Game Mode for ${playerName}`;
+
+  // Initialize game status options based on current game mode selection
+  updateGameStatusOptions();
+
+  // Show the modal
+  const modal = new bootstrap.Modal(document.getElementById("changeGMModal"));
+  modal.show();
+
+  // Event-Listener für den "Change Game Mode" Button im Modal
+  document.getElementById("changeGMBtn").onclick = function () {
+    const selectedGameMode = document.getElementById("gameModeSelect").value;
+    const selectedGameStatus = document.getElementById("Gm-Status").value;
+    changeGameMode(playerName, selectedGameMode, selectedGameStatus);
+    modal.hide();
+  };
+
+  // Add event listener to handle game mode selection and show/hide appropriate game status options
+  document.getElementById("gameModeSelect").onchange = function () {
+    updateGameStatusOptions();
+  };
+};
+
+// Function to update game status options based on selected game mode
+function updateGameStatusOptions() {
+  const gameModeSelect = document.getElementById("gameModeSelect");
+  const gameStatusSelect = document.getElementById("Gm-Status");
+  
+  if (!gameModeSelect || !gameStatusSelect) return;
+  
+  const selectedGameMode = gameModeSelect.value;
+  const options = gameStatusSelect.querySelectorAll("option");
+  
+  // Hide all options first
+  options.forEach(option => {
+    option.style.display = "none";
+    option.disabled = true;
+  });
+  
+  // Show relevant options based on game mode
+  if (selectedGameMode === "HnS") { // Hide and Seek
+    // Show Seeker and Hider
+    const seekerOption = gameStatusSelect.querySelector('.hns-option[value="Seeker"]');
+    const hiderOption = gameStatusSelect.querySelector('.hns-option[value="Hider"]');
+    if (seekerOption) {
+      seekerOption.style.display = "block";
+      seekerOption.disabled = false;
+    }
+    if (hiderOption) {
+      hiderOption.style.display = "block";
+      hiderOption.disabled = false;
+    }
+    gameStatusSelect.value = "notChange";
+  } else if (selectedGameMode === "Sardine") { // Sardine
+    // Show Can and Sardine
+    const sardineOption = gameStatusSelect.querySelector('.snh-option[value="Sardine"]');
+    const canOption = gameStatusSelect.querySelector('.snh-option[value="Can"]');
+    if (sardineOption) {
+      sardineOption.style.display = "block";
+      sardineOption.disabled = false;
+    }
+    if (canOption) {
+      canOption.style.display = "block";
+      canOption.disabled = false;
+    }
+    // Set default to Runner
+    gameStatusSelect.value = "notChange";
+    
+  } else if (selectedGameMode === "Freeze") { // Freeze Tag
+    // Show Chaser
+    const chaserOption = gameStatusSelect.querySelector('.freeze-option[value="Chaser"]');
+    const runnerOption = gameStatusSelect.querySelector('.freeze-option[value="Runner"]');
+    if (chaserOption) {
+      chaserOption.style.display = "block";
+      chaserOption.disabled = false;
+    }
+    if (runnerOption) {
+      runnerOption.style.display = "block";
+      runnerOption.disabled = false;
+    }
+    // Set default to Chaser
+    gameStatusSelect.value = "notChange";
+  }
+}
+
+// Global function to change game mode and status
+window.changeGameMode = async function(playerName, newGameMode, newGameStatus) {
+  // Only send game mode if not 'notChange'
+  if (newGameMode && newGameMode !== 'notChange') {
+    await fetch("/commands/exec", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ command: `gamemode ${playerName} ${newGameMode}` })
+    });
+  }
+  // Only send tag/status if not 'notChange'
+  if (newGameStatus && newGameStatus !== 'notChange') {
+    if (newGameStatus === 'Seeker' || newGameStatus === 'Chaser' || newGameStatus === 'Can') {
+      newGameStatus = true;
+    } else if (newGameStatus === 'Hider' || newGameStatus === 'Runner' || newGameStatus === 'Sardine') {
+      newGameStatus = false;
+    }
+    await fetch("/commands/exec", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ command: `tag seeking ${newGameMode} ${playerName} ${newGameStatus}` })
+    });
+  }
+  // Optionally, refresh the player table or UI here if needed
+  if (typeof renderPlayerTable === 'function') {
+    renderPlayerTable();
+  }
+};
+
 // Modal für Parameter-Editor ist bereits im HTML vorhanden, daher nicht dynamisch erstellen
 
 // Lebens- und Münzanzeige für das Param-Modal (Segment-Kreis, Herz, Zahl, Münze, interaktiv)
@@ -1379,17 +1519,6 @@ function renderCoinSVG(coins) {
         ${coinText}
         ${coinLine}
       </svg>
-    </div>
-  `;
-}
-function renderLifeSVG(lives) {
-  // Die Lebensanzeige nutzt jetzt die Original-Bilder aus images/Layout
-  // Die Zahl wird mittig über das Herz gelegt
-  return `
-    <div style="position:relative;width:90px;height:90px;display:flex;align-items:center;justify-content:center;">
-      <img src="images/Layout/NyLifeGauge00s.png" style="position:absolute;left:0;top:0;width:100%;height:100%;pointer-events:none;">
-      <img src="images/Layout/NyIconLifes.png" style="position:absolute;left:0;top:0;width:100%;height:100%;pointer-events:none;">
-      <span style="position:absolute;left:0;top:0;width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:36px;font-weight:bold;color:#fff;text-shadow:0 0 6px #000,0 0 2px #fff;user-select:none;cursor:ns-resize;" id="lifeScrubber">${lives}</span>
     </div>
   `;
 }
