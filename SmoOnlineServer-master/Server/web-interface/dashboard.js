@@ -1421,7 +1421,7 @@ function updateGameStatusOptions() {
       hiderOption.disabled = false;
     }
     gameStatusSelect.value = "notChange";
-  } else if (selectedGameMode === "SnH") { // Sardine
+  } else if (selectedGameMode === "Sardine") { // Sardine
     // Show Can and Sardine
     const sardineOption = gameStatusSelect.querySelector('.snh-option[value="Sardine"]');
     const canOption = gameStatusSelect.querySelector('.snh-option[value="Can"]');
@@ -1473,7 +1473,7 @@ window.changeGameMode = async function(playerName, newGameMode, newGameStatus) {
     await fetch("/commands/exec", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ command: `tag seeking ${playerName} ${newGameStatus}` })
+      body: JSON.stringify({ command: `tag seeking ${newGameMode} ${playerName} ${newGameStatus}` })
     });
   }
   // Optionally, refresh the player table or UI here if needed
