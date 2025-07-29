@@ -1,5 +1,6 @@
 import socket
 import sys
+import datetime
 
 # Super simple TCP server yoinked straight from google.com (http://pymotw.com/2/socket/tcp.html)
 
@@ -28,7 +29,9 @@ while True:
             data = connection.recv(1024)
 
             if data:
-                print(data.decode("utf-8"), end='', flush=True)
+                now = datetime.datetime.now()
+                timestamp = now.strftime("[%d.%m.%H:%M:%S] ")
+                print(timestamp + data.decode("utf-8"), end='', flush=True)
             else:
                 print(f'Connection Terminated.')
                 break

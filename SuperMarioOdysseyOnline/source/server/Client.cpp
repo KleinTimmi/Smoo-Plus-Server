@@ -918,6 +918,11 @@ void Client::updateGameInfo(GameInf* packet) {
     }
 }
 
+/**
+ * @brief
+ * 
+ * @param Packet
+ */
 void Client::handleExtrasPacket(Packet* curPacket) {
     if (auto* extras = static_cast<ExtrasPacket*>(curPacket)) {
         Logger::log("Processing Extras packet - InfiniteCapBounce: %d, Noclip: %d\n", 
