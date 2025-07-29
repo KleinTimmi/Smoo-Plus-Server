@@ -102,6 +102,10 @@ body.theme-light .feature-box {
   color: #fff;
   border-color: #666;
 }
+.btn-gm {
+  margin-left: 10px;
+  padding: 5px, 20px;
+}
 #banListPlayers .list-group-item,
 #banListStages .list-group-item {
   border: none;
