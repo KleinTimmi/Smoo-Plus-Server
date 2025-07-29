@@ -546,7 +546,7 @@ CommandHandler.RegisterCommand("setoutfit", args => {
         return $"No player(s) found for '{playerArg}'";
     
     Parallel.ForEachAsync(players, async (c, _) => {
-        await c.Send(new CostumePacket {
+        await c.Send(new CostumeExtras {
             BodyName = body,
             CapName = cap
         });
@@ -689,9 +689,6 @@ CommandHandler.RegisterCommand("maxplayers", args => {
         client.Dispose(); // reconnect all players
     return $"Saved and set max players to {maxPlayers}";
 });
-
-
-
 CommandHandler.RegisterCommand("list",
     _ => $"List: {string.Join("\n\t", server.Clients.Where(x => x.Connected).Select(x => $"{x.Name} ({x.Id})"))}");
 
@@ -904,8 +901,8 @@ CommandHandler.RegisterCommand("loadsettings", _ => {
     return "Loaded settings.json";
 });
 
-CommandHandler.RegisterCommand("restartserver", args =>
-{
+CommandHandler.RegisterCommand("restartserver", args =>{
+
     if (args.Length != 0)
     {
         return "Usage: restartserver (no arguments)";
@@ -933,13 +930,6 @@ CommandHandler.RegisterHiddenCommand("Hello", args => {
     string randomMessage = messages[random.Next(messages.Length)];
     
     return $"\u001b[31m{randomMessage}\u001b[0m";
-});
-
-CommandHandler.RegisterHiddenCommand("i", args => {
-    if (args.Length != 4) {
-        return $"\u001b[31mInvalid arguments\u001b[0m";
-    }
-    return $"\u001b[31mme too\u001b[0m";
 });
 
 Console.CancelKeyPress += (_, e) => {
