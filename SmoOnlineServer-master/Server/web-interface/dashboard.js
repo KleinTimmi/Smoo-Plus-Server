@@ -1473,7 +1473,7 @@ window.changeGameMode = async function(playerName, newGameMode, newGameStatus) {
     await fetch("/commands/exec", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ command: `tag ${playerName} ${newGameStatus}` })
+      body: JSON.stringify({ command: `tag seeking ${playerName} ${newGameStatus}` })
     });
   }
   // Optionally, refresh the player table or UI here if needed
