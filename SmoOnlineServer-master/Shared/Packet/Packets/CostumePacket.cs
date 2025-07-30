@@ -1,26 +1,38 @@
-﻿using System.Runtime.InteropServices;
+﻿using System;
 using System.Text;
 
 namespace Shared.Packet.Packets;
 
 [Packet(PacketType.Costume)]
-public struct CostumePacket : IPacket {
-    public string BodyName;
-    public string CapName;
+public struct CostumePacket : IPacket
+{
+    // Compatible with C++ CostumeInf (receive from mod) and CostumeSend (send to mod)
+    public string BodyName;  // Maps to bodyModel (CostumeInf) or BodyName (CostumeSend)
+    public string CapName;   // Maps to capModel (CostumeInf) or CapName (CostumeSend)
 
-    public short Size => Constants.CostumeNameSize * 2;
+    public short Size => (short)(Constants.CostumeNameSize * 2);
 
-    public void Serialize(Span<byte> data) {
-        Encoding.UTF8.GetBytes(BodyName ?? "").CopyTo(data[..Constants.CostumeNameSize]);
-        Encoding.UTF8.GetBytes(CapName ?? "").CopyTo(data[Constants.CostumeNameSize..(Constants.CostumeNameSize * 2)]);
+    public void Serialize(Span<byte> data)
+    {
+        // Fill buffer with zeros for C++ compatibility
+        data.Clear();
+
+        // BodyName
+        var bodyBytes = Encoding.ASCII.GetBytes(BodyName ?? "");
+        int bodyLen = Math.Min(bodyBytes.Length, Constants.CostumeNameSize - 1);
+        bodyBytes.AsSpan(0, bodyLen).CopyTo(data.Slice(0, bodyLen));
+        // Nullterminator ist durch data.Clear() schon gesetzt
+
+        // CapName
+        var capBytes = Encoding.ASCII.GetBytes(CapName ?? "");
+        int capLen = Math.Min(capBytes.Length, Constants.CostumeNameSize - 1);
+        capBytes.AsSpan(0, capLen).CopyTo(data.Slice(Constants.CostumeNameSize, capLen));
+        // Nullterminator ist durch data.Clear() schon gesetzt
     }
 
-    public void Deserialize(ReadOnlySpan<byte> data) {
-        BodyName = Encoding.UTF8.GetString(data[..Constants.CostumeNameSize]).TrimNullTerm();
-        CapName = Encoding.UTF8.GetString(data[Constants.CostumeNameSize..(Constants.CostumeNameSize * 2)]).TrimNullTerm();
+    public void Deserialize(ReadOnlySpan<byte> data)
+    {
+        BodyName = Encoding.ASCII.GetString(data.Slice(0, Constants.CostumeNameSize)).TrimEnd('\0');
+        CapName  = Encoding.ASCII.GetString(data.Slice(Constants.CostumeNameSize, Constants.CostumeNameSize)).TrimEnd('\0');
     }
-
-
-
-
 }

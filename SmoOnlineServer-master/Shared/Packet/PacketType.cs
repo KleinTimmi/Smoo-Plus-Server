@@ -16,7 +16,6 @@ public enum PacketType : short {
     Command, // = 12
     Extra, // = 15
     Health_Coins, // = 16
-    CostumeSend, // = 17 // i´ll make this cleaner in the future and put this in the normal Costume
 }
 
 /* this has to be the exact same Id as in the mod
