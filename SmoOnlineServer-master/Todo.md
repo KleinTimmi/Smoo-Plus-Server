@@ -7,7 +7,7 @@
 - Alles Loggen
 - Map (Kordinaten anpassen)
 - Save Position and load Position
-  - Koordinaten dess Spielers anzeigen
+  - Koordinaten des Spielers anzeigen
 
 # Server
 

@@ -553,11 +553,12 @@ document.addEventListener("DOMContentLoaded", function () {
   if (settingsFab) {
     settingsFab.onclick = function () {
       const modal = new bootstrap.Modal(document.getElementById("themeModal"));
-      // Current Theme in Modal select
+      // Aktuelles Theme im Dropdown setzen
       const theme = getSavedTheme();
-      document.getElementById("themeDark").checked = theme === "dark";
-      document.getElementById("themeLight").checked = theme === "light";
-      document.getElementById("themeSystem").checked = theme === "system";
+      const themeSelect = document.getElementById("themeSelect");
+      if (themeSelect) {
+        themeSelect.value = theme;
+      }
       modal.show();
     };
   }
@@ -585,17 +586,16 @@ document.addEventListener("DOMContentLoaded", function () {
     return localStorage.getItem("theme") || "system";
   }
   setTheme(getSavedTheme());
-  ["themeDark", "themeLight", "themeSystem"].forEach((id) => {
-    const el = document.getElementById(id);
-    if (el) {
-      el.onchange = function () {
-        if (el.checked) {
-          saveTheme(el.value);
-          setTheme(el.value);
-        }
-      };
-    }
-  });
+  const themeSelect = document.getElementById("themeSelect");
+  if (themeSelect) {
+    // Set current value from saved theme
+    themeSelect.value = getSavedTheme();
+    themeSelect.onchange = function () {
+      const value = themeSelect.value;
+      saveTheme(value);
+      setTheme(value);
+    };
+  }
   window
     .matchMedia("(prefers-color-scheme: dark)")
     .addEventListener("change", function () {
@@ -681,7 +681,7 @@ async function fetchPlayers() {
     Cap: "Mario",
     Body: "Mario",
     Capture: "Kuribo",
-    GameMode: "Multiplayer",
+    GameMode: "Hide and Seek",
     Stage: "CapWorldHomeStage",
     IPv4: "192.168.1.100",
     Banned: false,
@@ -1270,48 +1270,7 @@ window.crashPlayer = function (name) {
   });
 };
 
-// Teleport-Modal HTML einfügen, falls nicht vorhanden
-if (!document.getElementById("teleportModal")) {
-  const modalHtml = `
-    <div class="modal fade" id="teleportModal" tabindex="-1" aria-labelledby="teleportModalLabel" aria-hidden="true">
-      <div class="modal-dialog">
-        <div class="modal-content">
-          <div class="modal-header">
-            <h5 class="modal-title" id="teleportModalLabel">Teleport Spieler</h5>
-            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-          </div>
-          <div class="modal-body">
-            <form id="teleportForm">
-              <div class="mb-2">
-                <label for="teleportKingdom" class="form-label">Kingdom</label>
-                <select class="form-select" id="teleportKingdom">
-                  <option value="Cap Kingdom">Cap Kingdom</option>
-                  <option value="Cascade Kingdom">Cascade Kingdom</option>
-                  <option value="Wodded Kingdom">Wodded Kingdom</option>
-                </select>
-              </div>
-              <div class="mb-2">
-                <label for="teleportStage" class="form-label">Stage</label>
-                <select class="form-select" id="teleportStage"></select>
-              </div>
-              <div class="mb-2">
-                <label for="teleportScenario" class="form-label">Scenario</label>
-                <input type="number" class="form-control" id="teleportScenario" value="-1" min="-1" max="127" />
-              </div>
-              <input type="hidden" id="teleportPlayerName" />
-            </form>
-          </div>
-          <div class="modal-footer">
-            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Abbrechen</button>
-            <button type="button" class="btn btn-primary" id="teleportSendBtn">Teleportieren</button>
-          </div>
-        </div>
-      </div>
-    </div>
-  `;
-  document.body.insertAdjacentHTML("beforeend", modalHtml);
-}
-
+//Teleport Modal
 // Kingdom- und Stage-Auswahl im Teleport-Modal befüllen
 window.openTeleportModal = function (playerName) {
   document.getElementById("teleportPlayerName").value = playerName;
@@ -1343,7 +1302,7 @@ window.openTeleportModal = function (playerName) {
   modal.show();
 };
 
-// Teleport ausführen
+//Teleport ausführen
 if (!window.teleportModalHandlerAdded) {
   document.getElementById("teleportSendBtn").onclick = async function () {
     const player = document.getElementById("teleportPlayerName").value;
@@ -1357,12 +1316,130 @@ if (!window.teleportModalHandlerAdded) {
       }),
     });
     // Modal schließen
-    bootstrap.Modal.getInstance(
-      document.getElementById("teleportModal")
-    ).hide();
+    closeTeleportModal();
   };
   window.teleportModalHandlerAdded = true;
 }
+//Teleport Modal Close
+window.closeTeleportModal = function () {
+  const modalEl = document.getElementById("teleportModal");
+  const modal =
+    bootstrap.Modal.getInstance(modalEl) || new bootstrap.Modal(modalEl);
+  modal.hide();
+};
+
+//To Player Button
+document.getElementById("switchTpBtnP1").onclick = function () {
+  const currentModalEl = document.getElementById("teleportModal");
+  const currentModal =
+    bootstrap.Modal.getInstance(currentModalEl) ||
+    new bootstrap.Modal(currentModalEl);
+  currentModalEl.addEventListener("hidden.bs.modal", function handler() {
+    window.openTeleportPlayerModal();
+    currentModalEl.removeEventListener("hidden.bs.modal", handler);
+  });
+  currentModal.hide();
+};
+document.getElementById("switchTpBtnP2").onclick = function () {
+  const currentModalEl = document.getElementById("teleportCoordModal");
+  const currentModal =
+    bootstrap.Modal.getInstance(currentModalEl) ||
+    new bootstrap.Modal(currentModalEl);
+  currentModalEl.addEventListener("hidden.bs.modal", function handler() {
+    window.openTeleportPlayerModal();
+    currentModalEl.removeEventListener("hidden.bs.modal", handler);
+  });
+  currentModal.hide();
+};
+
+//To Stage Button
+document.getElementById("switchTpBtnS1").onclick = function () {
+  const currentModalEl = document.getElementById("teleportPlayerModal");
+  const currentModal =
+    bootstrap.Modal.getInstance(currentModalEl) ||
+    new bootstrap.Modal(currentModalEl);
+  currentModalEl.addEventListener("hidden.bs.modal", function handler() {
+    window.openTeleportModal();
+    currentModalEl.removeEventListener("hidden.bs.modal", handler);
+  });
+  currentModal.hide();
+};
+document.getElementById("switchTpBtnS2").onclick = function () {
+  const currentModalEl = document.getElementById("teleportCoordModal");
+  const currentModal =
+    bootstrap.Modal.getInstance(currentModalEl) ||
+    new bootstrap.Modal(currentModalEl);
+  currentModalEl.addEventListener("hidden.bs.modal", function handler() {
+    window.openTeleportModal();
+    currentModalEl.removeEventListener("hidden.bs.modal", handler);
+  });
+  currentModal.hide();
+};
+
+//To Coordinates Button
+document.getElementById("switchTpBtnC1").onclick = function () {
+  const currentModalEl = document.getElementById("teleportModal");
+  const currentModal =
+    bootstrap.Modal.getInstance(currentModalEl) ||
+    new bootstrap.Modal(currentModalEl);
+  currentModalEl.addEventListener("hidden.bs.modal", function handler() {
+    window.openTeleportCoordModal();
+    currentModalEl.removeEventListener("hidden.bs.modal", handler);
+  });
+  currentModal.hide();
+};
+document.getElementById("switchTpBtnC2").onclick = function () {
+  const currentModalEl = document.getElementById("teleportPlayerModal");
+  const currentModal =
+    bootstrap.Modal.getInstance(currentModalEl) ||
+    new bootstrap.Modal(currentModalEl);
+  currentModalEl.addEventListener("hidden.bs.modal", function handler() {
+    window.openTeleportCoordModal();
+    currentModalEl.removeEventListener("hidden.bs.modal", handler);
+  });
+  currentModal.hide();
+};
+
+// Player Teleport Modal
+document.getElementById("teleportPlayerSendBtn").onclick = function () {
+  //Logik Hinzufügen
+  closeTeleportPlayerModal();
+};
+
+//Open Teleport Player Modal
+window.openTeleportPlayerModal = function () {
+  const modal = new bootstrap.Modal(
+    document.getElementById("teleportPlayerModal")
+  );
+  modal.show();
+};
+//Teleport Player Modal Close
+window.closeTeleportPlayerModal = function () {
+  const modalEl = document.getElementById("teleportPlayerModal");
+  const modal =
+    bootstrap.Modal.getInstance(modalEl) || new bootstrap.Modal(modalEl);
+  modal.hide();
+};
+//Teleport Coordinate Modal
+document.getElementById("teleportCoordSendBtn").onclick = function () {
+  //Logik Hinzufügen
+  closeTeleportCoordModal();
+};
+
+//Open Teleport Coordinate Modal
+window.openTeleportCoordModal = function () {
+  const modal = new bootstrap.Modal(
+    document.getElementById("teleportCoordModal")
+  );
+  modal.show();
+};
+//Teleport Coordinate Modal Close
+window.closeTeleportCoordModal = function () {
+  const modalEl = document.getElementById("teleportCoordModal");
+  const modal =
+    bootstrap.Modal.getInstance(modalEl) || new bootstrap.Modal(modalEl);
+  modal.hide();
+};
 
 // Funktion zum Öffnen des Change GM Modals
 window.openChangeGMModal = function (playerName) {
@@ -1395,23 +1472,31 @@ window.openChangeGMModal = function (playerName) {
 function updateGameStatusOptions() {
   const gameModeSelect = document.getElementById("gameModeSelect");
   const gameStatusSelect = document.getElementById("Gm-Status");
-  
+
   if (!gameModeSelect || !gameStatusSelect) return;
-  
+
   const selectedGameMode = gameModeSelect.value;
   const options = gameStatusSelect.querySelectorAll("option");
-  
+
   // Hide all options first
-  options.forEach(option => {
+  options.forEach((option) => {
     option.style.display = "none";
     option.disabled = true;
   });
-  
+
   // Show relevant options based on game mode
-  if (selectedGameMode === "HnS") { // Hide and Seek
+  if (selectedGameMode === "notChange") {
+    // Don't show any options if game mode is "notChange"
+    return;
+  } else if (selectedGameMode === "hns") {
+    // Hide and Seek
     // Show Seeker and Hider
-    const seekerOption = gameStatusSelect.querySelector('.hns-option[value="Seeker"]');
-    const hiderOption = gameStatusSelect.querySelector('.hns-option[value="Hider"]');
+    const seekerOption = gameStatusSelect.querySelector(
+      '.hns-option[value="seeker"]'
+    );
+    const hiderOption = gameStatusSelect.querySelector(
+      '.hns-option[value="hider"]'
+    );
     if (seekerOption) {
       seekerOption.style.display = "block";
       seekerOption.disabled = false;
@@ -1421,10 +1506,15 @@ function updateGameStatusOptions() {
       hiderOption.disabled = false;
     }
     gameStatusSelect.value = "notChange";
-  } else if (selectedGameMode === "Sardine") { // Sardine
+  } else if (selectedGameMode === "sardine") {
+    // Sardine
     // Show Can and Sardine
-    const sardineOption = gameStatusSelect.querySelector('.snh-option[value="Sardine"]');
-    const canOption = gameStatusSelect.querySelector('.snh-option[value="Can"]');
+    const sardineOption = gameStatusSelect.querySelector(
+      '.snh-option[value="sardine"]'
+    );
+    const canOption = gameStatusSelect.querySelector(
+      '.snh-option[value="can"]'
+    );
     if (sardineOption) {
       sardineOption.style.display = "block";
       sardineOption.disabled = false;
@@ -1435,11 +1525,15 @@ function updateGameStatusOptions() {
     }
     // Set default to Runner
     gameStatusSelect.value = "notChange";
-    
-  } else if (selectedGameMode === "Freeze") { // Freeze Tag
+  } else if (selectedGameMode === "freeze") {
+    // Freeze Tag
     // Show Chaser
-    const chaserOption = gameStatusSelect.querySelector('.freeze-option[value="Chaser"]');
-    const runnerOption = gameStatusSelect.querySelector('.freeze-option[value="Runner"]');
+    const chaserOption = gameStatusSelect.querySelector(
+      '.freeze-option[value="chaser"]'
+    );
+    const runnerOption = gameStatusSelect.querySelector(
+      '.freeze-option[value="runner"]'
+    );
     if (chaserOption) {
       chaserOption.style.display = "block";
       chaserOption.disabled = false;
@@ -1454,30 +1548,46 @@ function updateGameStatusOptions() {
 }
 
 // Global function to change game mode and status
-window.changeGameMode = async function(playerName, newGameMode, newGameStatus) {
+window.changeGameMode = async function (
+  playerName,
+  newGameMode,
+  newGameStatus
+) {
   // Only send game mode if not 'notChange'
-  if (newGameMode && newGameMode !== 'notChange') {
+  if (newGameMode && newGameMode !== "notChange") {
     await fetch("/commands/exec", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ command: `gamemode ${playerName} ${newGameMode}` })
+      body: JSON.stringify({
+        command: `gamemode ${playerName} ${newGameMode}`,
+      }),
     });
   }
   // Only send tag/status if not 'notChange'
-  if (newGameStatus && newGameStatus !== 'notChange') {
-    if (newGameStatus === 'Seeker' || newGameStatus === 'Chaser' || newGameStatus === 'Can') {
+  if (newGameStatus && newGameStatus !== "notChange") {
+    if (
+      newGameStatus === "seeker" ||
+      newGameStatus === "chaser" ||
+      newGameStatus === "can"
+    ) {
       newGameStatus = true;
-    } else if (newGameStatus === 'Hider' || newGameStatus === 'Runner' || newGameStatus === 'Sardine') {
+    } else if (
+      newGameStatus === "hider" ||
+      newGameStatus === "runner" ||
+      newGameStatus === "sardine"
+    ) {
       newGameStatus = false;
     }
     await fetch("/commands/exec", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ command: `tag seeking ${newGameMode} ${playerName} ${newGameStatus}` })
+      body: JSON.stringify({
+        command: `tag seeking ${newGameMode} ${playerName} ${newGameStatus}`,
+      }),
     });
   }
   // Optionally, refresh the player table or UI here if needed
-  if (typeof renderPlayerTable === 'function') {
+  if (typeof renderPlayerTable === "function") {
     renderPlayerTable();
   }
 };
@@ -2426,40 +2536,4 @@ async function renderMap() {
   let stageName = kingdomToStage[selectedKingdom];
   let mapFile = mapImages[stageName] || "CapKingdom.png";
   document.getElementById("mapImage").src = "images/map/" + mapFile;
-
-  // Titel setzen
-  document.getElementById("mapTitle").textContent = "Map – " + selectedKingdom;
-
-  // Marker-Overlay leeren
-  const markerDiv = document.getElementById("playerMarkers");
-  markerDiv.innerHTML = "";
-
-  // Nur Spieler im aktuellen Kingdom anzeigen
-  players
-    .filter((p) => stageToKingdom[p.Stage] === selectedKingdom)
-    .forEach((p) => {
-      if (p.PosX !== undefined && p.PosY !== undefined) {
-        const bounds = mapBounds[stageName];
-        if (bounds && p.PosX !== undefined && p.PosY !== undefined) {
-          let x = (p.PosX - bounds.minX) / (bounds.maxX - bounds.minX);
-          let y = 1 - (p.PosY - bounds.minY) / (bounds.maxY - bounds.minY);
-          let marker = document.createElement("div");
-          marker.style.position = "absolute";
-          marker.style.left = x * 100 + "%";
-          marker.style.top = y * 100 + "%";
-          marker.style.transform = "translate(-50%, -50%)";
-          marker.style.width = "32px";
-          marker.style.height = "32px";
-          marker.innerHTML = `<img src="images/cap/${p.Cap}.png" title="${p.Name}" style="width:100%;border-radius:50%;">`;
-          markerDiv.appendChild(marker);
-        }
-      }
-    });
-
-  if (!stageName) {
-    console.error("Kein stageName für Kingdom:", selectedKingdom);
-  }
-  if (!mapImages[stageName]) {
-    console.error("Kein Bild für stageName:", stageName);
-  }
 }

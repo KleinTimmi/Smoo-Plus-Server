@@ -615,7 +615,7 @@
       <div class="modal-dialog modal-dialog-bottom-end">
         <div class="modal-content">
           <div class="modal-header">
-            <h5 class="modal-title" id="themeModalLabel">Select Theme</h5>
+            <h5 class="modal-title" id="themeModalLabel">Settings</h5>
             <button
               type="button"
               class="btn-close"
@@ -624,40 +624,12 @@
             ></button>
           </div>
           <div class="modal-body">
-            <div class="form-check mb-2">
-              <input
-                class="form-check-input"
-                type="radio"
-                name="themeRadio"
-                id="themeDark"
-                value="dark"
-              />
-              <label class="form-check-label" for="themeDark">Dark Mode</label>
-            </div>
-            <div class="form-check mb-2">
-              <input
-                class="form-check-input"
-                type="radio"
-                name="themeRadio"
-                id="themeLight"
-                value="light"
-              />
-              <label class="form-check-label" for="themeLight"
-                >Light Mode</label
-              >
-            </div>
-            <div class="form-check mb-2">
-              <input
-                class="form-check-input"
-                type="radio"
-                name="themeRadio"
-                id="themeSystem"
-                value="system"
-              />
-              <label class="form-check-label" for="themeSystem"
-                >System (Default)</label
-              >
-            </div>
+            <label class="form-label">Theme:</label>
+            <select id="themeSelect" class="form-select mb-3">
+              <option value="system">System (Default)</option>
+              <option value="dark">Dark Mode</option>
+              <option value="light">Light Mode</option>
+            </select>
           </div>
         </div>
       </div>
@@ -684,21 +656,29 @@
             ></button>
           </div>
           <div class="modal-body">
-            <label for="gameModeSelect" class="form-label" style="margin-top: 10px;">Game Mode:</label>
+            <label
+              for="gameModeSelect"
+              class="form-label"
+              style="margin-top: 10px"
+              >Game Mode:</label
+            >
             <select id="gameModeSelect" class="form-select">
-              <option value="HnS">Hide and Seek</option>
-              <option value="Sardine">Sardine</option>
-              <option value="Freeze">Freeze Tag</option>
+              <option value="notChange">Don't Change</option>
+              <option value="hns">Hide and Seek</option>
+              <option value="sardine">Sardine</option>
+              <option value="freeze">Freeze Tag</option>
             </select>
-            <label for="Gm-Status" class="form-label" style="margin-top: 10px;">Game Status:</label>
+            <label for="Gm-Status" class="form-label" style="margin-top: 10px"
+              >Game Status:</label
+            >
             <select id="Gm-Status" class="form-select">
               <option value="notChange">Don't Change</option>
-              <option value="Seeker" class="hns-option">Seeker</option>
-              <option value="Hider" class="hns-option">Hider</option>
-              <option value="Sardine" class="snh-option">Sardine</option>
-              <option value="Can" class="snh-option">Can</option>
-              <option value="Chaser" class="freeze-option">Chaser</option>
-              <option value="Runner" class="freeze-option">Runner</option>
+              <option value="seeker" class="hns-option">Seeker</option>
+              <option value="hider" class="hns-option">Hider</option>
+              <option value="sardine" class="snh-option">Sardine</option>
+              <option value="can" class="snh-option">Can</option>
+              <option value="chaser" class="freeze-option">Chaser</option>
+              <option value="runner" class="freeze-option">Runner</option>
             </select>
           </div>
           <div class="modal-footer">
@@ -716,6 +696,209 @@
         </div>
       </div>
     </div>
+    <!-- Modal for Stage Teleport -->
+    <div
+      class="modal fade"
+      id="teleportModal"
+      tabindex="-1"
+      aria-labelledby="teleportModalLabel"
+      aria-hidden="true"
+    >
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="teleportModalLabel">
+              Teleport Player / Stage
+            </h5>
+            <button
+              type="button"
+              class="btn-close"
+              data-bs-dismiss="modal"
+              aria-label="Close"
+            ></button>
+          </div>
+          <div class="modal-body">
+            <form id="teleportForm">
+              <div class="mb-2">
+                <label for="teleportKingdom" class="form-label">Kingdom:</label>
+                <select class="form-select" id="teleportKingdom">
+                  <option value="Cap Kingdom">Cap Kingdom</option>
+                  <option value="Cascade Kingdom">Cascade Kingdom</option>
+                  <option value="Wodded Kingdom">Wodded Kingdom</option>
+                </select>
+              </div>
+              <div class="mb-2">
+                <label for="teleportStage" class="form-label">Stage:</label>
+                <select class="form-select" id="teleportStage"></select>
+              </div>
+              <div class="mb-2">
+                <label for="teleportScenario" class="form-label"
+                  >Scenario:</label
+                >
+                <input
+                  type="number"
+                  class="form-control"
+                  id="teleportScenario"
+                  value="-1"
+                  min="-1"
+                  max="127"
+                />
+              </div>
+              <div class="d-flex justify-content-between mb-2">
+                <button class="btn" id="switchTpBtnC1" type="button">
+                  &lt;- To Coordinates
+                </button>
+                <button class="btn" id="switchTpBtnP1" type="button">
+                  To Player -&gt;
+                </button>
+              </div>
+              <input type="hidden" id="teleportPlayerName" />
+            </form>
+          </div>
+          <div class="modal-footer">
+            <button
+              type="button"
+              class="btn btn-secondary"
+              data-bs-dismiss="modal"
+            >
+              Cancel
+            </button>
+            <button type="button" class="btn btn-primary" id="teleportSendBtn">
+              Teleport
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <!-- Modal for Teleport Player -->
+    <div
+      class="modal fade"
+      id="teleportPlayerModal"
+      tabindex="-1"
+      aria-labelledby="teleportPlayerModalLabel"
+      aria-hidden="true"
+    >
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="teleportPlayerModalLabel">
+              Teleport Player / Player
+            </h5>
+            <button
+              type="button"
+              class="btn-close"
+              data-bs-dismiss="modal"
+              aria-label="Close"
+            ></button>
+          </div>
+          <div class="modal-body">
+            <form id="teleportPlayerForm">
+              <div class="mb-2">
+                <label for="teleportPlayerSelect" class="form-label"
+                  >Player:</label
+                >
+                <select class="form-select" id="teleportPlayerSelect"></select>
+              </div>
+              <div class="mb-2 d-flex justify-content-between">
+                <button class="btn" id="switchTpBtnS1" type="button">
+                  &lt;- To Stage
+                </button>
+                <button class="btn" id="switchTpBtnC2" type="button">
+                  To Coordinates -&gt;
+                </button>
+              </div>
+              <input type="hidden" id="teleportPlayerName" />
+            </form>
+          </div>
+          <div class="modal-footer">
+            <button
+              type="button"
+              class="btn btn-secondary"
+              data-bs-dismiss="modal"
+            >
+              Cancel
+            </button>
+            <button
+              type="button"
+              class="btn btn-primary"
+              id="teleportPlayerSendBtn"
+            >
+              Teleport
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <!-- Modal for Coordinate Teleport -->
+    <div
+      class="modal fade"
+      id="teleportCoordModal"
+      tabindex="-1"
+      aria-labelledby="teleportCoordModalLabel"
+      aria-hidden="true"
+    >
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="teleportCoordModalLabel">
+              Teleport Player / Coordinates
+            </h5>
+            <button
+              type="button"
+              class="btn-close"
+              data-bs-dismiss="modal"
+              aria-label="Close"
+            ></button>
+          </div>
+          <div class="modal-body">
+            <form id="teleportCoordForm">
+              <div class="mb-2">
+                <label for="teleportCoordX" class="form-label"
+                  >Cordinate X:</label
+                >
+                <input type="number" class="form-control" id="teleportCoordX" />
+              </div>
+              <div class="mb-2">
+                <label for="teleportCoordY" class="form-label"
+                  >Cordinate Y:</label
+                >
+                <input type="number" class="form-control" id="teleportCoordY" />
+              </div>
+              <div class="mb-2">
+                <label for="teleportCoordZ" class="form-label"
+                  >Cordinate Z:</label
+                >
+                <input type="number" class="form-control" id="teleportCoordZ" />
+              </div>
+            </form>
+          </div>
+          <div class="d-flex justify-content-between mb-2 px-3">
+            <button class="btn" id="switchTpBtnP2" type="button">
+              &lt;- To Player
+            </button>
+            <button class="btn" id="switchTpBtnS2" type="button">
+              To Stage -&gt;
+            </button>
+          </div>
+          <div class="modal-footer">
+            <button
+              type="button"
+              class="btn btn-secondary"
+              data-bs-dismiss="modal"
+            >
+              Cancel
+            </button>
+            <button
+              type="button"
+              class="btn btn-primary"
+              id="teleportCoordSendBtn"
+            >
+              Teleport
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
     <!-- Modal for Parameter Editor -->
     <div
       class="modal fade"
@@ -724,7 +907,7 @@
       aria-labelledby="paramEditorModalLabel"
       aria-hidden="true"
     >
-      <div class="modal-dialog modal-lg">
+      <div class="modal-dialog">
         <div class="modal-content">
           <div class="modal-header">
             <h5 class="modal-title" id="paramEditorModalLabel">
