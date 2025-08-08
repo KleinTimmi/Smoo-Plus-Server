@@ -5,7 +5,7 @@ riderModule.iml
 /_ReSharper.Caches/
 .idea/
 settings.json
-.vs/
+.vs/**
 
 /cache/
 /data/
