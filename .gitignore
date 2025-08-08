@@ -1,3 +1,14 @@
 ﻿/.vs
 /.devtools/
-/.vscode/settings.json
+/.vscode/
+bin/
+obj/
+/packages/
+riderModule.iml
+/_ReSharper.Caches/
+.idea/
+settings.json
+.vs/**
+
+/cache/
+/data/
