@@ -43,6 +43,7 @@
 #include "packets/ShineCollect.h"
 #include "packets/Extras.hpp"
 //#include "packets/Health_Coins.hpp"
+#include "packets/ChangeCostume.h"
 
 #include "puppets/PuppetHolder.hpp"
 
@@ -181,6 +182,7 @@ class Client {
         void updateHackCapInfo(HackCapInf* packet);
         void updateGameInfo(GameInf* packet);
         void updateCostumeInfo(CostumeInf* packet);
+        void changeCostume(ChangeCostume* packet);
         void updateShineInfo(ShineCollect* packet);
         void updatePlayerConnect(PlayerConnect* packet);
         void updateCaptureInfo(CaptureInf* packet);

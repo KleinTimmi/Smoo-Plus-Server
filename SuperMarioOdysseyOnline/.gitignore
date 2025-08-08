@@ -11,3 +11,5 @@ Custom Stage Builds/**
 
 compile_commands.json
 .idea
+.vs/**
+out/**

@@ -14,8 +14,12 @@ public enum PacketType : short {
     Capture, // = 10
     ChangeStage, // = 11
     Command, // = 12
+    UDPInit, // = 13
+    HolePunch, //14
     Extra, // = 15
     Health_Coins, // = 16
+    Mods, // = 17
+    ChangeCostume, // = 18
 }
 
 /* this has to be the exact same Id as in the mod

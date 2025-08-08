@@ -546,7 +546,7 @@ CommandHandler.RegisterCommand("setoutfit", args => {
         return $"No player(s) found for '{playerArg}'";
     
     Parallel.ForEachAsync(players, async (c, _) => {
-        await c.Send(new CostumePacket {
+        await c.Send(new ChangeCostumePacket {
             BodyName = body,
             CapName = cap
         });
