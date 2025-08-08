@@ -52,6 +52,7 @@ public class Settings {
     public ShineTable Shines { get; set; } = new ShineTable();
     public PersistShinesTable PersistShines { get; set; } = new PersistShinesTable();
     public JsonApiTable JsonApi { get; set; } = new JsonApiTable();
+    public WebInterfaceTable WebInterface { get; set; } = new WebInterfaceTable();
 
     public class ServerTable {
         public string Address { get; set; } = IPAddress.Any.ToString();
@@ -100,5 +101,11 @@ public class Settings {
     {
         public bool Enabled { get; set; } = false;
         public Dictionary<string, SortedSet<string>> Tokens { get; set; } = new Dictionary<string, SortedSet<string>>();
+    }
+    public class WebInterfaceTable
+    {
+        public bool Enabled { get; set; } = true;
+        public string? Address { get; set; } = "localhost";
+        public ushort Port { get; set; } = 8080;
     }
 }
