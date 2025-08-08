@@ -1,4 +1,4 @@
-name: Build and Publish .NET Project
+name: Build and Publish .NET 6 Project
 
 on:
   push:
@@ -17,16 +17,13 @@ jobs:
     - name: Setup .NET SDK
       uses: actions/setup-dotnet@v4
       with:
-        dotnet-version: '6.0' # oder deine gewünschte Version
+        dotnet-version: '6.0.x'
 
     - name: Restore dependencies
       run: dotnet restore SmoMultiplayerServer.sln
 
     - name: Build Debug Solution
       run: dotnet build "SmoMultiplayerServer.sln" --configuration Debug
-
-    - name: Build Release Server Project
-      run: dotnet build ./Server/Server.csproj -c Release --self-contained -r win-x64 -p:publishSingleFile=true
 
     - name: Publish Final Release
       run: dotnet publish ./Server/Server.csproj -c Release -r win-x64 --self-contained true -p:PublishSingleFile=true -p:IncludeAllContentForSelfExtract=true
@@ -35,4 +32,4 @@ jobs:
       uses: actions/upload-artifact@v3
       with:
         name: published-server
-        path: ./Server/bin/Release/net8.0/win-x64/publish/
+        path: ./Server/bin/Release/net6.0/win-x64/publish/
