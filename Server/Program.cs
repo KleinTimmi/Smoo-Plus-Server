@@ -957,322 +957,331 @@ Task.Run(() => {
 }).ContinueWith(logError);
 #pragma warning restore CS4014
 
-var webTask = Task.Run(async () =>
+// Webinterface nur starten, wenn aktiviert
+Task? webTask = null;
+if (Settings.Instance.WebInterface.Enabled)
 {
-    var listener = new HttpListener();
-    listener.Prefixes.Add("http://localhost:8080/");
-    listener.Start();
-    consoleLogger.Info("Webinterface running on http://localhost:8080/");
-    try
+    webTask = Task.Run(async () =>
     {
-        System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo
-        {
-            FileName = "http://localhost:8080/dashboard.html",
-            UseShellExecute = true
-        });
-    }
-    catch (Exception ex)
-    {
-        consoleLogger.Info("Could not open browser: " + ex.Message);
-    }
-
-    while (listener.IsListening)
-    {
-        var context = await listener.GetContextAsync();
-        string urlPath = context.Request.Url!.AbsolutePath.TrimStart('/').ToLower();
-        string filePath = Path.Combine(AppContext.BaseDirectory, "web-interface", urlPath.Replace('/', Path.DirectorySeparatorChar));
-
+        var listener = new HttpListener();
+        string address = Settings.Instance.WebInterface.Address ?? "localhost";
+        ushort port = Settings.Instance.WebInterface.Port;
+        listener.Prefixes.Add($"http://{address}:{port}/");
+        listener.Start();
+        consoleLogger.Info($"Webinterface running on http://{address}:{port}/");
         try
         {
-            // API: Serverinfo
-            if (urlPath.StartsWith("api/serverinfo"))
+            System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo
             {
-                var settings = Settings.Instance.Server;
-                string response = $"{{\"host\": \"{settings.Address}\", \"port\": {settings.Port}, \"maxPlayers\": {settings.MaxPlayers}}}";
-                context.Response.ContentType = "application/json";
-                byte[] buffer = Encoding.UTF8.GetBytes(response);
-                context.Response.ContentLength64 = buffer.Length;
-                context.Response.OutputStream.Write(buffer, 0, buffer.Length);
-                context.Response.OutputStream.Close();
-                continue;
-            }
-
-            // API: Konsolenbefehl ausführen
-            if (urlPath == "commands/exec" && context.Request.HttpMethod == "POST")
-            {
-                using var reader = new StreamReader(context.Request.InputStream);
-                string body = reader.ReadToEnd();
-                string command = "";
-                try
-                {
-                    var json = System.Text.Json.JsonDocument.Parse(body);
-                    command = json.RootElement.GetProperty("command").GetString() ?? "";
-                }
-                catch { }
-
-                var result = CommandHandler.GetResult(command);
-                string output = string.Join("\n", result.ReturnStrings);
-
-                // Kommando und Ausgabe ins Log schreiben
-                consoleLogger.Info($"> {command}\n{output}");
-
-                context.Response.ContentType = "text/plain";
-                byte[] buffer = Encoding.UTF8.GetBytes(output);
-                context.Response.ContentLength64 = buffer.Length;
-                context.Response.OutputStream.Write(buffer, 0, buffer.Length);
-                context.Response.OutputStream.Close();
-                continue;
-            }
-
-            // API: Konsolen-Log abrufen
-            if (urlPath == "commands/output" && context.Request.HttpMethod == "GET")
-            {
-                string output = consoleLogger.GetOutput();
-                context.Response.ContentType = "text/plain";
-                byte[] buffer = Encoding.UTF8.GetBytes(output);
-                context.Response.ContentLength64 = buffer.Length;
-                context.Response.OutputStream.Write(buffer, 0, buffer.Length);
-                context.Response.OutputStream.Close();
-                continue;
-            }
-
-            // API: Dummy-Console
-            if (urlPath.StartsWith("api/console"))
-            {
-                string response = "{\"output\": [\"API not implemented\"]}";
-                context.Response.ContentType = "application/json";
-                byte[] buffer = Encoding.UTF8.GetBytes(response);
-                context.Response.ContentLength64 = buffer.Length;
-                context.Response.OutputStream.Write(buffer, 0, buffer.Length);
-                context.Response.OutputStream.Close();
-                continue;
-            }
-
-            // API: Banlist
-            if (urlPath.StartsWith("api/banlist"))
-            {
-                var banPlayers = Settings.Instance.BanList.Players?.Select(guid => guid.ToString()).ToArray() ?? Array.Empty<string>();
-                var banStages = Settings.Instance.BanList.Stages?.ToArray() ?? Array.Empty<string>();
-                string response = System.Text.Json.JsonSerializer.Serialize(new {
-                    players = banPlayers,
-                    stages = banStages
-                });
-                context.Response.ContentType = "application/json";
-                byte[] buffer = Encoding.UTF8.GetBytes(response);
-                context.Response.ContentLength64 = buffer.Length;
-                context.Response.OutputStream.Write(buffer, 0, buffer.Length);
-                context.Response.OutputStream.Close();
-                continue;
-            }
-            // API: Playerlist
-            if (urlPath.StartsWith("api/players"))
-            {
-                var players = server.Clients
-                    .Where(c => c.Connected)
-                    .Select(c => {
-                        float? posX = null, posY = null;
-                        if (c.Metadata.ContainsKey("lastPlayerPacket")) {
-                            var pp = (PlayerPacket)c.Metadata["lastPlayerPacket"];
-                            posX = pp.Position.X;
-                            posY = pp.Position.Y;
-                        }
-                        // Capture-Objekt auslesen
-                        string capture = "";
-                        if (c.Metadata.ContainsKey("lastCapturePacket") && c.Metadata["lastCapturePacket"] is CapturePacket cp && cp.ModelName != null) {
-                            capture = cp.ModelName;
-                        }
-                        // GameMode auslesen
-                        string gameMode = "";
-                        if (c.Metadata.ContainsKey("gameMode") && c.Metadata["gameMode"] != null) {
-                            var gmObj = c.Metadata["gameMode"];
-                            Shared.Packet.Packets.GameMode? gmEnum = null;
-                            if (gmObj is Shared.Packet.Packets.GameMode gme) {
-                                gmEnum = gme;
-                            } else if (gmObj is int gmi) {
-                                gmEnum = (Shared.Packet.Packets.GameMode)gmi;
-                            } else if (gmObj is sbyte gmsb) {
-                                gmEnum = (Shared.Packet.Packets.GameMode)gmsb;
-                            } else if (gmObj is string gms && Enum.TryParse<Shared.Packet.Packets.GameMode>(gms, out var parsed)) {
-                                gmEnum = parsed;
-                            }
-                            if (gmEnum != null) {
-                                gameMode = gmEnum.ToString();
-                                if ((gmEnum == Shared.Packet.Packets.GameMode.HideAndSeek || gmEnum == Shared.Packet.Packets.GameMode.Sardines || gmEnum == Shared.Packet.Packets.GameMode.FreezeTag) 
-                                    && c.Metadata.ContainsKey("seeking") && c.Metadata["seeking"] != null) {
-                                    bool isSeeker = false;
-                                    if (bool.TryParse(c.Metadata["seeking"].ToString(), out bool parsedSeek)) isSeeker = parsedSeek;
-                                    if (gmEnum == Shared.Packet.Packets.GameMode.HideAndSeek) {
-                                        gameMode += isSeeker ? " (Seeker)" : " (Hider)";
-                                    } else if (gmEnum == Shared.Packet.Packets.GameMode.FreezeTag) {
-                                        gameMode += isSeeker ? " (Chaser)" : " (Runner)";
-                                    } else if (gmEnum == Shared.Packet.Packets.GameMode.Sardines) {
-                                        gameMode += isSeeker ? " (Büchse)" : " (Sardine)";
-                                    }
-                                }
-                            } else {
-                                gameMode = gmObj.ToString();
-                            }
-                        }
-                        // Neue Stats auslesen
-                        int lives = c.Metadata.ContainsKey("lives") ? Convert.ToInt32(c.Metadata["lives"]) : 0;
-                        int coins = c.Metadata.ContainsKey("coins") ? Convert.ToInt32(c.Metadata["coins"]) : 0;
-                        string outfit = c.Metadata.ContainsKey("outfit") ? c.Metadata["outfit"].ToString() ?? "" : "";
-                        float speed = c.Metadata.ContainsKey("speed") ? Convert.ToSingle(c.Metadata["speed"]) : 1.0f;
-                        float jumpHeight = c.Metadata.ContainsKey("jumpHeight") ? Convert.ToSingle(c.Metadata["jumpHeight"]) : 1.0f;
-                        // Cap/Body ggf. Override verwenden
-                        string cap = c.Metadata.ContainsKey("capOverride") && c.Metadata["capOverride"] is string co && !string.IsNullOrEmpty(co)
-                            ? co : (c.CurrentCostume?.CapName ?? "");
-                        string body = c.Metadata.ContainsKey("bodyOverride") && c.Metadata["bodyOverride"] is string bo && !string.IsNullOrEmpty(bo)
-                            ? bo : (c.CurrentCostume?.BodyName ?? "");
-                        return new {
-                            Name = c.Name,
-                            IPv4 = c.Connected ? ((IPEndPoint)c.Socket?.RemoteEndPoint!).Address.ToString() : null,
-                            Banned = c.Banned,
-                            Ignored = c.Ignored,
-                            Cap = cap,
-                            Body = body,
-                            Capture = capture,
-                            GameMode = gameMode,
-                            Stage = c.Metadata.ContainsKey("lastGamePacket") ? ((GamePacket)c.Metadata["lastGamePacket"]).Stage : "",
-                            PosX = posX,
-                            PosY = posY,
-                            Lives = lives,
-                            Coins = coins,
-                            Outfit = outfit,
-                            Speed = speed,
-                            JumpHeight = jumpHeight
-                        };
-                    }).ToArray();
-
-                string response = System.Text.Json.JsonSerializer.Serialize(new { Players = players });
-                context.Response.ContentType = "application/json";
-                byte[] buffer = Encoding.UTF8.GetBytes(response);
-                context.Response.ContentLength64 = buffer.Length;
-                context.Response.OutputStream.Write(buffer, 0, buffer.Length);
-                context.Response.OutputStream.Close();
-                continue;
-            }
-
-            // API: Stages
-            if (urlPath.StartsWith("api/stages"))
-            {
-                try
-                {
-                    // Erstelle die Stage-Daten aus der Stages-Klasse
-                    var stagesByKingdom = new Dictionary<string, List<string>>();
-                    var stageToKingdom = new Dictionary<string, string>();
-                    var kingdomToStage = new Dictionary<string, string>();
-                    var mapImages = new Dictionary<string, string>();
-
-                    // Erstelle stagesByKingdom aus Stage2Alias und Alias2Kingdom
-                    foreach (var stageEntry in Shared.Stages.Stage2Alias)
-                    {
-                        var stage = stageEntry.Key;
-                        var alias = stageEntry.Value;
-
-                        // Verwende ContainsKey und Indexer für OrderedDictionary
-                        if (Shared.Stages.Alias2Kingdom.Contains(alias))
-                        {
-                            var kingdom = Shared.Stages.Alias2Kingdom[alias]?.ToString();
-                            if (!string.IsNullOrEmpty(kingdom))
-                            {
-                                if (!stagesByKingdom.ContainsKey(kingdom))
-                                {
-                                    stagesByKingdom[kingdom] = new List<string>();
-                                }
-                                stagesByKingdom[kingdom].Add(stage);
-
-                                // Erstelle stageToKingdom Mapping
-                                stageToKingdom[stage] = kingdom;
-
-                                // Erstelle kingdomToStage Mapping für Home Stages
-                                if (stage.Contains("HomeStage"))
-                                {
-                                    kingdomToStage[kingdom] = stage;
-                                }
-                            }
-                        }
-                    }
-
-                    // Erstelle mapImages basierend auf kingdomToStage
-                    foreach (var entry in kingdomToStage)
-                    {
-                        var kingdom = entry.Key;
-                        var homeStage = entry.Value;
-                        var kingdomName = kingdom.Replace(" ", "");
-                        mapImages[homeStage] = $"{kingdomName}.png";
-                    }
-
-                    // Erstelle JSON-Response
-                    var response = new
-                    {
-                        stagesByKingdom,
-                        stageToKingdom,
-                        kingdomToStage,
-                        mapImages
-                    };
-
-                    string jsonResponse = System.Text.Json.JsonSerializer.Serialize(response);
-                    context.Response.ContentType = "application/json";
-                    byte[] buffer = Encoding.UTF8.GetBytes(jsonResponse);
-                    context.Response.ContentLength64 = buffer.Length;
-                    context.Response.OutputStream.Write(buffer, 0, buffer.Length);
-                    context.Response.OutputStream.Close();
-                    continue;
-                }
-                catch (Exception ex)
-                {
-                    context.Response.StatusCode = 500;
-                    byte[] buffer = Encoding.UTF8.GetBytes($"Error loading stages: {ex.Message}");
-                    context.Response.ContentLength64 = buffer.Length;
-                    context.Response.OutputStream.Write(buffer, 0, buffer.Length);
-                    context.Response.OutputStream.Close();
-                    continue;
-                }
-            }
-            
-            // Statische Dateien ausliefern
-            if (File.Exists(filePath))
-            {
-                string ext = Path.GetExtension(filePath).ToLower();
-                context.Response.ContentType = ext switch
-                {
-                    ".html" => "text/html",
-                    ".css" => "text/css",
-                    ".js" => "application/javascript",
-                    ".png" => "image/png",
-                    ".jpg" => "image/jpeg",
-                    ".ico" => "image/x-icon",
-                    _ => "application/octet-stream"
-                };
-                byte[] buffer = File.ReadAllBytes(filePath);
-                context.Response.ContentLength64 = buffer.Length;
-                context.Response.OutputStream.Write(buffer, 0, buffer.Length);
-            }
-            else
-            {
-                // Fallback: index.html für SPA-Routing
-                string fallback = Path.Combine(AppContext.BaseDirectory, "web-interface", "index.html");
-                byte[] buffer = File.ReadAllBytes(fallback);
-                context.Response.ContentType = "text/html";
-                context.Response.ContentLength64 = buffer.Length;
-                context.Response.OutputStream.Write(buffer, 0, buffer.Length);
-            }
-            context.Response.OutputStream.Close();
+                FileName = $"http://{address}:{port}/dashboard.html",
+                UseShellExecute = true
+            });
         }
         catch (Exception ex)
         {
-            context.Response.StatusCode = 500;
-            byte[] buffer = Encoding.UTF8.GetBytes("Internal Server Error\n" + ex);
-            context.Response.ContentLength64 = buffer.Length;
-            context.Response.OutputStream.Write(buffer, 0, buffer.Length);
-            context.Response.OutputStream.Close();
+            consoleLogger.Info("Could not open browser: " + ex.Message);
         }
-    }
-});
 
+        while (listener.IsListening)
+        {
+            var context = await listener.GetContextAsync();
+            string urlPath = context.Request.Url!.AbsolutePath.TrimStart('/').ToLower();
+            string filePath = Path.Combine(AppContext.BaseDirectory, "web-interface", urlPath.Replace('/', Path.DirectorySeparatorChar));
+
+            try
+            {
+                // API: Serverinfo
+                if (urlPath.StartsWith("api/serverinfo"))
+                {
+                    var settings = Settings.Instance.Server;
+                    string response = $"{{\"host\": \"{settings.Address}\", \"port\": {settings.Port}, \"maxPlayers\": {settings.MaxPlayers}}}";
+                    context.Response.ContentType = "application/json";
+                    byte[] buffer = Encoding.UTF8.GetBytes(response);
+                    context.Response.ContentLength64 = buffer.Length;
+                    context.Response.OutputStream.Write(buffer, 0, buffer.Length);
+                    context.Response.OutputStream.Close();
+                    continue;
+                }
+
+                // API: Konsolenbefehl ausführen
+                if (urlPath == "commands/exec" && context.Request.HttpMethod == "POST")
+                {
+                    using var reader = new StreamReader(context.Request.InputStream);
+                    string body = reader.ReadToEnd();
+                    string command = "";
+                    try
+                    {
+                        var json = System.Text.Json.JsonDocument.Parse(body);
+                        command = json.RootElement.GetProperty("command").GetString() ?? "";
+                    }
+                    catch { }
+
+                    var result = CommandHandler.GetResult(command);
+                    string output = string.Join("\n", result.ReturnStrings);
+
+                    // Kommando und Ausgabe ins Log schreiben
+                    consoleLogger.Info($"> {command}\n{output}");
+
+                    context.Response.ContentType = "text/plain";
+                    byte[] buffer = Encoding.UTF8.GetBytes(output);
+                    context.Response.ContentLength64 = buffer.Length;
+                    context.Response.OutputStream.Write(buffer, 0, buffer.Length);
+                    context.Response.OutputStream.Close();
+                    continue;
+                }
+
+                // API: Konsolen-Log abrufen
+                if (urlPath == "commands/output" && context.Request.HttpMethod == "GET")
+                {
+                    string output = consoleLogger.GetOutput();
+                    context.Response.ContentType = "text/plain";
+                    byte[] buffer = Encoding.UTF8.GetBytes(output);
+                    context.Response.ContentLength64 = buffer.Length;
+                    context.Response.OutputStream.Write(buffer, 0, buffer.Length);
+                    context.Response.OutputStream.Close();
+                    continue;
+                }
+
+                // API: Dummy-Console
+                if (urlPath.StartsWith("api/console"))
+                {
+                    string response = "{\"output\": [\"API not implemented\"]}";
+                    context.Response.ContentType = "application/json";
+                    byte[] buffer = Encoding.UTF8.GetBytes(response);
+                    context.Response.ContentLength64 = buffer.Length;
+                    context.Response.OutputStream.Write(buffer, 0, buffer.Length);
+                    context.Response.OutputStream.Close();
+                    continue;
+                }
+
+                // API: Banlist
+                if (urlPath.StartsWith("api/banlist"))
+                {
+                    var banPlayers = Settings.Instance.BanList.Players?.Select(guid => guid.ToString()).ToArray() ?? Array.Empty<string>();
+                    var banStages = Settings.Instance.BanList.Stages?.ToArray() ?? Array.Empty<string>();
+                    string response = System.Text.Json.JsonSerializer.Serialize(new {
+                        players = banPlayers,
+                        stages = banStages
+                    });
+                    context.Response.ContentType = "application/json";
+                    byte[] buffer = Encoding.UTF8.GetBytes(response);
+                    context.Response.ContentLength64 = buffer.Length;
+                    context.Response.OutputStream.Write(buffer, 0, buffer.Length);
+                    context.Response.OutputStream.Close();
+                    continue;
+                }
+                // API: Playerlist
+                if (urlPath.StartsWith("api/players"))
+                {
+                    var players = server.Clients
+                        .Where(c => c.Connected)
+                        .Select(c => {
+                            float? posX = null, posY = null;
+                            if (c.Metadata.ContainsKey("lastPlayerPacket")) {
+                                var pp = (PlayerPacket)c.Metadata["lastPlayerPacket"];
+                                posX = pp.Position.X;
+                                posY = pp.Position.Y;
+                            }
+                            // Capture-Objekt auslesen
+                            string capture = "";
+                            if (c.Metadata.ContainsKey("lastCapturePacket") && c.Metadata["lastCapturePacket"] is CapturePacket cp && cp.ModelName != null) {
+                                capture = cp.ModelName;
+                            }
+                            // GameMode auslesen
+                            string gameMode = "";
+                            if (c.Metadata.ContainsKey("gameMode") && c.Metadata["gameMode"] != null) {
+                                var gmObj = c.Metadata["gameMode"];
+                                Shared.Packet.Packets.GameMode? gmEnum = null;
+                                if (gmObj is Shared.Packet.Packets.GameMode gme) {
+                                    gmEnum = gme;
+                                } else if (gmObj is int gmi) {
+                                    gmEnum = (Shared.Packet.Packets.GameMode)gmi;
+                                } else if (gmObj is sbyte gmsb) {
+                                    gmEnum = (Shared.Packet.Packets.GameMode)gmsb;
+                                } else if (gmObj is string gms && Enum.TryParse<Shared.Packet.Packets.GameMode>(gms, out var parsed)) {
+                                    gmEnum = parsed;
+                                }
+                                if (gmEnum != null) {
+                                    gameMode = gmEnum.ToString();
+                                    if ((gmEnum == Shared.Packet.Packets.GameMode.HideAndSeek || gmEnum == Shared.Packet.Packets.GameMode.Sardines || gmEnum == Shared.Packet.Packets.GameMode.FreezeTag) 
+                                        && c.Metadata.ContainsKey("seeking") && c.Metadata["seeking"] != null) {
+                                        bool isSeeker = false;
+                                        if (bool.TryParse(c.Metadata["seeking"].ToString(), out bool parsedSeek)) isSeeker = parsedSeek;
+                                        if (gmEnum == Shared.Packet.Packets.GameMode.HideAndSeek) {
+                                            gameMode += isSeeker ? " (Seeker)" : " (Hider)";
+                                        } else if (gmEnum == Shared.Packet.Packets.GameMode.FreezeTag) {
+                                            gameMode += isSeeker ? " (Chaser)" : " (Runner)";
+                                        } else if (gmEnum == Shared.Packet.Packets.GameMode.Sardines) {
+                                            gameMode += isSeeker ? " (Büchse)" : " (Sardine)";
+                                        }
+                                    }
+                                } else {
+                                    gameMode = gmObj.ToString();
+                                }
+                            }
+                            // Neue Stats auslesen
+                            int lives = c.Metadata.ContainsKey("lives") ? Convert.ToInt32(c.Metadata["lives"]) : 0;
+                            int coins = c.Metadata.ContainsKey("coins") ? Convert.ToInt32(c.Metadata["coins"]) : 0;
+                            string outfit = c.Metadata.ContainsKey("outfit") ? c.Metadata["outfit"].ToString() ?? "" : "";
+                            float speed = c.Metadata.ContainsKey("speed") ? Convert.ToSingle(c.Metadata["speed"]) : 1.0f;
+                            float jumpHeight = c.Metadata.ContainsKey("jumpHeight") ? Convert.ToSingle(c.Metadata["jumpHeight"]) : 1.0f;
+                            // Cap/Body ggf. Override verwenden
+                            string cap = c.Metadata.ContainsKey("capOverride") && c.Metadata["capOverride"] is string co && !string.IsNullOrEmpty(co)
+                                ? co : (c.CurrentCostume?.CapName ?? "");
+                            string body = c.Metadata.ContainsKey("bodyOverride") && c.Metadata["bodyOverride"] is string bo && !string.IsNullOrEmpty(bo)
+                                ? bo : (c.CurrentCostume?.BodyName ?? "");
+                            return new {
+                                Name = c.Name,
+                                IPv4 = c.Connected ? ((IPEndPoint)c.Socket?.RemoteEndPoint!).Address.ToString() : null,
+                                Banned = c.Banned,
+                                Ignored = c.Ignored,
+                                Cap = cap,
+                                Body = body,
+                                Capture = capture,
+                                GameMode = gameMode,
+                                Stage = c.Metadata.ContainsKey("lastGamePacket") ? ((GamePacket)c.Metadata["lastGamePacket"]).Stage : "",
+                                PosX = posX,
+                                PosY = posY,
+                                Lives = lives,
+                                Coins = coins,
+                                Outfit = outfit,
+                                Speed = speed,
+                                JumpHeight = jumpHeight
+                            };
+                        }).ToArray();
+
+                    string response = System.Text.Json.JsonSerializer.Serialize(new { Players = players });
+                    context.Response.ContentType = "application/json";
+                    byte[] buffer = Encoding.UTF8.GetBytes(response);
+                    context.Response.ContentLength64 = buffer.Length;
+                    context.Response.OutputStream.Write(buffer, 0, buffer.Length);
+                    context.Response.OutputStream.Close();
+                    continue;
+                }
+
+                // API: Stages
+                if (urlPath.StartsWith("api/stages"))
+                {
+                    try
+                    {
+                        // Erstelle die Stage-Daten aus der Stages-Klasse
+                        var stagesByKingdom = new Dictionary<string, List<string>>();
+                        var stageToKingdom = new Dictionary<string, string>();
+                        var kingdomToStage = new Dictionary<string, string>();
+                        var mapImages = new Dictionary<string, string>();
+
+                        // Erstelle stagesByKingdom aus Stage2Alias und Alias2Kingdom
+                        foreach (var stageEntry in Shared.Stages.Stage2Alias)
+                        {
+                            var stage = stageEntry.Key;
+                            var alias = stageEntry.Value;
+
+                            // Verwende ContainsKey und Indexer für OrderedDictionary
+                            if (Shared.Stages.Alias2Kingdom.Contains(alias))
+                            {
+                                var kingdom = Shared.Stages.Alias2Kingdom[alias]?.ToString();
+                                if (!string.IsNullOrEmpty(kingdom))
+                                {
+                                    if (!stagesByKingdom.ContainsKey(kingdom))
+                                    {
+                                        stagesByKingdom[kingdom] = new List<string>();
+                                    }
+                                    stagesByKingdom[kingdom].Add(stage);
+
+                                    // Erstelle stageToKingdom Mapping
+                                    stageToKingdom[stage] = kingdom;
+
+                                    // Erstelle kingdomToStage Mapping für Home Stages
+                                    if (stage.Contains("HomeStage"))
+                                    {
+                                        kingdomToStage[kingdom] = stage;
+                                    }
+                                }
+                            }
+                        }
+
+                        // Erstelle mapImages basierend auf kingdomToStage
+                        foreach (var entry in kingdomToStage)
+                        {
+                            var kingdom = entry.Key;
+                            var homeStage = entry.Value;
+                            var kingdomName = kingdom.Replace(" ", "");
+                            mapImages[homeStage] = $"{kingdomName}.png";
+                        }
+
+                        // Erstelle JSON-Response
+                        var response = new
+                        {
+                            stagesByKingdom,
+                            stageToKingdom,
+                            kingdomToStage,
+                            mapImages
+                        };
+
+                        string jsonResponse = System.Text.Json.JsonSerializer.Serialize(response);
+                        context.Response.ContentType = "application/json";
+                        byte[] buffer = Encoding.UTF8.GetBytes(jsonResponse);
+                        context.Response.ContentLength64 = buffer.Length;
+                        context.Response.OutputStream.Write(buffer, 0, buffer.Length);
+                        context.Response.OutputStream.Close();
+                        continue;
+                    }
+                    catch (Exception ex)
+                    {
+                        context.Response.StatusCode = 500;
+                        byte[] buffer = Encoding.UTF8.GetBytes($"Error loading stages: {ex.Message}");
+                        context.Response.ContentLength64 = buffer.Length;
+                        context.Response.OutputStream.Write(buffer, 0, buffer.Length);
+                        context.Response.OutputStream.Close();
+                        continue;
+                    }
+                }
+                
+                // Statische Dateien ausliefern
+                if (File.Exists(filePath))
+                {
+                    string ext = Path.GetExtension(filePath).ToLower();
+                    context.Response.ContentType = ext switch
+                    {
+                        ".html" => "text/html",
+                        ".css" => "text/css",
+                        ".js" => "application/javascript",
+                        ".png" => "image/png",
+                        ".jpg" => "image/jpeg",
+                        ".ico" => "image/x-icon",
+                        _ => "application/octet-stream"
+                    };
+                    byte[] buffer = File.ReadAllBytes(filePath);
+                    context.Response.ContentLength64 = buffer.Length;
+                    context.Response.OutputStream.Write(buffer, 0, buffer.Length);
+                }
+                else
+                {
+                    // Fallback: index.html für SPA-Routing
+                    string fallback = Path.Combine(AppContext.BaseDirectory, "web-interface", "index.html");
+                    byte[] buffer = File.ReadAllBytes(fallback);
+                    context.Response.ContentType = "text/html";
+                    context.Response.ContentLength64 = buffer.Length;
+                    context.Response.OutputStream.Write(buffer, 0, buffer.Length);
+                }
+                context.Response.OutputStream.Close();
+            }
+            catch (Exception ex)
+            {
+                context.Response.StatusCode = 500;
+                byte[] buffer = Encoding.UTF8.GetBytes("Internal Server Error\n" + ex);
+                context.Response.ContentLength64 = buffer.Length;
+                context.Response.OutputStream.Write(buffer, 0, buffer.Length);
+                context.Response.OutputStream.Close();
+            }
+        }
+    });
+}
 // Spielserver separat starten
 var gameTask = server.Listen(cts.Token);
 
 // Auf beide Tasks warten
-await Task.WhenAll(webTask, gameTask);
+if (webTask != null)
+    await Task.WhenAll(webTask, gameTask);
+else
+    await gameTask;
