@@ -371,7 +371,6 @@ body.theme-light .tab-content {
 }
 body.theme-light .modal-header,
 body.theme-light .modal-footer {
-  /* Modal */
   background: #e9ecef !important;
   color: #23232a !important;
   border-bottom: 1px solid #bbb !important;

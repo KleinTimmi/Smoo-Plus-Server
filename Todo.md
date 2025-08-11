@@ -1,11 +1,9 @@
 ## Todo
 
-# mehr Dokumentation
-
 # Website
 
 - Alles Loggen
-- Map (Kordinaten anpassen)
+- Map Logik
 - Save Position and load Position
   - Koordinaten des Spielers anzeigen
 
