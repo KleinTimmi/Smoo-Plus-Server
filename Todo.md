@@ -6,8 +6,11 @@
 - Map Logik
 - Save Position and load Position
   - Koordinaten des Spielers anzeigen
+- TP zu bestümten Player
+- TP zu bestimmter cordinate
+- Voice chat
 
-# Server
+# Mod
 
 - param editor
   - Leben
@@ -20,8 +23,5 @@
     - reset to normal button
   - JUMP high
     - reset to normal button
-
-# Serversite Consolen Befehle
-
 - TP zu bestümten Player
 - TP zu bestimmter cordinate

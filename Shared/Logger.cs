@@ -5,6 +5,8 @@ namespace Shared;
 public class Logger {
     private readonly List<string> outputBuffer = new();
     private readonly object bufferLock = new();
+    private static readonly List<string> globalOutputBuffer = new();
+    private static readonly object globalBufferLock = new();
 
     public Logger(string name) {
         Name = name;
@@ -31,6 +33,17 @@ public class Logger {
                     outputBuffer.RemoveAt(0);
             }
         }
+
+        // Also append to global buffer
+        lock (globalBufferLock)
+        {
+            foreach (var line in text.Split('\n'))
+            {
+                globalOutputBuffer.Add($"[{DateTime.Now}] {level} [{Name}] {line}");
+                if (globalOutputBuffer.Count > 10000)
+                    globalOutputBuffer.RemoveAt(0);
+            }
+        }
         Handler?.Invoke(Name, level, text, color);
     }
 
@@ -50,6 +63,14 @@ public class Logger {
                 .Append(' ')
                 .AppendLine(str);
         return builder.ToString();
+    }
+
+    public static string GetGlobalOutput()
+    {
+        lock (globalBufferLock)
+        {
+            return string.Join(Environment.NewLine, globalOutputBuffer);
+        }
     }
 
     public delegate void LogHandler(string source, string level, string text, ConsoleColor color);

@@ -1033,7 +1033,7 @@ if (Settings.Instance.WebInterface.Enabled)
                 // API: Konsolen-Log abrufen
                 if (urlPath == "commands/output" && context.Request.HttpMethod == "GET")
                 {
-                    string output = consoleLogger.GetOutput();
+                    string output = Shared.Logger.GetGlobalOutput();
                     context.Response.ContentType = "text/plain";
                     byte[] buffer = Encoding.UTF8.GetBytes(output);
                     context.Response.ContentLength64 = buffer.Length;
