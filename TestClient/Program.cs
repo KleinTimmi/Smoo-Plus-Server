@@ -8,6 +8,13 @@ using Shared.Packet.Packets;
 
 // Guid startId = new Guid(1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
 
+// Host/Port-Auflösung: ENV > Argument > Default
+string host = Environment.GetEnvironmentVariable("SMO_SERVER_HOST")
+    ?? (args.Length > 0 ? args[0] : "127.0.0.1");
+int port = int.TryParse(Environment.GetEnvironmentVariable("SMO_SERVER_PORT"), out int pEnv)
+    ? pEnv
+    : (args.Length > 1 && int.TryParse(args[1], out int pArg) ? pArg : 1027);
+
 Guid baseOtherId = Guid.Parse("8ca3fcdd-2940-1000-b5f8-579301fcbfbb");
 // Guid baseOtherId = Guid.Parse("d5feae62-2e71-1000-88fd-597ea147ae88");
 
@@ -24,9 +31,16 @@ PacketType[] reboundPackets = {
 //string lastCapture = ""; //not referenced
 List<TcpClient> clients = new List<TcpClient>();
 
-async Task S(string n, Guid otherId, Guid ownId) {
+async Task S(string n, Guid otherId, Guid ownId, string serverHost, int serverPort) {
     Logger logger = new Logger($"Client ({n})");
-    TcpClient client = new TcpClient(args[0], 1027);
+    TcpClient client;
+    try {
+        Console.WriteLine($"Verbinde zu {serverHost}:{serverPort}...");
+        client = new TcpClient(serverHost, serverPort);
+    } catch (Exception ex) {
+        logger.Error($"Verbindung zu {serverHost}:1027 fehlgeschlagen: {ex.Message}");
+        return;
+    }
     clients.Add(client);
     NetworkStream stream = client.GetStream();
     logger.Info("Connected!");
@@ -100,7 +114,7 @@ IEnumerable<Task> stuff = Enumerable.Range(0, 7).Select(i => {
     byte[] tmp = temp.ToByteArray();
     tmp[0]++;
     Guid newOwnId = new Guid(tmp);
-    Task task = S($"Sussy {i}", temp, newOwnId);
+    Task task = S($"SMOO+ {i}", temp, newOwnId, host, port);
     temp = newOwnId;
     return task;
 });

@@ -674,27 +674,7 @@ async function fetchPlayers() {
   if (!response.ok) return [];
   const data = await response.json();
   const realPlayers = data.Players || [];
-
-  // Add test-player
-  const testPlayer = {
-    Name: "TestPlayer",
-    Cap: "Mario",
-    Body: "Mario",
-    Capture: "Kuribo",
-    GameMode: "Hide and Seek",
-    Stage: "CapWorldHomeStage",
-    IPv4: "192.168.1.100",
-    Banned: false,
-    Lives: 3,
-    Coins: 150,
-    Speed: 1.0,
-    JumpHeight: 1.0,
-    PosX: 1000,
-    PosY: 500,
-  };
-
-  // Add test-player to the list
-  return [testPlayer, ...realPlayers];
+  return realPlayers;
 }
 
 function getCapImg(capName) {
