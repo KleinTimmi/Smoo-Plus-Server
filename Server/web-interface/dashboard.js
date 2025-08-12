@@ -639,10 +639,27 @@ function updateConsoleOutput() {
   fetch("/commands/output")
     .then((r) => r.text())
     .then((text) => {
-      document.getElementById("log").textContent = text;
-      // Automatically scroll down:
-      const logDiv = document.getElementById("log");
-      logDiv.scrollTop = logDiv.scrollHeight;
+      const logEl = document.getElementById("log");
+      if (!logEl) return;
+
+      const escapeHtml = (s) =>
+        s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+
+      const classify = (line) => {
+        if (/error/i.test(line)) return "log-error";
+        if (/warn/i.test(line)) return "log-warn";
+        return "log-info";
+      };
+
+      const html = text
+        .split("\n")
+        .map(
+          (line) => `<span class="${classify(line)}">${escapeHtml(line)}</span>`
+        )
+        .join("\n");
+
+      logEl.innerHTML = html;
+      logEl.scrollTop = logEl.scrollHeight;
     });
 }
 function fetchIp() {

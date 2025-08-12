@@ -19,6 +19,16 @@ button.flex-fill {
   padding: 8px;
   font-family: monospace;
   white-space: pre-wrap;
+  line-height: 0.9;
+}
+.log-info {
+  color: #cbd5e1;
+}
+.log-warn {
+  color: #fbbf24;
+}
+.log-error {
+  color: #f87171;
 }
 .feature-box {
   max-width: 300px;
