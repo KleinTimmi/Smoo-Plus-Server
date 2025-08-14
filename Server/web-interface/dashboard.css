@@ -22,13 +22,13 @@ button.flex-fill {
   line-height: 0.9;
 }
 .log-info {
-  color: #cbd5e1;
+  color: #f2f2f2;
 }
 .log-warn {
-  color: #fbbf24;
+  color: #f9f1a5;
 }
 .log-error {
-  color: #f87171;
+  color: #e74856;
 }
 .feature-box {
   max-width: 300px;
