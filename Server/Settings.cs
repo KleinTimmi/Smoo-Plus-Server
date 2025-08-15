@@ -104,6 +104,8 @@ public class Settings {
     }
     public class WebInterfaceTable
     {
+        public string? Username { get; set; } = "admin";
+        public string? Password { get; set; } = "admin";
         public bool Enabled { get; set; } = true;
         public string? Address { get; set; } = "localhost";
         public ushort Port { get; set; } = 8080;

@@ -18,7 +18,7 @@
     - Player töten
     - Set life
   - coins
-  - Outfides
+  - Outfides (direkt stage neu laden und zurück teleportieren)
   - Speed
     - reset to normal button
   - JUMP high

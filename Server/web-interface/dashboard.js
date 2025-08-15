@@ -364,6 +364,211 @@ const mapImages = {
   DarkerWorldHomeStage: "DarkerSide.png",
 };
 
+// Global settings object
+let serverSettings = {
+  username: "admin",
+  password: "admin",
+};
+
+// Function to fetch server settings
+async function fetchServerSettings() {
+  try {
+    const response = await fetch("/api", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        Type: "Settings",
+      }),
+    });
+
+    if (response.ok) {
+      const data = await response.json();
+
+      if (data && data.username && data.password) {
+        // Store the credentials without logging them
+        serverSettings.username = data.username;
+        serverSettings.password = data.password;
+        return true;
+      } else {
+        console.warn("Invalid response format, using default credentials");
+        return false;
+      }
+    } else {
+      const errorText = await response.text();
+      console.warn(
+        `Failed to fetch server settings (${response.status}):`,
+        errorText
+      );
+      return false;
+    }
+  } catch (error) {
+    console.error("Error fetching server settings:", error);
+    return false;
+  }
+}
+
+// Login Modal
+function openLoginModal() {
+  const modal = new bootstrap.Modal(document.getElementById("loginModal"));
+  modal.show();
+}
+
+function closeLoginModal() {
+  const modal = new bootstrap.Modal(document.getElementById("loginModal"));
+  modal.hide();
+}
+
+// Initialize login functionality
+async function initLogin() {
+  // Show login modal immediately for better UX
+  openLoginModal();
+
+  // Try to load settings from server in the background
+  const settingsLoaded = await fetchServerSettings();
+
+  if (!settingsLoaded) {
+    console.warn("Using default credentials (admin/admin)");
+  }
+
+  // Set up guest button
+  document.getElementById("guestBtn").addEventListener("click", function () {
+    localStorage.setItem("admin", "false");
+    closeLoginModal();
+    // Enable guest mode UI restrictions
+    enableGuestMode();
+  });
+
+  // Set up login button
+  document
+    .getElementById("loginBtn")
+    .addEventListener("click", async function (e) {
+      e.preventDefault(); // Prevent form submission
+
+      const username = document.getElementById("username").value;
+      const password = document.getElementById("password").value;
+      const wrongLoginElement = document.getElementById("wrongLogin");
+
+      // Hide any previous error messages
+      wrongLoginElement.style.display = "none";
+
+      if (
+        username === serverSettings.username &&
+        password === serverSettings.password
+      ) {
+        localStorage.setItem("admin", "true");
+
+        // Re-enable full UI for admin
+        enableAdminMode();
+
+        const modal = bootstrap.Modal.getInstance(
+          document.getElementById("loginModal")
+        );
+        if (modal) {
+          modal.hide();
+        } else {
+          closeLoginModal();
+        }
+
+        // Initialize the rest of the application after successful login
+        initializeApplication();
+      } else {
+        wrongLoginElement.style.display = "block";
+
+        // Auto-hide the error after 3 seconds
+        setTimeout(() => {
+          wrongLoginElement.style.display = "none";
+        }, 3000);
+      }
+    });
+}
+
+// Initialize the login functionality when the page loads
+document.addEventListener("DOMContentLoaded", function () {
+  // Initialize the login system
+  initLogin();
+
+  // Set up other event listeners and initialization code here
+  initializeColumnVisibility();
+  fillKingdomDropdowns();
+
+  // Set theme
+  const theme = getSavedTheme();
+  setTheme(theme);
+
+  // Initialize the rest of the application
+  initializeApplication();
+
+  // If previously marked as guest, enforce guest mode
+  if (localStorage.getItem("admin") === "false") {
+    enableGuestMode();
+  }
+});
+
+// Function to initialize the rest of the application after login
+function initializeApplication() {
+  // Add any additional initialization code here
+  // This function will be called after successful login
+}
+
+// --- Access helpers ---
+function isAdmin() {
+  return localStorage.getItem("admin") === "true";
+}
+
+function enableGuestMode() {
+  // Only show chat section
+  showSection("chat");
+
+  // Hide all nav items except Chat
+  const navIdsToHide = [
+    "navDashboard",
+    "navPlayerlist",
+    "navFeatures",
+    "navConsole",
+    "navMap",
+  ];
+  navIdsToHide.forEach((id) => {
+    const el = document.getElementById(id);
+    if (el) el.style.display = "none";
+  });
+  const chatNav = document.getElementById("navChat");
+  if (chatNav) chatNav.style.display = "block";
+
+  // Enable chat input for guests
+  const chatInput = document.getElementById("chatInput");
+  const chatSendBtn = document.getElementById("chatSendBtn");
+  if (chatInput) chatInput.disabled = false;
+  if (chatSendBtn) chatSendBtn.disabled = false;
+
+  // Keep settings FAB visible for guests (opens guest settings modal)
+  const settingsFab = document.getElementById("settingsFab");
+  if (settingsFab) settingsFab.style.display = "flex";
+}
+
+function enableAdminMode() {
+  // Show all nav items
+  [
+    "navDashboard",
+    "navPlayerlist",
+    "navFeatures",
+    "navConsole",
+    "navMap",
+    "navChat",
+  ].forEach((id) => {
+    const el = document.getElementById(id);
+    if (el) el.style.display = "block";
+  });
+
+  // Show settings FAB
+  const settingsFab = document.getElementById("settingsFab");
+  if (settingsFab) settingsFab.style.display = "flex";
+
+  // Default to dashboard view
+  showSection("dashboard");
+}
+
 // --- Hilfsfunktionen ganz oben einfügen ---
 function getSavedTheme() {
   return localStorage.getItem("theme") || "system";
@@ -552,13 +757,14 @@ document.addEventListener("DOMContentLoaded", function () {
   const settingsFab = document.getElementById("settingsFab");
   if (settingsFab) {
     settingsFab.onclick = function () {
-      const modal = new bootstrap.Modal(document.getElementById("themeModal"));
-      // Aktuelles Theme im Dropdown setzen
+      const modalId = isAdmin() ? "settingsModalAdmin" : "settingsModalGuest";
+      const modalEl = document.getElementById(modalId);
+      if (!modalEl) return;
+      // Aktuelles Theme im Dropdown in dem jeweiligen Modal setzen
       const theme = getSavedTheme();
-      const themeSelect = document.getElementById("themeSelect");
-      if (themeSelect) {
-        themeSelect.value = theme;
-      }
+      const selectInModal = modalEl.querySelector("#themeSelect");
+      if (selectInModal) selectInModal.value = theme;
+      const modal = new bootstrap.Modal(modalEl);
       modal.show();
     };
   }
@@ -586,16 +792,22 @@ document.addEventListener("DOMContentLoaded", function () {
     return localStorage.getItem("theme") || "system";
   }
   setTheme(getSavedTheme());
-  const themeSelect = document.getElementById("themeSelect");
-  if (themeSelect) {
-    // Set current value from saved theme
-    themeSelect.value = getSavedTheme();
-    themeSelect.onchange = function () {
-      const value = themeSelect.value;
+  // Initialize both theme selects (admin and guest modals)
+  const themeSelects = document.querySelectorAll(
+    "#settingsModalAdmin #themeSelect, #settingsModalGuest #themeSelect"
+  );
+  themeSelects.forEach((sel) => {
+    sel.value = getSavedTheme();
+    sel.onchange = function () {
+      const value = sel.value;
       saveTheme(value);
       setTheme(value);
+      // Mirror value to the other modal's select to keep them in sync
+      themeSelects.forEach((other) => {
+        if (other !== sel) other.value = value;
+      });
     };
-  }
+  });
   window
     .matchMedia("(prefers-color-scheme: dark)")
     .addEventListener("change", function () {
@@ -820,6 +1032,11 @@ logDiv.textContent += "Neuer Log-Eintrag\n";
 logDiv.scrollTop = logDiv.scrollHeight; // Scrollt automatisch nach unten
 
 function showSection(section) {
+  // If guest, force chat only
+  if (!isAdmin() && section !== "chat") {
+    section = "chat";
+  }
+
   document.getElementById("dashboardSection").style.display =
     section === "dashboard" ? "block" : "none";
   document.getElementById("playerlistSection").style.display =
@@ -830,6 +1047,8 @@ function showSection(section) {
     section === "console" ? "block" : "none";
   document.getElementById("mapSection").style.display =
     section === "map" ? "block" : "none";
+  document.getElementById("chatSection").style.display =
+    section === "chat" ? "block" : "none";
   // Active-Klasse setzen
   document
     .getElementById("navDashboard")
@@ -846,6 +1065,9 @@ function showSection(section) {
   document
     .getElementById("navMap")
     .classList.toggle("active", section === "map");
+  document
+    .getElementById("navChat")
+    .classList.toggle("active", section === "chat");
 }
 
 document.getElementById("navDashboard").onclick = function (e) {
@@ -875,6 +1097,10 @@ document.getElementById("navMap").onclick = function (e) {
   e.preventDefault();
   showSection("map");
   renderMap();
+};
+document.getElementById("navChat").onclick = function (e) {
+  e.preventDefault();
+  showSection("chat");
 };
 
 async function loadServerInfo() {
@@ -2107,7 +2333,6 @@ window.openParamEditor = async function (playerName) {
     }
     const lives = players[0].Lives || 0;
     overlay.innerHTML = renderLifeOverlay(lives);
-    console.log("updateLifeOverlay wird aufgerufen!", lives);
   }
   setInterval(updateLifeOverlay, 1000);
 

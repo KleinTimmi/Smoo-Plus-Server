@@ -15,6 +15,35 @@
     />
   </head>
   <body>
+    <!-- Login Modal -->
+    <div class="modal fade" id="loginModal" tabindex="-1" data-bs-backdrop="static" data-bs-keyboard="false">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <label class="modal-title">Log In</label>
+          </div>
+          <div class="modal-body">
+            <form id="loginForm">
+              <div class="mb-3">
+                <label for="username" class="form-label">Username</label>
+                <input type="text" class="form-control" id="username" required>
+              </div>
+              <div class="mb-3">
+                <label for="password" class="form-label">Password</label>
+                <input type="password" class="form-control" id="password" required>
+              </div>
+              <div class="mb-3">
+                <div id="wrongLogin" class="alert alert-danger" style="display: none;">Wrong Username or Password. Try Again or Continue as Guest</div>
+              </div>
+            </form>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" id="guestBtn" data-bs-dismiss="modal">Guest</button>
+            <button type="submit" class="btn btn-primary" id="loginBtn">Log In</button>
+          </div>
+        </div>
+      </div>
+    </div>
     <div class="container-fluid">
       <div class="row">
         <nav class="col-md-2 d-none d-md-block sidebar py-4">
@@ -36,6 +65,9 @@
             </li>
             <li class="nav-item">
               <a class="nav-link" href="#" id="navMap">Map</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="#" id="navChat">Chat</a>
             </li>
           </ul>
         </nav>
@@ -604,18 +636,56 @@
     <div class="settings-fab" id="settingsFab" title="Settings">
       <i class="bi bi-gear-fill"></i>
     </div>
-    <!-- Settings Modal -->
+    <!-- Chat Section -->
+    <div id="chatSection" style="display: none">
+      <div class="dashboard-title mt-4">Chat</div>
+      <div class="card">
+        <div class="card-body">
+          </div>
+        </div>
+      </div>
+    <!-- Settings Modal Admin-->
     <div
       class="modal fade"
-      id="themeModal"
+      id="settingsModalAdmin"
       tabindex="-1"
-      aria-labelledby="themeModalLabel"
+      aria-labelledby="settingsModalAdminLabel"
       aria-hidden="true"
     >
       <div class="modal-dialog modal-dialog-bottom-end">
         <div class="modal-content">
           <div class="modal-header">
-            <h5 class="modal-title" id="themeModalLabel">Settings</h5>
+            <h5 class="modal-title" id="settingsModalAdminLabel">Settings</h5>
+            <button
+              type="button"
+              class="btn-close"
+              data-bs-dismiss="modal"
+              aria-label="Close"
+            ></button>
+          </div>
+          <div class="modal-body">
+            <label class="form-label">Theme:</label>
+            <select id="themeSelect" class="form-select mb-3">
+              <option value="system">System (Default)</option>
+              <option value="dark">Dark Mode</option>
+              <option value="light">Light Mode</option>
+            </select>
+          </div>
+        </div>
+      </div>
+    </div>
+    <!-- Settings Modal Guest-->
+    <div
+      class="modal fade"
+      id="settingsModalGuest"
+      tabindex="-1"
+      aria-labelledby="settingsModalGuestLabel"
+      aria-hidden="true"
+    >
+      <div class="modal-dialog modal-dialog-bottom-end">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="settingsModalGuestLabel">Settings</h5>
             <button
               type="button"
               class="btn-close"

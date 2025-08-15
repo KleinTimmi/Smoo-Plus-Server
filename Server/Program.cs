@@ -1,8 +1,9 @@
-﻿using System.Collections.Concurrent;
+using System.Collections.Concurrent;
 using System.Net;
 using System.Numerics;
 using System.Text;
 using System.Text.Json;
+using Server.JsonApi;
 using Server;
 using Shared;
 using Shared.Packet.Packets;
@@ -990,6 +991,95 @@ if (Settings.Instance.WebInterface.Enabled)
 
             try
             {
+                // API: Handle JSON API requests
+                if (urlPath == "api" && context.Request.HttpMethod == "POST")
+                {
+                    try
+                    {
+                        using var reader = new StreamReader(context.Request.InputStream);
+                        string body = await reader.ReadToEndAsync();
+                        var json = System.Text.Json.JsonDocument.Parse(body);
+                        
+                        if (json.RootElement.TryGetProperty("Type", out var typeElement))
+                        {
+                            string type = typeElement.GetString() ?? "";
+                            
+                            // Create a context for the API request with the HTTP context
+                            var ctx = new Context(server, context);
+                            
+                            try 
+                            {
+                                // Handle the request based on type
+                                switch (type)
+                                {
+                                    case "Settings":
+                                        await ApiRequestSettings.Send(ctx);
+                                        break;
+                                    case "ConsoleCommand":
+                                        if (json.RootElement.TryGetProperty("Command", out var commandElement))
+                                        {
+                                            string command = commandElement.GetString() ?? "";
+                                            if (!string.IsNullOrWhiteSpace(command))
+                                            {
+                                                consoleLogger.Info($"[Dashboard] Executing command: {command}");
+                                                var result = CommandHandler.GetResult(command);
+                                                var response = new { success = true, output = result.ReturnStrings };
+                                                await ctx.Send(response);
+                                            }
+                                            else
+                                            {
+                                                context.Response.StatusCode = 400;
+                                                await context.Response.OutputStream.WriteAsync(Encoding.UTF8.GetBytes("Command cannot be empty"));
+                                            }
+                                        }
+                                        else
+                                        {
+                                            context.Response.StatusCode = 400;
+                                            await context.Response.OutputStream.WriteAsync(Encoding.UTF8.GetBytes("Missing 'Command' in request"));
+                                        }
+                                        break;
+                                    default:
+                                        context.Response.StatusCode = 400;
+                                        await context.Response.OutputStream.WriteAsync(Encoding.UTF8.GetBytes($"Unknown API type: {type}"));
+                                        break;
+                                }
+                            }
+                            catch (Exception ex)
+                            {
+                                // Log the error and return a 500 response
+                                consoleLogger.Error($"Error handling API request: {ex}");
+                                context.Response.StatusCode = 500;
+                                var errorResponse = new { error = "Internal server error", details = ex.Message };
+                                string errorJson = JsonSerializer.Serialize(errorResponse);
+                                await context.Response.OutputStream.WriteAsync(Encoding.UTF8.GetBytes(errorJson));
+                            }
+                            finally
+                            {
+                                if (context.Response.OutputStream.CanWrite)
+                                {
+                                    context.Response.OutputStream.Close();
+                                }
+                            }
+                            continue;
+                        }
+                        else
+                        {
+                            context.Response.StatusCode = 400;
+                            await context.Response.OutputStream.WriteAsync(Encoding.UTF8.GetBytes("Missing 'Type' in request"));
+                            context.Response.OutputStream.Close();
+                            continue;
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        context.Response.StatusCode = 500;
+                        await context.Response.OutputStream.WriteAsync(Encoding.UTF8.GetBytes($"Error processing API request: {ex.Message}"));
+                        context.Response.OutputStream.Close();
+                        consoleLogger.Error($"API error: {ex}");
+                        continue;
+                    }
+                }
+
                 // API: Serverinfo
                 if (urlPath.StartsWith("api/serverinfo"))
                 {
