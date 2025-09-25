@@ -2,17 +2,17 @@
 
 # Website
 
-- Alles Loggen
+- Mod auswahl (Stage hinzufügen)
 - Map Logik
 - Save Position and load Position
   - Koordinaten des Spielers anzeigen
 - TP zu bestümten Player
 - TP zu bestimmter cordinate
-- Voice chat
+- Voice Chat / Chat
 
 # Mod
 
-- param editor
+- Param Editor
   - Leben
     - Königs Herz geben
     - Player töten
