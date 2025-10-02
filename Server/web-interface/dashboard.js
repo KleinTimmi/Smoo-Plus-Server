@@ -1,368 +1,17 @@
 // --- Cap- und Body-Bildnamen (aus images/cap und images/body) ---
 let lastSeenPlayers = {};
 
-const caps = [
-  "MarioZombie",
-  "MarioTuxedo",
-  "MarioTopper",
-  "MarioTailCoat",
-  "MarioSwimwear",
-  "MarioSunshine",
-  "MarioSuit",
-  "MarioSpaceSuit",
-  "MarioSnowSuit",
-  "MarioShopMan",
-  "MarioScientist",
-  "MarioSanta",
-  "MarioSailor",
-  "MarioRango",
-  "MarioRacer",
-  "MarioPrimitiveMan",
-  "MarioPoncho",
-  "MarioPirate",
-  "MarioPilot",
-  "MarioPeach",
-  "MarioPainter",
-  "MarioNew3DS",
-  "MarioMechanic",
-  "MarioMaker",
-  "MarioKoopa",
-  "MarioKing",
-  "MarioHappi",
-  "MarioGunman",
-  "MarioGolf",
-  "MarioFootball",
-  "MarioExplorer",
-  "MarioDoctor",
-  "MarioDiddyKong",
-  "MarioCook",
-  "MarioColorWario",
-  "MarioColorWaluigi",
-  "MarioColorLuigi",
-  "MarioColorGold",
-  "MarioColorClassic",
-  "MarioClown",
-  "MarioCaptain",
-  "MarioArmor",
-  "MarioAloha",
-  "Mario64Metal",
-  "Mario64",
-  "Mario",
-];
-const bodies = [
-  "MarioZombie",
-  "MarioUnderwear",
-  "MarioTuxedo",
-  "MarioTopper",
-  "MarioTailCoat",
-  "MarioSwimwear",
-  "MarioSunshine",
-  "MarioSuit",
-  "MarioSpaceSuit",
-  "MarioSnowSuit",
-  "MarioShopMan",
-  "MarioScientist",
-  "MarioSanta",
-  "MarioSailor",
-  "MarioRango",
-  "MarioRacer",
-  "MarioPrimitiveMan",
-  "MarioPoncho",
-  "MarioPirate",
-  "MarioPilot",
-  "MarioPeach",
-  "MarioPainter",
-  "MarioNew3DS",
-  "MarioMechanic",
-  "MarioMaker",
-  "MarioKoopa",
-  "MarioKing",
-  "MarioHappi",
-  "MarioHakama",
-  "MarioGunman",
-  "MarioGolf",
-  "MarioFootball",
-  "MarioExplorer",
-  "MarioDoctor",
-  "MarioDiddyKong",
-  "MarioCook",
-  "MarioColorWario",
-  "MarioColorWaluigi",
-  "MarioColorLuigi",
-  "MarioColorGold",
-  "MarioColorClassic",
-  "MarioClown",
-  "MarioBone",
-  "MarioArmor",
-  "MarioAloha",
-  "Mario64Metal",
-  "Mario64",
-  "Mario",
-];
+// Use centralized constants from GameConstants
+const {
+  caps,
+  bodies,
+  stagesByKingdom,
+  stageToKingdom,
+  kingdomToStage,
+  mapImages,
+} = window.GameConstants || {};
 
-const stagesByKingdom = {
-  Odyssey: ["HomeShipInsideStage"],
-  "Cap Kingdom": [
-    "CapWorldHomeStage",
-    "CapWorldTowerStage",
-    "PoisonWaveExStage",
-    "PushBlockExStage",
-    "FrogSearchExStage",
-    "RollingExStage",
-  ],
-  "Cascade Kingdom": [
-    "WaterfallWorldHomeStage",
-    "TrexPoppunExStage",
-    "WanwanClashExStage",
-    "Lift2DExStage",
-    "CapAppearExStage",
-    "WindBlowExStage",
-  ],
-  "Sand Kingdom": [
-    "SandWorldHomeStage",
-    "SandWorldShopStage",
-    "SandWorldSlotStage",
-    "SandWorldCostumeStage",
-    "SandWorldSecretStage",
-    "SandWorldVibrationStage",
-    "SandWorldPyramid000Stage",
-    "SandWorldPyramid001Stage",
-    "SandWorldUnderground000Stage",
-    "SandWorldUnderground001Stage",
-    "SandWorldPressExStage",
-    "SandWorldMeganeExStage",
-    "SandWorldKillerExStage",
-    "SandWorldSphinxExStage",
-    "SandWorldRotateExStage",
-    "MeganeLiftExStage",
-    "RocketFlowerExStage",
-    "WaterTubeExStage",
-  ],
-  "Lake Kingdom": [
-    "LakeWorldHomeStage",
-    "LakeWorldShopStage",
-    "GotogotonExStage",
-    "FastenerExStage",
-    "TrampolineWallCatchExStage",
-    "FrogPoisonExStage",
-  ],
-  "Wodded Kingdom": [
-    "ForestWorldHomeStage",
-    "ForestWorldTowerStage",
-    "ForestWorldBossStage",
-    "ForestWorldWoodsStage",
-    "ForestWorldWoodsCostumeStage",
-    "ForestWorldWoodsTreasureStage",
-    "ForestWorldBonusStage",
-    "ForestWorldWaterExStage",
-    "FogMountainExStage",
-    "RailCollisionExStage",
-    "ShootingElevatorExStage",
-    "ForestWorldCloudBonusExStage",
-    "PackunPoisonExStage",
-    "AnimalChaseExStage",
-    "KillerRoadExStage",
-  ],
-  "Cloud Kingdom": [
-    "CloudWorldHomeStage",
-    "FukuwaraiKuriboStage",
-    "Cube2DExStage",
-  ],
-  "Lost Kingdom": [
-    "ClashWorldHomeStage",
-    "ClashWorldShopStage",
-    "ImomuPoisonExStage",
-    "JangoExStage",
-  ],
-  "City Kingdom": [
-    "CityWorldHomeStage",
-    "CityWorldShop01Stage",
-    "CityWorldSandSlotStage",
-    "CityWorldMainTowerStage",
-    "CityWorldFactoryStage",
-    "RadioControlExStage",
-    "Note2D3DRoomExStage",
-    "Theater2DExStage",
-    "CityPeopleRoadStage",
-    "ElectricWireExStage",
-    "ShootingCityExStage",
-    "CapRotatePackunExStage",
-    "PoleGrabCeilExStage",
-    "PoleKillerExStage",
-    "TrexBikeExStage",
-    "DonsukeExStage",
-    "SwingSteelExStage",
-    "BikeSteelExStage",
-  ],
-  "Snow Kingdom": [
-    "SnowWorldHomeStage",
-    "SnowWorldShopStage",
-    "SnowWorldCostumeStage",
-    "IceWalkerExStage",
-    "SnowWorldTownStage",
-    "SnowWorldLobby000Stage",
-    "SnowWorldLobby001Stage",
-    "SnowWorldRace000Stage",
-    "SnowWorldRace001Stage",
-    "SnowWorldRaceTutorialStage",
-    "SnowWorldLobbyExStage",
-    "SnowWorldRaceExStage",
-    "SnowWorldRaceHardExStage",
-    "IceWaterDashExStage",
-    "IceWaterBlockExStage",
-    "ByugoPuzzleExStage",
-    "SnowWorldCloudBonusExStage",
-    "KillerRailCollisionExStage",
-  ],
-  "Seaside Kingdom": [
-    "SeaWorldHomeStage",
-    "SeaWorldCostumeStage",
-    "SeaWorldSecretStage",
-    "SeaWorldVibrationStage",
-    "SeaWorldUtsuboCaveStage",
-    "SeaWorldSneakingManStage",
-    "CloudExStage",
-    "WaterValleyExStage",
-    "SenobiTowerExStage",
-    "ReflectBombExStage",
-    "TogezoRotateExStage",
-  ],
-  "Luncheon Kingdom": [
-    "LavaWorldHomeStage",
-    "LavaWorldCostumeStage",
-    "LavaWorldTreasureStage",
-    "LavaWorldUpDownExStage",
-    "LavaWorldBubbleLaneExStage",
-    "ForkExStage",
-    "LavaWorldExcavationExStage",
-    "LavaWorldClockExStage",
-    "GabuzouClockExStage",
-    "CapAppearLavaLiftExStage",
-    "LavaWorldFenceLiftExStage",
-  ],
-  "Ruin Kingdom": [
-    "BossRaidWorldHomeStage",
-    "DotTowerExStage",
-    "BullRunExStage",
-  ],
-  "Bowser Kingdom": [
-    "SkyWorldHomeStage",
-    "SkyWorldShopStage",
-    "SkyWorldCostumeStage",
-    "SkyWorldTreasureStage",
-    "TsukkunRotateExStage",
-    "JizoSwitchExStage",
-    "SkyWorldCloudBonusExStage",
-    "KaronWingTowerStage",
-    "TsukkunClimbExStage",
-  ],
-  "Moon Kingdom": [
-    "MoonWorldHomeStage",
-    "MoonWorldCaptureParadeStage",
-    "MoonWorldWeddingRoomStage",
-    "MoonWorldWeddingRoom2Stage",
-    "MoonWorldKoopa1Stage",
-    "MoonWorldKoopa2Stage",
-    "Galaxy2DExStage",
-    "MoonAthleticExStage",
-  ],
-  "Dark Side": [
-    "Special1WorldHomeStage",
-    "Special1WorldTowerStackerStage",
-    "Special1WorldTowerBombTailStage",
-    "Special1WorldTowerFireBlowerStage",
-    "Special1WorldTowerCapThrowerStage",
-    "KillerRoadNoCapExStage",
-    "PackunPoisonNoCapExStage",
-    "BikeSteelNoCapExStage",
-    "ShootingCityYoshiExStage",
-    "SenobiTowerYoshiExStage",
-    "LavaWorldUpDownYoshiExStage",
-  ],
-  "Darker Side": [
-    "Special2WorldHomeStage",
-    "Special2WorldLavaStage",
-    "Special2WorldCloudStage",
-    "Special2WorldKoopaStage",
-  ],
-  "Peach Kingdom": [
-    "PeachWorldHomeStage",
-    "PeachWorldCastleStage",
-    "PeachWorldShopStage",
-    "PeachWorldCostumeStage",
-    "FukuwaraiMarioStage",
-    "PeachWorldPictureBossKnuckleStage",
-    "PeachWorldPictureBossForestStage",
-    "PeachWorldPictureMofumofuStage",
-    "PeachWorldPictureGiantWanderBossStage",
-    "PeachWorldPictureBossMagmaStage",
-    "PeachWorldPictureBossRaidStage",
-    "RevengeBossKnuckleStage",
-    "RevengeForestBossStage",
-    "RevengeMofumofuStage",
-    "RevengeGiantWanderBossStage",
-    "RevengeBossMagmaStage",
-    "RevengeBossRaidStage",
-    "YoshiCloudExStage",
-    "DotHardExStage",
-  ],
-};
-
-const stageToKingdom = {
-  CapWorldHomeStage: "Cap Kingdom",
-  SandWorldHomeStage: "Sand Kingdom",
-  WaterfallWorldHomeStage: "Cascade Kingdom",
-  LakeWorldHomeStage: "Lake Kingdom",
-  ForestWorldHomeStage: "Wodded Kingdom",
-  CloudWorldHomeStage: "Cloud Kingdom",
-  CityWorldHomeStage: "City Kingdom",
-  SnowWorldHomeStage: "Snow Kingdom",
-  SeaWorldHomeStage: "Seaside Kingdom",
-  LavaWorldHomeStage: "Luncheon Kingdom",
-  BossRaidWorldHomeStage: "Ruin Kingdom",
-  KoopaWorldHomeStage: "Bowser Kingdom",
-  MoonWorldHomeStage: "Moon Kingdom",
-  DarkWorldHomeStage: "Dark Side",
-  DarkerWorldHomeStage: "Darker Side",
-};
-
-const kingdomToStage = {
-  Odyssey: "HomeShipInsideStage",
-  "Cap Kingdom": "CapWorldHomeStage",
-  "Cascade Kingdom": "WaterfallWorldHomeStage",
-  "Sand Kingdom": "SandWorldHomeStage",
-  "Lake Kingdom": "LakeWorldHomeStage",
-  "Wodded Kingdom": "ForestWorldHomeStage",
-  "Cloud Kingdom": "CloudWorldHomeStage",
-  "City Kingdom": "CityWorldHomeStage",
-  "Snow Kingdom": "SnowWorldHomeStage",
-  "Seaside Kingdom": "SeaWorldHomeStage",
-  "Luncheon Kingdom": "LavaWorldHomeStage",
-  "Ruin Kingdom": "BossRaidWorldHomeStage",
-  "Bowser Kingdom": "KoopaWorldHomeStage",
-  "Moon Kingdom": "MoonWorldHomeStage",
-  "Dark Side": "DarkWorldHomeStage",
-  "Darker Side": "DarkerWorldHomeStage",
-};
-
-const mapImages = {
-  HomeShipInsideStage: "Odyssey.png",
-  CapWorldHomeStage: "CapKingdom.png",
-  WaterfallWorldHomeStage: "CascadeKingdom.png",
-  SandWorldHomeStage: "SandKingdom.png",
-  LakeWorldHomeStage: "LakeKingdom.png",
-  ForestWorldHomeStage: "WoodedKingdom.png",
-  CloudWorldHomeStage: "CloudKingdom.png",
-  CityWorldHomeStage: "MetroKingdom.png",
-  SnowWorldHomeStage: "SnowKingdom.png",
-  SeaWorldHomeStage: "SeasideKingdom.png",
-  LavaWorldHomeStage: "LuncheonKingdom.png",
-  BossRaidWorldHomeStage: "RuinedKingdom.png",
-  KoopaWorldHomeStage: "BowserKingdom.png",
-  MoonWorldHomeStage: "MoonKingdom.png",
-  DarkWorldHomeStage: "DarkSide.png",
-  DarkerWorldHomeStage: "DarkerSide.png",
-};
+// stagesByKingdom, stageToKingdom, kingdomToStage, mapImages are supplied by GameConstants
 
 // Global settings object
 let serverSettings = {
@@ -487,15 +136,21 @@ async function initLogin() {
 // Initialize the login functionality when the page loads
 document.addEventListener("DOMContentLoaded", function () {
   // Initialize the login system
-  initLogin();
+  if (window.Auth && typeof window.Auth.initLogin === "function") {
+    window.Auth.initLogin();
+  } else {
+    initLogin();
+  }
 
   // Set up other event listeners and initialization code here
   initializeColumnVisibility();
   fillKingdomDropdowns();
 
   // Set theme
-  const theme = getSavedTheme();
-  setTheme(theme);
+  if (window.Theme) {
+    window.Theme.setTheme(window.Theme.getSavedTheme());
+    window.Theme.init();
+  }
 
   // Initialize the rest of the application
   initializeApplication();
@@ -753,76 +408,17 @@ document.addEventListener("DOMContentLoaded", function () {
     sendKingdom.dispatchEvent(new Event("change"));
   }
 
-  // Settings-FAB-Button initialize
-  const settingsFab = document.getElementById("settingsFab");
-  if (settingsFab) {
-    settingsFab.onclick = function () {
-      const modalId = isAdmin() ? "settingsModalAdmin" : "settingsModalGuest";
-      const modalEl = document.getElementById(modalId);
-      if (!modalEl) return;
-      // Aktuelles Theme im Dropdown in dem jeweiligen Modal setzen
-      const theme = getSavedTheme();
-      const selectInModal = modalEl.querySelector("#themeSelect");
-      if (selectInModal) selectInModal.value = theme;
-      const modal = new bootstrap.Modal(modalEl);
-      modal.show();
-    };
-  }
+  // Settings-FAB-Button handled by Theme.init()
 
-  // --- Theme-Logik ---
-  function setTheme(theme) {
-    document.body.classList.remove("theme-dark", "theme-light");
-    if (theme === "dark") {
-      document.body.classList.add("theme-dark");
-    } else if (theme === "light") {
-      document.body.classList.add("theme-light");
-    } else {
-      // System: je nach prefers-color-scheme
-      if (window.matchMedia("(prefers-color-scheme: dark)").matches) {
-        document.body.classList.add("theme-dark");
-      } else {
-        document.body.classList.add("theme-light");
-      }
-    }
-  }
-  function saveTheme(theme) {
-    localStorage.setItem("theme", theme);
-  }
-  function getSavedTheme() {
-    return localStorage.getItem("theme") || "system";
-  }
-  setTheme(getSavedTheme());
-  // Initialize both theme selects (admin and guest modals)
-  const themeSelects = document.querySelectorAll(
-    "#settingsModalAdmin #themeSelect, #settingsModalGuest #themeSelect"
-  );
-  themeSelects.forEach((sel) => {
-    sel.value = getSavedTheme();
-    sel.onchange = function () {
-      const value = sel.value;
-      saveTheme(value);
-      setTheme(value);
-      // Mirror value to the other modal's select to keep them in sync
-      themeSelects.forEach((other) => {
-        if (other !== sel) other.value = value;
-      });
-    };
-  });
-  window
-    .matchMedia("(prefers-color-scheme: dark)")
-    .addEventListener("change", function () {
-      if (getSavedTheme() === "system") setTheme("system");
-    });
+  // Theme logic initialized by Theme.init()
 
-  const mapKingdomSelect = document.getElementById("mapKingdomSelect");
-  if (mapKingdomSelect) {
-    mapKingdomSelect.addEventListener("change", function () {
-      renderMap();
-    });
+  // Initialize Map module
+  if (window.MapUI && typeof window.MapUI.init === "function") {
+    window.MapUI.init();
+  } else {
+    // Fallback
+    renderMap();
   }
-
-  // Map initial anzeigen
-  renderMap();
 });
 
 document.getElementById("consoleSendBtn").onclick = function (e) {
@@ -1076,14 +672,10 @@ document.getElementById("navDashboard").onclick = function (e) {
   loadServerInfo();
 };
 let playerlistInterval;
-document.getElementById("navPlayerlist").onclick = async function (e) {
-  e.preventDefault();
-  await renderPlayerTable();
-  showSection("playerlist");
-  initializeColumnVisibility(); // Spalten-Sichtbarkeit initialisieren
-  clearInterval(playerlistInterval);
-  playerlistInterval = setInterval(renderPlayerTable, 500); // alle 0,5 Sekunden aktualisieren
-};
+// Delegate Playerlist navigation to PlayerUI
+if (window.PlayerUI && typeof window.PlayerUI.init === "function") {
+  window.PlayerUI.init();
+}
 document.getElementById("navFeatures").onclick = function (e) {
   e.preventDefault();
   showSection("features");
