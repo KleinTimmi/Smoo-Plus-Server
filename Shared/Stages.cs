@@ -1,10 +1,57 @@
-using System.Collections;
+﻿using System.Collections;
 using System.Collections.Specialized;
-//using Mods;
+using System.Text.Json;
 
 namespace Shared;
 
 public static class Stages {
+
+
+    public static void LoadAllCustomStagesFromMods(string modsFolder = "Mods")
+    {
+        if (!Directory.Exists(modsFolder))
+        {
+            Console.WriteLine($"[Stages] Mods folder not found: {modsFolder}");
+            return;
+        }
+
+        var files = Directory.GetFiles(modsFolder, "*_Stages.json", SearchOption.AllDirectories);
+        foreach (var file in files)
+        {
+            try
+            {
+                string json = File.ReadAllText(file);
+                var customData = JsonSerializer.Deserialize<Dictionary<string, StageInfo>>(json);
+                if (customData == null) continue;
+
+                foreach (var (alias, info) in customData)
+                {
+                    Alias2Stage[alias] = info.HomeStage ?? "";
+                    Alias2Kingdom[alias] = info.Kingdom ?? "";
+
+                    foreach (var stage in info.Stages ?? Enumerable.Empty<string>())
+                    {
+                        Stage2Alias[stage] = alias;
+                    }
+
+                    Console.WriteLine($"[Stages] Loaded alias '{alias}' → Kingdom: '{info.Kingdom}', HomeStage: '{info.HomeStage}'");
+
+                    if (!info.Stages.Contains(info.HomeStage))
+                    {
+                        Console.WriteLine($"[Stages] Warning: homeStage '{info.HomeStage}' not listed in stages for alias '{alias}'");
+                    }
+                }
+
+                Console.WriteLine($"[Stages] Finished loading {customData.Count} aliases from {Path.GetFileName(file)}");
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"[Stages] Failed to load {file}: {ex.Message}");
+            }
+        }
+    }
+
+
 
     public static string? Input2Stage(string input) {
         // alias value
@@ -75,6 +122,7 @@ public static class Stages {
         { "dark",    "Special1WorldHomeStage"  },
         { "darker",  "Special2WorldHomeStage"  },
         { "odyssey", "HomeShipInsideStage"     },
+
     };
 
     public static readonly OrderedDictionary Alias2Kingdom = new OrderedDictionary() {
@@ -276,4 +324,19 @@ public static class Stages {
         { "Special2WorldKoopaStage"               , "darker"  },
         { "HomeShipInsideStage"                   , "odyssey" },
     };
+
+
+
+    
+
 }
+
+public class StageInfo
+{
+    public string Kingdom { get; set; } = "";
+    public string HomeStage { get; set; } = "";
+    public List<string> Stages { get; set; } = new();
+
+
+}
+

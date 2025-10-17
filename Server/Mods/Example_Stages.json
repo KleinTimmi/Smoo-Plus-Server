@@ -1,0 +1,11 @@
+{
+  "Cap Kingdom": { 
+    "Kingdom": "Cap",
+    "HomeStage": "CapWorldHomeStage",
+    "Stages": [
+      "CapWorldHomeStage",
+      "CapWorldTowerStage"
+    ]
+  }
+}
+

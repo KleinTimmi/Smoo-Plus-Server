@@ -1,0 +1,10 @@
+{
+  "caribbean": {
+    "Kingdom": "Caribbean",
+    "HomeStage": "CaribbeanWorldHomeStage",
+    "Stages": [
+      "CaribbeanWorldHomeStage",
+      "CaribbeanWorldMariosHouseStage"
+    ]
+  }
+}

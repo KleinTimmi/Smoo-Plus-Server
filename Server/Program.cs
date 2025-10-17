@@ -349,7 +349,7 @@ server.PacketHandler = (c, p) => {
     }
     return (failToFind, toActUpon, ambig);
 }
-
+#region RegisterComands
 CommandHandler.RegisterCommand("rejoin", args => {
     if (args.Length == 0) {
         return "Usage: rejoin <* | !* (usernames to not rejoin...) | (usernames to rejoin...)>";
@@ -932,7 +932,7 @@ CommandHandler.RegisterHiddenCommand("Hello", args => {
     
     return $"\u001b[31m{randomMessage}\u001b[0m";
 });
-
+#endregion
 Console.CancelKeyPress += (_, e) => {
     e.Cancel = true;
     consoleLogger.Info("Received Ctrl+C");
@@ -946,6 +946,7 @@ CommandHandler.RegisterCommandAliases(_ => {
 
 #pragma warning disable CS4014
 Task.Run(() => {
+    Stages.LoadAllCustomStagesFromMods();
     consoleLogger.Info("Run help command for valid commands.");
     while (true) {
         string? text = Console.ReadLine();
