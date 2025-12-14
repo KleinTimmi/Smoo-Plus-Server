@@ -129,6 +129,21 @@ public class Client : IDisposable {
         };
     }
 
+    public async Task SendMessage(
+    uint senderId,
+    SendMessagePacket.MessageTypes messageType,
+    string message
+    )
+    {
+        var packet = new SendMessagePacket
+        {
+            SenderId = senderId,
+            MessageType = messageType,
+            Message = message
+        };
+        await Send(packet);
+    }
+
     public static bool operator ==(Client? left, Client? right) {
         return left is { } leftClient && right is { } rightClient && leftClient.Id == rightClient.Id;
     }

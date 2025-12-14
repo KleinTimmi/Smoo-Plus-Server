@@ -20,6 +20,7 @@ public enum PacketType : short {
     Health_Coins, // = 16
     Mods, // = 17
     ChangeCostume, // = 18
+    SendMessage, // = 19
 }
 
 /* this has to be the exact same Id as in the mod
