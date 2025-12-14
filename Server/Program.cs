@@ -8,6 +8,7 @@ using Server;
 using Shared;
 using Shared.Packet.Packets;
 using Timer = System.Timers.Timer;
+using System.Diagnostics.Tracing;
 
 Server.Server server = new Server.Server();
 HashSet<int> shineBag = new HashSet<int>();
@@ -932,6 +933,118 @@ CommandHandler.RegisterHiddenCommand("Hello", args => {
     
     return $"\u001b[31m{randomMessage}\u001b[0m";
 });
+
+CommandHandler.RegisterCommand("sendmessage", args =>
+{
+    if (args.Length < 2)
+    {
+        return "Usage: sendmessage [username/*/system] [message]";
+    }
+
+    string target = args[0];
+
+    // Reconstruct message (everything after the first argument)
+    string message = string.Join(" ", args.Skip(1));
+
+    string[] words = message.Split(' ');
+    List<string> msgParts = new List<String>();
+    string str = "";
+    for (int i = 0; i < words.Length; i++)
+    {
+        string word = words[i];
+        if (str.Length + word.Length + 1 < Constants.MessageSize)
+        {
+            str = str + " " + word;
+        }
+        else
+        {
+            msgParts.Add(str);
+            if (word.Length < Constants.MessageSize)
+            {
+                str = word;
+            }
+            else
+            {
+                string remainder = word;
+                while (remainder.Length > Constants.MessageSize)
+                {
+                    msgParts.Add(remainder.Substring(0, Constants.MessageSize));
+                    remainder = remainder.Substring(Constants.MessageSize);
+                }
+                str = remainder;
+            }
+        }
+        if (i == words.Length - 1)
+        {
+            msgParts.Add(str);
+        }
+    }
+
+
+    // System message (broadcast)
+    if (target.Equals("system", StringComparison.OrdinalIgnoreCase))
+    {
+        
+        foreach (string msg in msgParts)
+        {
+            Parallel.ForEachAsync(
+                server.Clients.Where(c => c.Connected),
+                async (client, _) =>
+                {
+                    await client.SendMessage(
+                        senderId: 0,
+                        messageType: SendMessagePacket.MessageTypes.System,
+                        message: msg
+                    );
+                }
+            ).Wait();
+        }
+        return $"Sent system message to all clients";
+    }
+
+    if (target == "*")
+    {
+        foreach (string msg in msgParts)
+        {
+            Parallel.ForEachAsync(
+            server.Clients.Where(c => c.Connected),
+            async (client, _) =>
+            {
+                await client.SendMessage(
+                    senderId: 0,
+                    messageType: SendMessagePacket.MessageTypes.Chat,
+                    message: message
+                );
+            }
+            ).Wait();
+        }
+        return $"Sent message to all players";
+    }
+
+
+    Client? targetClient = server.Clients
+        .FirstOrDefault(c => c.Connected && c.Name.Equals(target, StringComparison.OrdinalIgnoreCase));
+
+    if (targetClient == null)
+    {
+        return $"User \"{target}\" not found or not connected";
+    }
+
+    Parallel.ForEachAsync(
+            server.Clients.Where(c => c.Connected && c.Name.Equals(target, StringComparison.OrdinalIgnoreCase)),
+            async (client, _) =>
+            {
+                await client.SendMessage(
+                    senderId: 0,
+                    messageType: SendMessagePacket.MessageTypes.Chat,
+                    message: message
+                );
+            }
+            ).Wait();
+
+    return $"Sent message to \"{targetClient.Name}\"";
+});
+
 #endregion
 Console.CancelKeyPress += (_, e) => {
     e.Cancel = true;
