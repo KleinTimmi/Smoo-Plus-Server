@@ -1083,7 +1083,7 @@ if (Settings.Instance.WebInterface.Enabled)
         ushort port = Settings.Instance.WebInterface.Port;
         listener.Prefixes.Add($"http://{address}:{port}/");
         listener.Start();
-        consoleLogger.Info($"Webinterface running on http://{address}:{port}/");
+        consoleLogger.Info($"Webinterface running on http://{address}:{port}/dashboard.html");
         try
         {
             System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo

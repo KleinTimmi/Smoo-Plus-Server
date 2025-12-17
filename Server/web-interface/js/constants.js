@@ -285,7 +285,7 @@ window.GameConstants = (function () {
       "Special2WorldCloudStage",
       "Special2WorldKoopaStage",
     ],
-    "Peach Kingdom": [
+    "Mushroom Kingdom": [
       "PeachWorldHomeStage",
       "PeachWorldCastleStage",
       "PeachWorldShopStage",
@@ -324,6 +324,7 @@ window.GameConstants = (function () {
     MoonWorldHomeStage: "Moon Kingdom",
     DarkWorldHomeStage: "Dark Side",
     DarkerWorldHomeStage: "Darker Side",
+    PeachWorldHomeStage: "Mushroom Kingdom",
   };
 
   const kingdomToStage = {
@@ -343,6 +344,7 @@ window.GameConstants = (function () {
     "Moon Kingdom": "MoonWorldHomeStage",
     "Dark Side": "DarkWorldHomeStage",
     "Darker Side": "DarkerWorldHomeStage",
+    "Mushroom Kingdom": "PeachWorldHomeStage",
   };
 
   const mapImages = {
@@ -362,6 +364,7 @@ window.GameConstants = (function () {
     MoonWorldHomeStage: "MoonKingdom.png",
     DarkWorldHomeStage: "DarkSide.png",
     DarkerWorldHomeStage: "DarkerSide.png",
+    PeachWorldHomeStage: "MushroomKingdom.png",
   };
 
   return {

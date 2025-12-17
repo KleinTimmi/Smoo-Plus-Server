@@ -1621,6 +1621,7 @@ window.openParamEditor = async function (playerName) {
 
   //Give 9999 coins
   document.getElementById("coinsGiveBtn").onclick = function () {
+    const player = document.getElementById("paramPlayerName").value;
     fetch("/commands/exec", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -1630,6 +1631,7 @@ window.openParamEditor = async function (playerName) {
 
   //Reset coins to 0
   document.getElementById("coinsResetBtn").onclick = function () {
+    const player = document.getElementById("paramPlayerName").value;
     fetch("/commands/exec", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
