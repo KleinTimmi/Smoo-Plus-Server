@@ -114,7 +114,7 @@ IEnumerable<Task> stuff = Enumerable.Range(0, 7).Select(i => {
     byte[] tmp = temp.ToByteArray();
     tmp[0]++;
     Guid newOwnId = new Guid(tmp);
-    Task task = S($"SMOO+ {i}", temp, newOwnId, host, port);
+    Task task = S($"SMOO+{i}", temp, newOwnId, host, port);
     temp = newOwnId;
     return task;
 });

@@ -1152,6 +1152,9 @@ if (Settings.Instance.WebInterface.Enabled)
                                             await context.Response.OutputStream.WriteAsync(Encoding.UTF8.GetBytes("Missing 'Command' in request"));
                                         }
                                         break;
+                                    case "Stages":
+                                        await ApiRequestStages.Send(ctx);
+                                        break;
                                     default:
                                         context.Response.StatusCode = 400;
                                         await context.Response.OutputStream.WriteAsync(Encoding.UTF8.GetBytes($"Unknown API type: {type}"));

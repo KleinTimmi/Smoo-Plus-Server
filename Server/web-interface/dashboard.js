@@ -2,7 +2,7 @@
 let lastSeenPlayers = {};
 
 // Use centralized constants from GameConstants
-const {
+let {
   caps,
   bodies,
   stagesByKingdom,
@@ -11,7 +11,7 @@ const {
   mapImages,
 } = window.GameConstants || {};
 
-// stagesByKingdom, stageToKingdom, kingdomToStage, mapImages are supplied by GameConstants
+// stagesByKingdom, stageToKingdom, kingdomToStage, mapImages are supplied by GameConstants or fetched from server
 
 // Global settings object
 let serverSettings = {
@@ -54,6 +54,47 @@ async function fetchServerSettings() {
     }
   } catch (error) {
     console.error("Error fetching server settings:", error);
+    return false;
+  }
+}
+
+// Function to fetch stages from Mods
+async function fetchStages() {
+  try {
+    const response = await fetch("/api", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        Type: "Stages",
+      }),
+    });
+
+    if (response.ok) {
+      const data = await response.json();
+
+      if (data && data.stagesByKingdom) {
+        // Update the global variables with fetched data
+        stagesByKingdom = data.stagesByKingdom;
+        stageToKingdom = data.stageToKingdom;
+        kingdomToStage = data.kingdomToStage;
+        mapImages = data.mapImages;
+        return true;
+      } else {
+        console.warn("Invalid stages response format, using fallback");
+        return false;
+      }
+    } else {
+      const errorText = await response.text();
+      console.warn(
+        `Failed to fetch stages (${response.status}):`,
+        errorText
+      );
+      return false;
+    }
+  } catch (error) {
+    console.error("Error fetching stages:", error);
     return false;
   }
 }
@@ -370,7 +411,13 @@ function fillKingdomDropdowns() {
 }
 
 // When the page is loaded, fill the Kingdom-Dropdowns and initialize
-document.addEventListener("DOMContentLoaded", function () {
+document.addEventListener("DOMContentLoaded", async function () {
+  // Fetch stages from server
+  const stagesFetched = await fetchStages();
+  if (!stagesFetched) {
+    console.warn("Using fallback stages from GameConstants");
+  }
+
   // Kingdom-Dropdowns initialisieren
   fillKingdomDropdowns();
 
@@ -1687,8 +1734,6 @@ window.openParamEditor = async function (playerName) {
       body: JSON.stringify({ command: `setoutfit ${player} ${body} ${cap}` }),
     });
   };
-
-  //Button delete
 
   //Speed Set Button
   document.getElementById("speedSetBtn").onclick = function () {
