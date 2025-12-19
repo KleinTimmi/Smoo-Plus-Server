@@ -1072,6 +1072,7 @@ Task.Run(() => {
 }).ContinueWith(logError);
 #pragma warning restore CS4014
 
+#region WebInterface
 // Webinterface nur starten, wenn aktiviert
 Task? webTask = null;
 if (Settings.Instance.WebInterface.Enabled)
@@ -1484,6 +1485,8 @@ if (Settings.Instance.WebInterface.Enabled)
         }
     });
 }
+
+#endregion
 // Spielserver separat starten
 var gameTask = server.Listen(cts.Token);
 

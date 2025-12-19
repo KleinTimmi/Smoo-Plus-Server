@@ -210,6 +210,7 @@ public class Server {
                     // send server init (required to crash ignored players later)
                     await client.Send(new InitPacket {
                         MaxPlayers = (client.Ignored ? (ushort) 1 : Settings.Instance.Server.MaxPlayers),
+                        Version    = Constants.ServerVersion,
                     });
 
                     // don't init or announce an ignored client to other players any further
