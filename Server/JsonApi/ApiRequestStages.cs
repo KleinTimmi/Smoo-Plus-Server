@@ -17,29 +17,32 @@ public class ApiRequestStages {
                 var stage = stageEntry.Key;
                 var alias = stageEntry.Value;
                 
-                // Verwende den Alias als Key statt dem Kingdom
-                if (!stagesByKingdom.ContainsKey(alias)) {
-                    stagesByKingdom[alias] = new List<string>();
-                }
-                stagesByKingdom[alias].Add(stage);
-                
-                // Erstelle stageToKingdom Mapping (hier ist Kingdom der Alias)
-                stageToKingdom[stage] = alias;
-                
-                // Hole das echte Kingdom für kingdomToStage
+                // Verwende ContainsKey und Indexer für OrderedDictionary
                 if (Shared.Stages.Alias2Kingdom.Contains(alias)) {
                     var kingdom = Shared.Stages.Alias2Kingdom[alias]?.ToString();
                     if (!string.IsNullOrEmpty(kingdom)) {
+                        if (!stagesByKingdom.ContainsKey(kingdom)) {
+                            stagesByKingdom[kingdom] = new List<string>();
+                        }
+                        stagesByKingdom[kingdom].Add(stage);
+                        
+                        // Erstelle stageToKingdom Mapping
+                        stageToKingdom[stage] = kingdom;
+                        
                         // Erstelle kingdomToStage Mapping für Home Stages
                         if (stage.Contains("HomeStage")) {
-                            kingdomToStage[alias] = stage;
+                            kingdomToStage[kingdom] = stage;
                         }
-                        
-                        // Erstelle mapImages basierend auf dem echten Kingdom
-                        var kingdomName = kingdom.Replace(" ", "");
-                        mapImages[stage] = $"{kingdomName}.png";
                     }
                 }
+            }
+
+            // Erstelle mapImages basierend auf kingdomToStage
+            foreach (var entry in kingdomToStage) {
+                var kingdom = entry.Key;
+                var homeStage = entry.Value;
+                var kingdomName = kingdom.Replace(" ", "");
+                mapImages[homeStage] = $"{kingdomName}.png";
             }
 
             // Erstelle JSON-Response
