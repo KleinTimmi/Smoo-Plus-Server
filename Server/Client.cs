@@ -152,7 +152,6 @@ public class Client : IDisposable
     string message
     )
     {
-        Logger.Info("Sending Message Packetr");
         var packet = new SendMessagePacket
         {
             SenderId = senderId,

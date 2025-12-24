@@ -612,8 +612,6 @@ CommandHandler.RegisterCommand("noclip", args =>
     return $"Gave player/s: {string.Join(", ", players.Select(p => p.Name))} Noclip: {enable}";
 });
 
-
-
 CommandHandler.RegisterCommand("setoutfit", args =>
 {
     const string optionUsage = "Usage: setoutfit <Player/*> <body> <cap>";
@@ -642,15 +640,6 @@ CommandHandler.RegisterCommand("setoutfit", args =>
 
     return $"Set outfit for player/s: {string.Join(", ", players.Select(p => p.Name))} Body: {body} Cap: {cap}";
 });
-
-//Register Command Message
-CommandHandler.RegisterCommandAliases(_ =>
-{
-    const string optionUsage = "Usage: message <Player/*> <message>";
-    if (args.Length != 2)
-        return optionUsage;
-    return "not implemented";
-}, "msg", "message");
 
 CommandHandler.RegisterCommand("scenario", args =>
 {
@@ -1046,7 +1035,6 @@ CommandHandler.RegisterCommand("lifeup", args =>
     return $"Gave Life Up Heart (6 Leben) an {toActUpon.Count} Spieler";
 });
 
-
 CommandHandler.RegisterCommand("loadsettings", _ =>
 {
     Settings.LoadSettings();
@@ -1086,11 +1074,11 @@ CommandHandler.RegisterHiddenCommand("Hello", args =>
     return $"\u001b[31m{randomMessage}\u001b[0m";
 });
 
-CommandHandler.RegisterCommand("sendmessage", args =>
+CommandHandler.RegisterCommandAliases(args =>
 {
     if (args.Length < 2)
     {
-        return "Usage: sendmessage [username/*/system] [message]";
+        return "Usage: msg [username/*/system] [message]";
     }
 
     string target = args[0];
@@ -1140,17 +1128,18 @@ CommandHandler.RegisterCommand("sendmessage", args =>
         return $"Sent message to all players";
     }
 
+    Client[] players = target == "*"
+            ? server.Clients.Where(c => c.Connected).ToArray()
+            : server.Clients.Where(c => c.Connected && target.Any(x => c.Name.StartsWith(x))).ToArray();
 
-    Client? targetClient = server.Clients
-        .FirstOrDefault(c => c.Connected && c.Name.Equals(target, StringComparison.OrdinalIgnoreCase));
-
-    if (targetClient == null)
+    if (players.Count() == 0)
     {
-        return $"User \"{target}\" not found or not connected";
+        return "\u001b[0;31mPlayer not found\u001b[0m";
     }
 
+
     Parallel.ForEachAsync(
-            server.Clients.Where(c => c.Connected && c.Name.Equals(target, StringComparison.OrdinalIgnoreCase)),
+            players,
             async (client, _) =>
             {
                 await client.SendMessage(
@@ -1161,8 +1150,8 @@ CommandHandler.RegisterCommand("sendmessage", args =>
             }
             ).Wait();
 
-    return $"Sent message to \"{targetClient.Name}\"";
-});
+    return $"Sent message to \"{players[0].Name}\"";
+}, "sendmessage", "message", "msg");
 
 #endregion
 Console.CancelKeyPress += (_, e) =>
