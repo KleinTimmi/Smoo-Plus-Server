@@ -1,8 +1,8 @@
 {
   "Server": {
     "Address": "0.0.0.0",
-    "Port": 1027,
-    "MaxPlayers": 4
+    "Port": 1028,
+    "MaxPlayers": 8
   },
   "Flip": {
     "Enabled": true,
