@@ -9,6 +9,7 @@ using Shared;
 using Shared.Packet.Packets;
 using Timer = System.Timers.Timer;
 using System.Diagnostics.Tracing;
+using Shared.Packet;
 
 Server.Server server = new Server.Server();
 HashSet<int> shineBag = new HashSet<int>();
@@ -146,6 +147,18 @@ server.PacketHandler = (c, p) =>
 {
     switch (p)
     {
+
+        case DisconnectPacket dcPacket:
+            {
+                // c.Logger.Warn("Got Disconnect Packet");
+                Task.Run(async () =>
+                            {
+                                // await Task.Delay(500);
+                                await c.Send(new UnhandledPacket());
+                            });
+                return true;
+            }
+
         case GamePacket gamePacket:
             {
                 // crash ignored player
@@ -339,7 +352,6 @@ server.PacketHandler = (c, p) =>
                 break;
             }
     }
-
     return true; // Broadcast packet to all other clients
 };
 
