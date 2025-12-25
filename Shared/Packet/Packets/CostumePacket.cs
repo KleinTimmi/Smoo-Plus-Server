@@ -3,7 +3,7 @@ using System.Text;
 
 namespace Shared.Packet.Packets;
 
-[Packet(PacketType.Costume)]
+[Packet(PacketType.CostumeInf)]
 public struct CostumePacket : IPacket
 {
     // Compatible with C++ CostumeInf (receive from mod) and CostumeSend (send to mod)
@@ -33,6 +33,6 @@ public struct CostumePacket : IPacket
     public void Deserialize(ReadOnlySpan<byte> data)
     {
         BodyName = Encoding.ASCII.GetString(data.Slice(0, Constants.CostumeNameSize)).TrimEnd('\0');
-        CapName  = Encoding.ASCII.GetString(data.Slice(Constants.CostumeNameSize, Constants.CostumeNameSize)).TrimEnd('\0');
+        CapName = Encoding.ASCII.GetString(data.Slice(Constants.CostumeNameSize, Constants.CostumeNameSize)).TrimEnd('\0');
     }
 }

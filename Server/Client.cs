@@ -68,7 +68,7 @@ public class Client : IDisposable
         try
         {
             // don't send most packets to ignored players
-            if (Ignored && packetAttribute.Type != PacketType.Init && packetAttribute.Type != PacketType.ChangeStage)
+            if (Ignored && packetAttribute.Type != PacketType.ClientInit && packetAttribute.Type != PacketType.ChangeStage)
             {
                 memory.Dispose();
                 return;
@@ -95,14 +95,14 @@ public class Client : IDisposable
         PacketHeader header = new PacketHeader();
         header.Deserialize(data.Span);
 
-        if (!Connected && !Ignored && header.Type != PacketType.Connect)
+        if (!Connected && !Ignored && header.Type != PacketType.PlayerConnect)
         {
             Server.Logger.Error($"Didn't send {header.Type} to {Id} because they weren't connected yet");
             return;
         }
 
         // don't send most packets to ignored players
-        if (Ignored && header.Type != PacketType.Init && header.Type != PacketType.ChangeStage)
+        if (Ignored && header.Type != PacketType.ClientInit && header.Type != PacketType.ChangeStage)
         {
             return;
         }

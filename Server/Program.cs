@@ -587,9 +587,10 @@ CommandHandler.RegisterCommand("infCapDive", args =>
 
 });
 
+CommandHandler.UnregisterCommand("infCapDive"); // TODO: implement command in Mod
+
 CommandHandler.RegisterCommand("noclip", args =>
 {
-
     const string optionUsage = "Usage: noclip <Player/*> <true/false>";
     if (args.Length != 2)
     {
@@ -624,6 +625,8 @@ CommandHandler.RegisterCommand("noclip", args =>
     return $"Gave player/s: {string.Join(", ", players.Select(p => p.Name))} Noclip: {enable}";
 });
 
+CommandHandler.UnregisterCommand("noclip"); // TODO: implement command in Mod
+
 CommandHandler.RegisterCommand("setoutfit", args =>
 {
     const string optionUsage = "Usage: setoutfit <Player/*> <body> <cap>";
@@ -652,6 +655,8 @@ CommandHandler.RegisterCommand("setoutfit", args =>
 
     return $"Set outfit for player/s: {string.Join(", ", players.Select(p => p.Name))} Body: {body} Cap: {cap}";
 });
+
+CommandHandler.UnregisterCommand("setoutfit"); // TODO: implement command in Mod
 
 CommandHandler.RegisterCommand("scenario", args =>
 {
@@ -713,8 +718,8 @@ CommandHandler.RegisterCommand("tag", args =>
                 }
                 else if (client != null)
                 {
-                    server.Broadcast(tagPacket, client);
-                    client.Send(tagPacket);
+                    _ = server.Broadcast(tagPacket, client);
+                    _ = client.Send(tagPacket);
                 }
                 return $"Set time for {(args[1] == "*" ? "everyone" : args[1])} to {minutes}:{seconds}";
             }
@@ -739,8 +744,8 @@ CommandHandler.RegisterCommand("tag", args =>
                 }
                 else if (client != null)
                 {
-                    server.Broadcast(tagPacket, client);
-                    client.Send(tagPacket);
+                    _ = server.Broadcast(tagPacket, client);
+                    _ = client.Send(tagPacket);
                 }
                 return $"Set {(args[1] == "*" ? "everyone" : args[1])} to {(seeking ? "seeker" : "hider")}";
             }
@@ -981,6 +986,8 @@ CommandHandler.RegisterCommand("health", args =>
     return $"Set health to {health} for {toActUpon.Count} player(s)";
 });
 
+CommandHandler.UnregisterCommand("health"); // TODO: implement command in Mod
+
 CommandHandler.RegisterCommand("coins", args =>
 {
     const string optionUsage = "usage: coins <player/*> <coins>";
@@ -1016,6 +1023,8 @@ CommandHandler.RegisterCommand("coins", args =>
     return $"Set coins to {coins} for {toActUpon.Count} player(s)";
 });
 
+CommandHandler.UnregisterCommand("coins"); // TODO: implement command in Mod
+
 CommandHandler.RegisterCommand("lifeup", args =>
 {
     const string optionUsage = "usage: lifeup <player/*>";
@@ -1046,6 +1055,8 @@ CommandHandler.RegisterCommand("lifeup", args =>
 
     return $"Gave Life Up Heart (6 Leben) an {toActUpon.Count} Spieler";
 });
+
+CommandHandler.UnregisterCommand("lifeup"); // TODO: implement command in Mod
 
 CommandHandler.RegisterCommand("loadsettings", _ =>
 {
@@ -1201,10 +1212,12 @@ Task.Run(() =>
 #region WebInterface
 // Webinterface nur starten, wenn aktiviert
 Task? webTask = null;
-if (Settings.Instance.WebInterface.Enabled)
+if (false)//Settings.Instance.WebInterface.Enabled
 {
     webTask = Task.Run(async () =>
     {
+
+        cts.Token.ThrowIfCancellationRequested();
         var listener = new HttpListener();
         string address = Settings.Instance.WebInterface.Address ?? "localhost";
         ushort port = Settings.Instance.WebInterface.Port;
@@ -1226,6 +1239,7 @@ if (Settings.Instance.WebInterface.Enabled)
 
         while (listener.IsListening)
         {
+            cts.Token.ThrowIfCancellationRequested();
             var context = await listener.GetContextAsync();
             string urlPath = context.Request.Url!.AbsolutePath.TrimStart('/').ToLower();
             string filePath = Path.Combine(AppContext.BaseDirectory, "web-interface", urlPath.Replace('/', Path.DirectorySeparatorChar));
@@ -1631,7 +1645,7 @@ if (Settings.Instance.WebInterface.Enabled)
                 context.Response.OutputStream.Close();
             }
         }
-    });
+    }, cts.Token);
 }
 
 #endregion

@@ -4,7 +4,8 @@ using System.Text.Json;
 
 namespace Shared;
 
-public static class Stages {
+public static class Stages
+{
 
 
     public static void LoadAllCustomStagesFromMods(string modsFolder = "Mods")
@@ -53,51 +54,64 @@ public static class Stages {
 
 
 
-    public static string? Input2Stage(string input) {
+    public static string? Input2Stage(string input)
+    {
         // alias value
-        if (Alias2Stage.TryGetValue(input.ToLower(), out string? mapName)) {
+        if (Alias2Stage.TryGetValue(input.ToLower(), out string? mapName))
+        {
             return mapName;
         }
         // exact stage value
-        if (IsStage(input)) {
+        if (IsStage(input))
+        {
             return input;
         }
         // force input value with a !
-        if (input.EndsWith("!")) {
+        if (input.EndsWith("!"))
+        {
             return input.Substring(0, input.Length - 1);
         }
         return null;
     }
 
-    public static string KingdomAliasMapping() {
+    public static string KingdomAliasMapping()
+    {
         string result = "";
-        foreach (DictionaryEntry item in Alias2Kingdom) {
-          result += item.Key + "  ->  " + item.Value + "\n";
+        foreach (DictionaryEntry item in Alias2Kingdom)
+        {
+            result += item.Key + "  ->  " + item.Value + "\n";
         }
         return result;
     }
 
-    public static bool IsAlias(string input) {
+    public static bool IsAlias(string input)
+    {
         return Alias2Stage.ContainsKey(input);
     }
 
-    public static bool IsStage(string input) {
+    public static bool IsStage(string input)
+    {
         return Stage2Alias.ContainsKey(input);
     }
 
-    public static IEnumerable<string> StagesByInput(string input) {
-        if (IsAlias(input)) {
+    public static IEnumerable<string> StagesByInput(string input)
+    {
+        if (IsAlias(input))
+        {
             var stages = Stage2Alias
                 .Where(e => e.Value == input)
                 .Select(e => e.Key)
             ;
-            foreach (string stage in stages) {
+            foreach (string stage in stages)
+            {
                 yield return stage;
             }
         }
-        else {
+        else
+        {
             string? stage = Input2Stage(input);
-            if (stage != null) {
+            if (stage != null)
+            {
                 yield return stage;
             }
         }
@@ -327,7 +341,7 @@ public static class Stages {
 
 
 
-    
+
 
 }
 

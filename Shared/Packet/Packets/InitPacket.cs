@@ -3,7 +3,7 @@ using System.Text;
 
 namespace Shared.Packet.Packets;
 
-[Packet(PacketType.Init)]
+[Packet(PacketType.ClientInit)]
 public struct InitPacket : IPacket
 {
     // Payload size: ushort + fixed char buffer

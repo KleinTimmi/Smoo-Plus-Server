@@ -146,7 +146,7 @@ window.GameConstants = (function () {
       "TrampolineWallCatchExStage",
       "FrogPoisonExStage",
     ],
-    "Wodded Kingdom": [
+    "Wooded Kingdom": [
       "ForestWorldHomeStage",
       "ForestWorldTowerStage",
       "ForestWorldBossStage",
@@ -313,7 +313,7 @@ window.GameConstants = (function () {
     SandWorldHomeStage: "Sand Kingdom",
     WaterfallWorldHomeStage: "Cascade Kingdom",
     LakeWorldHomeStage: "Lake Kingdom",
-    ForestWorldHomeStage: "Wodded Kingdom",
+    ForestWorldHomeStage: "Wooded Kingdom",
     CloudWorldHomeStage: "Cloud Kingdom",
     CityWorldHomeStage: "City Kingdom",
     SnowWorldHomeStage: "Snow Kingdom",
@@ -333,7 +333,7 @@ window.GameConstants = (function () {
     "Cascade Kingdom": "WaterfallWorldHomeStage",
     "Sand Kingdom": "SandWorldHomeStage",
     "Lake Kingdom": "LakeWorldHomeStage",
-    "Wodded Kingdom": "ForestWorldHomeStage",
+    "Wooded Kingdom": "ForestWorldHomeStage",
     "Cloud Kingdom": "CloudWorldHomeStage",
     "City Kingdom": "CityWorldHomeStage",
     "Snow Kingdom": "SnowWorldHomeStage",
