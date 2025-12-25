@@ -14,7 +14,7 @@ Must have the [.NET 8 SDK](https://dotnet.microsoft.com/en-us/download) and Git 
 Run these commands in your shell:
 
 ```shell
-git clone https://github.com/KleinTimmi/Smoo-Plus-Server/releases
+git clone https://github.com/KleinTimmi/Smoo-Plus-Server.git
 cd SmoOnlineServer
 # replace run with build to only build the server
 dotnet run --project Server/Server.csproj -c Release
