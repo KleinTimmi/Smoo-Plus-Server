@@ -1,6 +1,7 @@
 ﻿using System.Buffers;
 using System.Net;
 using System.Net.Sockets;
+using Server.AviscribeApi;
 using Shared;
 using Shared.Packet;
 using Shared.Packet.Packets;
@@ -15,9 +16,17 @@ public class Server
     private readonly MemoryPool<byte> _memoryPool = MemoryPool<byte>.Shared;
     public Func<Client, IPacket, bool>? PacketHandler = null!;
     public event Action<Client, ConnectPacket> ClientJoined = null!;
+    private readonly AviscribeApiHost _aviscribeApi = new();
 
     public async Task Listen(CancellationToken? token = null)
     {
+        var cancellationToken = token ?? CancellationToken.None;
+        await _aviscribeApi.InitializeAsync(cancellationToken);
+#pragma warning disable CS4014
+        _aviscribeApi.RunMaintenanceAsync(cancellationToken)
+            .ContinueWith(x => { if (x.Exception != null) Logger.Error(x.Exception.ToString()); });
+#pragma warning restore CS4014
+
         Socket serverSocket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
         serverSocket.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.ReuseAddress, true);
         serverSocket.Bind(new IPEndPoint(IPAddress.Parse(Settings.Server.Address), Settings.Server.Port));
@@ -32,16 +41,11 @@ public class Server
                 Socket socket = token.HasValue ? await serverSocket.AcceptAsync(token.Value) : await serverSocket.AcceptAsync();
                 socket.SetSocketOption(SocketOptionLevel.Tcp, SocketOptionName.NoDelay, true);
 
-                if (!Settings.JsonApi.Enabled)
-                {
-                    Logger.Error($"Accepted connection for client {socket.RemoteEndPoint}");
-                }
-
                 // start sub thread to handle client
                 try
                 {
 #pragma warning disable CS4014
-                    Task.Run(() => HandleSocket(socket))
+                    Task.Run(() => HandleSocket(socket, cancellationToken), cancellationToken)
                         .ContinueWith(x => { if (x.Exception != null) { Logger.Error(x.Exception.ToString()); } });
 #pragma warning restore CS4014
                 }
@@ -152,9 +156,9 @@ public class Server
     }
 
 
-    private async Task HandleSocket(Socket socket)
+    private async Task HandleSocket(Socket socket, CancellationToken cancellationToken)
     {
-        Client client = new Client(socket) { Server = this };
+        Client? client = null;
         var remote = socket.RemoteEndPoint;
         IMemoryOwner<byte> memory = null!;
 
@@ -170,7 +174,10 @@ public class Server
                     readSize += readOffset;
                     while (readOffset < readSize)
                     {
-                        int size = await socket.ReceiveAsync(readMem[readOffset..readSize], SocketFlags.None);
+                        int size = await socket.ReceiveAsync(
+                            readMem[readOffset..readSize],
+                            SocketFlags.None,
+                            cancellationToken);
                         if (size == 0)
                         {
                             // treat it as a disconnect and exit
@@ -186,6 +193,15 @@ public class Server
                 }
                 // if blank data, close socket
                 if (!await Read(memory.Memory, Constants.HeaderSize, 0)) { break; }
+
+                if (first && AviscribeApiHost.MatchesPrefix(
+                        memory.Memory.Span[..Constants.HeaderSize]))
+                {
+                    memory.Dispose();
+                    memory = null!;
+                    await _aviscribeApi.HandleAsync(socket, cancellationToken);
+                    goto close;
+                }
 
                 PacketHeader header = GetHeader(memory.Memory.Span);
                 
@@ -213,6 +229,7 @@ public class Server
                 if (first)
                 {
                     first = false; // only do this once
+                    client = new Client(socket) { Server = this };
 
                     // first client packet has to be the client init
                     if (header.Type != PacketType.PlayerConnect)
@@ -367,7 +384,7 @@ public class Server
                     // send missing or outdated packets from others to the new client
                     await ResendPackets(client);
                 }
-                else if (header.Id != client.Id && client.Id != Guid.Empty)
+                else if (header.Id != client!.Id && client.Id != Guid.Empty)
                 {
                     throw new Exception($"Client {client.Name} sent packet with invalid client id {header.Id} instead of {client.Id}");
                 }
@@ -398,15 +415,19 @@ public class Server
 #pragma warning restore CS4014
             }
         }
+        catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
+        {
+            memory?.Dispose();
+        }
         catch (Exception e)
         {
             if (e is SocketException { SocketErrorCode: SocketError.ConnectionReset })
             {
-                client.Logger.Info($"Disconnected from the server: Connection reset");
+                (client?.Logger ?? Logger).Info($"Disconnected from the server: Connection reset");
             }
             else
             {
-                client.Logger.Error($"Disconnecting due to exception: {e}");
+                (client?.Logger ?? Logger).Error($"Disconnecting due to exception: {e}");
                 if (socket.Connected)
                 {
 #pragma warning disable CS4014
@@ -420,7 +441,7 @@ public class Server
         }
 
         // client disconnected
-        if (client.Name != "Unknown User" && client.Id != Guid.Parse("00000000-0000-0000-0000-000000000000"))
+        if (client is not null && client.Name != "Unknown User" && client.Id != Guid.Empty)
         {
             Logger.Info($"Client {remote} ({client.Name}/{client.Id}) disconnected from the server");
         }
@@ -430,6 +451,13 @@ public class Server
         }
         
         close:
+        if (client is null)
+        {
+            memory?.Dispose();
+            socket.Dispose();
+            return;
+        }
+
         bool wasConnected = client.Connected;
         client.Connected = false;
         try

@@ -44,5 +44,16 @@
   "JsonApi": {
     "Enabled": false,
     "Tokens": {}
+  },
+  "Aviscribe": {
+    "Enabled": true,
+    "IdleExpirationMinutes": 30,
+    "MaximumRunHours": null,
+    "OwnerTimeoutSeconds": 45,
+    "WaitTimeoutSeconds": 25,
+    "StateFilename": "./aviscribe-runs.json",
+    "MaximumEventsPerRun": 20000,
+    "RetainedChangeCount": 512,
+    "RetainedEventFeedCount": 200
   }
 }

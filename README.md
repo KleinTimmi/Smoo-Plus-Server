@@ -71,6 +71,14 @@ Run `help` to get what commands are available in the server console.
 Run the `loadsettings` command in the console to update the settings without restarting.
 Server address and port will require a server restart, but everything else should update when you run `loadsettings`.
 
+### Aviscribe
+
+[Aviscribe](https://github.com/xTektonic/Aviscribe) multiplayer support is enabled by default and uses the same address and port as the SMOO+ game server. Players create and join rooms from Aviscribe; no additional server port is required.
+
+`aviscribe inspect`: shows the active room, owner, run settings, and players
+`aviscribe state`: shows the shared moon state for troubleshooting
+`aviscribe end`: closes the active room for every player
+
 [//]: # "TODO: Document all commands, possibly rename them too."
 
 ## Settings
@@ -84,6 +92,18 @@ Flip: flips the player upside down, defaults: enabled: true, pov: both
 Scenario: sync's scenario's for all players on the server, default: false  
 Banlist: banned people are unable to join the server, default: false  
 PersistShines/Moons: Allows the server to remember moon progress across crashes/restarts
+
+### Aviscribe
+
+Enabled: enables Aviscribe multiplayer, default: true  
+IdleExpirationMinutes: closes rooms with no run activity, default: 30  
+MaximumRunHours: optionally limits the total room lifetime, default: null  
+OwnerTimeoutSeconds: transfers ownership when the owner disconnects, default: 45  
+WaitTimeoutSeconds: controls how long change requests wait for activity, default: 25  
+StateFilename: stores active rooms across server restarts, default: ./aviscribe-runs.json  
+MaximumEventsPerRun: limits the number of moon events in one run, default: 20000  
+RetainedChangeCount: keeps recent changes for reconnecting players, default: 512  
+RetainedEventFeedCount: limits recent activity shown to players, default: 200
 
 ### Discord
 

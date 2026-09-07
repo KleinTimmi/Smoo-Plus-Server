@@ -46,6 +46,7 @@ public class Settings {
     public static DiscordTable Discord => Instance.Discord;
     public static SyncTable Syncing => Instance.Syncing;
     public static JsonApiTable JsonApi => Instance.JsonApi;
+    public static AviscribeTable Aviscribe => Instance.Aviscribe;
     
     public static SettingsData GetSettingsData() => Instance;
 
@@ -58,6 +59,7 @@ public class Settings {
         public DiscordTable Discord { get; set; } = new();
         public SyncTable Syncing { get; set; } = new();
         public JsonApiTable JsonApi { get; set; } = new();
+        public AviscribeTable Aviscribe { get; set; } = new();
     }
 
     public class ServerTable
@@ -132,6 +134,19 @@ public class Settings {
     {
         public bool Enabled { get; set; } = false;
         public Dictionary<string, SortedSet<string>> Tokens { get; set; } = new();
+    }
+
+    public class AviscribeTable
+    {
+        public bool Enabled { get; set; } = true;
+        public int IdleExpirationMinutes { get; set; } = 30;
+        public int? MaximumRunHours { get; set; }
+        public int OwnerTimeoutSeconds { get; set; } = 45;
+        public int WaitTimeoutSeconds { get; set; } = 25;
+        public string StateFilename { get; set; } = "./aviscribe-runs.json";
+        public int MaximumEventsPerRun { get; set; } = 20_000;
+        public int RetainedChangeCount { get; set; } = 512;
+        public int RetainedEventFeedCount { get; set; } = 200;
     }
 
    

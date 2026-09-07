@@ -141,9 +141,19 @@ public class Client : IDisposable
         };
     }
 
-       public static bool operator ==(Client? left, Client? right)
+    public static bool operator ==(Client? left, Client? right)
     {
-        return left is { } leftClient && right is { } rightClient && leftClient.Id == rightClient.Id;
+        if (ReferenceEquals(left, right))
+        {
+            return true;
+        }
+
+        if (left is null || right is null)
+        {
+            return false;
+        }
+
+        return left.Id == right.Id;
     }
 
     public static bool operator !=(Client? left, Client? right)
@@ -153,13 +163,11 @@ public class Client : IDisposable
 
     public override bool Equals(object? obj)
     {
-        if (obj is Client c)
-            return  this == c;
-        return false;
+        return obj is Client client && this == client;
     }
 
     public override int GetHashCode()
     {
-        return Id.GetHashCode(); //relies upon same info as == operator.
+        return Id.GetHashCode(); // Relies upon the same value as the equality operator.
     }
 }
